@@ -1,0 +1,13 @@
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.tmp
+*.bak
+*.hrb
+.history
+.hbmk
+*.NotInGit
+Thumbs.db
