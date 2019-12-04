@@ -1,62 +1,53 @@
+#include "hb_fcgi.ch"
 
-#xcommand TRY => BEGIN SEQUENCE WITH __BreakBlock()
-#xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
-#xcommand FINALLY => ALWAYS
-#xcommand ENDTRY => END
-#xcommand ENDDO => END
-#xcommand ENDFOR => END
-
-#xtranslate Allt( <x> )    => alltrim( <x> )
-#xtranslate Trans( <x> )    => alltrim( str(<x>,10) )
-
+//=================================================================================================================
 
 Function Main()
 
-local iRequestID
 local iRequestCount := 0
 local iInputLength := 0
 local cInput := ""
 local cQUERY_STRING := ""
 local cVar
 
-OutputDebugString("[Harbour] Starting echox")
+SendToDebugView("Starting echo")
 
-altd()
+oFcgi := hb_Fcgi()
 
-do while .t. 
-    iRequestID = hb_Fcgi_Wait()
-
-    OutputDebugString("[Harbour] iRequestID = "+Trans(iRequestID))
-
-    if iRequestID < 0
-        exit
-    endif
-
+do while (oFcgi:MaxRequestToProcess <= 0 .or. iRequestCount < oFcgi:MaxRequestToProcess) .and. (oFcgi:Wait() >= 0)
     iRequestCount++
 
-    altd()
-
-    hb_Fcgi_ContentType("Content-type: text/html")
-
-    hb_Fcgi_Print("<h1>FastCGI echox prg MSVC 2019 - 11/26/20191 001 </h1>")
+    oFcgi:Print("<h1>FastCGI echo 067</h1>")
     
-    hb_Fcgi_Print("<p>Request Count = "+Trans( iRequestCount )+"</p>")
+    oFcgi:Print("<p>Request Count = "+Trans( iRequestCount )+"</p>")
 
-    iInputLength := hb_Fcgi_GetContentLength()
-    hb_Fcgi_Print("<p>Input Length = "+Trans( iInputLength )+"</p>")
+    oFcgi:Print("<p>Input Length = "+Trans( oFcgi:GetInputLength() )+"</p>")
 
-    cQUERY_STRING := hb_Fcgi_GetParameter("QUERY_STRING")
-    hb_Fcgi_Print("<p>QUERY_STRING = "+cQUERY_STRING+"</p>")
+    oFcgi:Print("<p>QUERY_STRING = "+oFcgi:GetEnvironment("QUERY_STRING")+"</p>")
 
-    cInput := HB_FCGI_GETINPUT(iInputLength)
-    hb_Fcgi_Print("<p>INPUT = "+cInput+"</p>")
+    oFcgi:Print("<p>Request Environment:</p>")
+    oFcgi:Print(oFcgi:ListEnvironment())
 
-    hb_Fcgi_PrintEnvironment()
+    oFcgi:Print([<p>Input Field "FirstName" = ]+oFcgi:GetInputValue("FirstName")+[</p>])
+    oFcgi:Print([<p>Input Field "LastName" = ]+oFcgi:GetInputValue("LastName")+[</p>])
+    oFcgi:Print([<p>Input Field "NotExistingValue" = ]+oFcgi:GetInputValue("Bogus")+[</p>])
 
-    HB_FCGI_FINISH()
+    oFcgi:Print([<p>Uploaded File Name "File1" = ]+oFcgi:GetInputFileName("File1")+[</p>])
+    oFcgi:Print([<p>Uploaded File Content Type "File1" = ]+oFcgi:GetInputFileContentType("File1")+[</p>])
+
+    oFcgi:SaveInputFileContent("File1","d:\281\"+oFcgi:GetInputFileName("File1"))
+    oFcgi:SaveInputFileContent("File2","d:\281\"+oFcgi:GetInputFileName("File2"))
+    oFcgi:SaveInputFileContent("File3","d:\281\"+oFcgi:GetInputFileName("File3"))
+    oFcgi:SaveInputFileContent("File4","d:\281\"+oFcgi:GetInputFileName("File4"))
+
+    // cInput := oFcgi:GetRawInput()
+    // oFcgi:Print("<p>INPUT = "+cInput+"</p>")
+
+    //hb_Fcgi_PrintEnvironment()
+
 end
 
-OutputDebugString("[Harbour] Done\n")
+SendToDebugView("Done")
 
 return nil
 

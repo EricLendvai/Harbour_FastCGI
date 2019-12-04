@@ -13,7 +13,7 @@
                     "EXEName":"echo",
                     "BuildMode":"release",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\fcgi-hb\\fcgi202\\"
+                    "WebsiteFolder":"\\fcgi-hb\\fcgi_echo\\"
                 }
             },
             "presentation": {
@@ -35,7 +35,7 @@
                     "EXEName":"echo",
                     "BuildMode":"debug",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\fcgi-hb\\fcgi202\\"
+                    "WebsiteFolder":"\\fcgi-hb\\fcgi_echo\\"
                 }
             },
             "presentation": {

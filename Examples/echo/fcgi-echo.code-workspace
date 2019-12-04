@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\..\\hb_fcgi"
+		},
+		{
+			"path": "..\\..\\fcgi-2.4.1\\libfcgi"
+		},
+		{
+			"path": "..\\..\\fcgi-2.4.1\\include"
+		},
+		{
+			"path": "c:\\apache24-64\\conf"
+		}
+	],
+	"settings": {
+		"files.autoSave": "onFocusChange",
+		"harbour.compilerExecutable": "C:\\Harbour\\bin\\win\\msvc64\\harbour.exe",
+		"harbour.extraOptions": "-iC:\\Harbour\\include",
+		"harbour.extraIncludePaths":["C:\\Harbour\\include\\",
+			                          "R:\\fcgi-hb-msvc\\hb_fcgi\\"],
+		"harbour.warningLevel":1,
+		"harbour.decorator":true,
+		"local-history.path": "R:\\VSCode_History\\fcgi-hb-msvc",
+		"local-history.treeLocation": "localHistory",
+		"local-history.daysLimit": 0,
+		"local-history.maxDisplay": 5
+	}
+}

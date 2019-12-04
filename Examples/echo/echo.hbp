@@ -6,11 +6,4 @@
 
 echo.prg
 
-..\..\hb_fcgi\hb_fcgi.c
-
-..\..\hb_fcgi\vscode_debugger.prg
-
--i..\..\fcgi-2.4.1\include
-
--L..\..\fcgi-2.4.1\libfcgi\Release
--llibfcgi
+..\..\hb_fcgi\hb_fcgi.hbm

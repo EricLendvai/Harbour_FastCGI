@@ -67,7 +67,7 @@ if not exist %BuildMode%\%EXEName%.exe (
 		)
 
 		echo.
-		echo Ready
+		echo Ready            BuildMode = %BuildMode%
 		
 	) else (
 		echo Compilation Error
