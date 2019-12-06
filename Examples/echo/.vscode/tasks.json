@@ -12,8 +12,9 @@
                 "env": {
                     "EXEName":"echo",
                     "BuildMode":"release",
+					"HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\fcgi-hb\\fcgi_echo\\"
+                    "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
             "presentation": {
@@ -34,8 +35,9 @@
                 "env": {
                     "EXEName":"echo",
                     "BuildMode":"debug",
+					"HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\fcgi-hb\\fcgi_echo\\"
+                    "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
             "presentation": {

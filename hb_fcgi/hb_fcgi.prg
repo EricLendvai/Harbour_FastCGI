@@ -172,7 +172,7 @@ method LoadInput() class hb_Fcgi
         ::LoadedInput := .t.
         ::InputRaw := hb_Fcgx_GetInput(::GetInputLength())  //Will return a buffer that could have chr(0) in it
 
-        hb_MemoWrit("R:\fcgi-hb\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
+        // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
 
         cContentType := ::GetEnvironment("CONTENT_TYPE")
 

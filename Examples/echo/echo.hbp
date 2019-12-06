@@ -2,7 +2,7 @@
 
 -hbexe
 
--o${BuildMode}\${EXEName}
+-o${HB_COMPILER}\${BuildMode}\${EXEName}
 
 echo.prg
 
