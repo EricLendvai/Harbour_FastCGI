@@ -1,6 +1,4 @@
 #include "hb_fcgi.ch"
-
-#include "hbclass.ch"
 #include "hbhrb.ch"
 
 // #include "hbhrb.ch"
@@ -13,7 +11,6 @@
 
 Function Main()
 
-local iRequestCount := 0
 local cInput := ""
 local cQUERY_STRING := ""
 local cVar
@@ -38,12 +35,10 @@ ErrorBlock( { | o | OnError( o ) } )
 
 oFcgi := hb_Fcgi():New()
 
-do while (oFcgi:MaxRequestToProcess <= 0 .or. iRequestCount < oFcgi:MaxRequestToProcess) .and. (oFcgi:Wait() >= 0)
-    iRequestCount++
-    
+do while oFcgi:Wait()
     ? "<h1>FastCGI mod_harbour 008</h1>"
 
-    ? "<p>Request Count = "+Trans( iRequestCount )+"</p>"
+    ? "<p>Request Count = "+Trans( oFcgi:RequestCount )+"</p>"
 
     ? "<p>Input Length = "+Trans( oFcgi:GetInputLength() )+"</p>"
 
@@ -161,11 +156,7 @@ do while (oFcgi:MaxRequestToProcess <= 0 .or. iRequestCount < oFcgi:MaxRequestTo
 
     hb_Fcgi_PrintEnvironment()
 
-    oFcgi:Finish()
-
-    iRequestCount := iRequestCount
-
-end
+enddo
 
 SendToDebugView("Done")
 

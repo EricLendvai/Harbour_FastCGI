@@ -31,10 +31,13 @@ class hb_Fcgi
         data   AppConfig                  init {=>}   // Will be set to case insensitive keys
         method LoadAppConfig()
 
-        data   request_method             init ""
+        data   RequestMethod              init ""
+        data   ProcessingRequest          init .f.    // To determine if the :Finish() method should be called.
 
     exported:
+        data   RequestCount               init 0    READONLY
         data   MaxRequestToProcess        init 0    READONLY
+        data   FastCGIExeFullPath         init ""   READONLY
         method New() constructor
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
@@ -63,41 +66,91 @@ method New() class hb_Fcgi
     hb_hSetCaseMatch( ::AppConfig, .f. )
 
     // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
+    ::FastCGIExeFullPath := hb_argV(0)
 
     hb_Fcgx_Init()
 return Self
 //-----------------------------------------------------------------------------------------------------------------
 method Wait() class hb_Fcgi
     //Used to wait for the next page request
-    local iReturn
-    ::TransmittedContentType := ""
-    iReturn := hb_Fcgx_Wait()
-    if iReturn >= 0
-        
-        ::LoadedRequestEnvironment := .f.
-        ::LoadedQueryString        := .f.
-        ::LoadedInput              := .f.
-        ::LoadedHeader             := .f.
+    local lProcessRequest      //If web page should be built
+    local lValidRequest := .f.
+    local cREQUEST_URI
+    local iWaitResult
 
-        hb_HClear(::RequestEnvironment)
-        hb_HClear(::QueryString)
-        hb_HClear(::Input)
-        hb_HClear(::Header)
-
-        ::InputLength              := -1
-        ::InputRaw                 := ""
-
-        ::request_method           := ""
-
-        if ::ReloadConfigAtEveryRequest .or. !::LoadedAppConfig
-            ::LoadAppConfig()
-        endif
+    if ::ProcessingRequest
+        ::Finish()
     endif
-    
-return iReturn
+
+    do while !lValidRequest  //Needed a loop in case processed invalid .kill requests
+        if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
+            //Reached Max Number of Requests to Process
+            lValidRequest   := .t.
+            lProcessRequest := .f.
+        else
+            if (iWaitResult := hb_Fcgx_Wait()) >= 0
+                ::RequestCount++
+        
+                ::TransmittedContentType   := ""
+                ::LoadedRequestEnvironment := .f.
+                ::LoadedQueryString        := .f.
+                ::LoadedInput              := .f.
+                ::LoadedHeader             := .f.
+        
+                hb_HClear(::RequestEnvironment)
+                hb_HClear(::QueryString)
+                hb_HClear(::Input)
+                hb_HClear(::Header)
+        
+                ::InputLength              := -1
+                ::InputRaw                 := ""
+        
+                ::RequestMethod           := ""
+        
+                if ::ReloadConfigAtEveryRequest .or. !::LoadedAppConfig
+                    ::LoadAppConfig()
+                endif
+        
+                cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
+                SendToDebugView("cREQUEST_URI",cREQUEST_URI)
+                if right(cREQUEST_URI,5) == ".kill"
+                    if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
+                        //_M_ should we delete the .kill ? only it there is only 1 handle on the current exe.
+                        //_M_Test number of instances of current exe in memory
+                        // SendToDebugView("Marker 1",::FastCGIExeFullPath)
+                        // SendToDebugView("Marker 2",left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
+                        // SendToDebugView("Remote Kill of "+::FastCGIExeFullPath)
+                        ::Print("Remote Kill")
+                        ::Finish()
+                        lValidRequest   := .t.
+                        lProcessRequest := .f.
+                    else
+                        ::Print("Invalid Kill Request")
+                        ::Finish()
+                        lValidRequest   := .f.  // Will stay in this method and not try to build a web page
+                        lProcessRequest := .f.
+                    endif
+                else
+                    lValidRequest   := .t.
+                    lProcessRequest := .t.
+                endif
+            else
+                // Add code to log why the wait failed. Use the variable iWaitResult
+                lValidRequest   := .t.
+                lProcessRequest := .f.
+            endif
+        endif
+    enddo
+
+    ::ProcessingRequest = lProcessRequest
+
+return lProcessRequest
 //-----------------------------------------------------------------------------------------------------------------
 method Finish() class hb_Fcgi
-    hb_Fcgx_Finish()
+    if ::ProcessingRequest
+        ::ProcessingRequest := .f.
+        hb_Fcgx_Finish()
+    endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Print(par_html) class hb_Fcgi
@@ -279,7 +332,6 @@ method LoadInput() class hb_Fcgi
             
         endcase
 
-
     endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
@@ -372,16 +424,16 @@ method GetInputLength() class hb_Fcgi
 return ::InputLength
 //-----------------------------------------------------------------------------------------------------------------
 method IsGet() class hb_Fcgi
-    if empty(::request_method)
-        ::request_method := ::GetEnvironment("REQUEST_METHOD")
+    if empty(::RequestMethod)
+        ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
     endif
-return (::request_method == "GET")
+return (::RequestMethod == "GET")
 //-----------------------------------------------------------------------------------------------------------------
 method IsPost() class hb_Fcgi
-    if empty(::request_method)
-        ::request_method := ::GetEnvironment("REQUEST_METHOD")
+    if empty(::RequestMethod)
+        ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
     endif
-return (::request_method == "POST")
+return (::RequestMethod == "POST")
 //-----------------------------------------------------------------------------------------------------------------
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
@@ -425,7 +477,10 @@ function SendToDebugView(cStep,xValue)
     endif
     
 return .T.
-    
+//=================================================================================================================
+function SendToClipboard(cText)
+    wvt_SetClipboard(cText)
+return .T.
 //=================================================================================================================
 FUNCTION hb_StrTranI( cSource, cRepl, cTrans )  // from https://groups.google.com/forum/#!topic/harbour-users/NMKwSSX7TtU
     LOCAL cTarget := ""
