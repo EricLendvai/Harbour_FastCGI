@@ -394,7 +394,8 @@ method LoadAppConfig() class hb_Fcgi
     local cName
     local cValue
     local iNumberOfConfigs := 0
-    cConfigText := hb_MemoRead(hb_DirBase()+"config.txt")
+    //The configuration file is purposely not with a .txt extension to block users from accessing it.
+    cConfigText := hb_MemoRead(hb_DirBase()+"config.fcgi")
     cConfigText := StrTran(StrTran(cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
     for each cLine in hb_ATokens(cConfigText,chr(10),.f.,.f.)
         nPos := at("=",cLine)
