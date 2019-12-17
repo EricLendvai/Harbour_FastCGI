@@ -8,7 +8,7 @@
             "type": "harbour-dbg",
             "request": "launch",
             "name": "FCGITaskManager Down",
-            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager",
+            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager.exe",
             "arguments": ["down","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho",""],
             "stopOnEntry": false,
             "preLaunchTask": "CompileDebug",
@@ -21,8 +21,8 @@
         {
             "type": "harbour-dbg",
             "request": "launch",
-            "name": "FCGITaskManager Activate",
-            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager",
+            "name": "FCGITaskManager Activate Echo",
+            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager.exe",
             "arguments": ["activate","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho",""],
             "stopOnEntry": false,
             "preLaunchTask": "CompileDebug",
@@ -31,7 +31,36 @@
             "sourcePaths": [
                 "${workspaceFolder}\\"
             ]
+        },
+        {
+            "type": "harbour-dbg",
+            "request": "launch",
+            "name": "FCGITaskManager Activate Echo 2",
+            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager.exe",
+            "arguments": ["activate","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho","2"],
+            "stopOnEntry": false,
+            "preLaunchTask": "CompileDebug",
+            "postDebugTask": "",
+            "workingDir": "${workspaceFolder}\\",
+            "sourcePaths": [
+                "${workspaceFolder}\\"
+            ]
+        },
+        {
+            "type": "harbour-dbg",
+            "request": "launch",
+            "name": "FCGITaskManager Kill Echo 1",
+            "program": "${workspaceFolder}\\msvc64\\debug\\FCGITaskManager.exe",
+            "arguments": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho","1"],
+            "stopOnEntry": false,
+            "preLaunchTask": "CompileDebug",
+            "postDebugTask": "",
+            "workingDir": "${workspaceFolder}\\",
+            "sourcePaths": [
+                "${workspaceFolder}\\"
+            ]
         }
+
 
     ]
 }

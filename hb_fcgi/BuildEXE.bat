@@ -18,6 +18,7 @@ goto End
 
 :GoodParameters
 
+rem The following command most likely will do nothing if the SoftKill task was called first.
 taskkill /IM FCGI%EXEName%.exe /f /t 2>nul
 
 if %HB_COMPILER% == msvc64 call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64

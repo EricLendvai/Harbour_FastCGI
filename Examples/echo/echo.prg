@@ -14,7 +14,7 @@ SendToDebugView("Starting echo")
 oFcgi := hb_Fcgi():New()
 
 do while oFcgi:Wait()
-    oFcgi:Print("<h1>FastCGI echo version 104</h1>")
+    oFcgi:Print("<h1>FastCGI echo</h1>")
     
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
     oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")

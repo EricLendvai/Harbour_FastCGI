@@ -12,11 +12,13 @@
                 "env": {
                     "EXEName":"echo",
                     "BuildMode":"release",
-					"HB_COMPILER":"msvc64",
+                    "HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
                     "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
+            "dependsOrder": "sequence",
+            "dependsOn":["SoftKillFcgiExe"],
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -40,6 +42,8 @@
                     "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
+            "dependsOrder": "sequence",
+            "dependsOn":["SoftKillFcgiExe"],
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -54,6 +58,12 @@
             "type": "shell",
             "command":"taskkill",
             "args": ["/IM","FCGIecho.exe","/f","/t"]
+        },
+        {
+            "label":"SoftKillFcgiExe",
+            "type": "shell",
+            "command":"${workspaceFolder}\\..\\..\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe",
+            "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho",""]
         }
     ]
 }
