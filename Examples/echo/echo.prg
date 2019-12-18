@@ -15,7 +15,7 @@ oFcgi := hb_Fcgi():New()
 
 do while oFcgi:Wait()
     oFcgi:Print("<h1>FastCGI echo</h1>")
-    
+    // altd()
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
     oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
     oFcgi:Print("<p>REQUEST_URI   = "+oFcgi:GetEnvironment("REQUEST_URI")+"</p>")

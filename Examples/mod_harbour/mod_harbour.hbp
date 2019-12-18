@@ -17,3 +17,4 @@ harbour.def
 mod_harbour.prg
 
 ..\..\hb_fcgi\hb_fcgi.hbm
+..\..\hb_fcgi\debugger.hbm

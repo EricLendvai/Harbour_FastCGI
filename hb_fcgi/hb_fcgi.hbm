@@ -5,8 +5,8 @@
 hb_fcgi_c.c
 hb_fcgi.prg
 
-#Ensure to update the following prg when the harbour VSCODE extension is updated. 
-vscode_debugger.prg
+##Ensure to update the following prg when the harbour VSCODE extension is updated. 
+#vscode_debugger.prg
 
 #Using the following line tells hbmk2 to search the current folder for the hb_fcgi.ch file. 
 -i.
