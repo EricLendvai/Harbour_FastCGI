@@ -58,7 +58,10 @@ class hb_Fcgi
         method IsPost()                             SETGET   //Used to query if the page was sent as a POST request
         //_M_ method GetHeader(cName)  // TODO
 
-ENDCLASS
+        method OnFirstRequest() inline nil
+        method OnShutdown()     inline nil
+
+endclass
 
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
@@ -77,6 +80,9 @@ method Wait() class hb_Fcgi
     local lValidRequest := .f.
     local cREQUEST_URI
     local iWaitResult
+    local lKillMarkerPresent
+    local cDownFileName
+    local nPos
 
     if ::ProcessingRequest
         ::Finish()
@@ -84,13 +90,11 @@ method Wait() class hb_Fcgi
 
     do while !lValidRequest  //Needed a loop in case processed invalid .kill requests
         if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
-            //Reached Max Number of Requests to Process
+            //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
             lValidRequest   := .t.
             lProcessRequest := .f.
         else
             if (iWaitResult := hb_Fcgx_Wait()) >= 0
-                ::RequestCount++
-        
                 ::TransmittedContentType   := ""
                 ::LoadedRequestEnvironment := .f.
                 ::LoadedQueryString        := .f.
@@ -112,28 +116,47 @@ method Wait() class hb_Fcgi
                 endif
         
                 cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
-                SendToDebugView("cREQUEST_URI",cREQUEST_URI)
+                // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
+
+                lKillMarkerPresent := file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
+
                 if right(cREQUEST_URI,5) == ".kill"
-                    if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
-                        //_M_ should we delete the .kill ? only it there is only 1 handle on the current exe.
-                        //_M_Test number of instances of current exe in memory
-                        // SendToDebugView("Marker 1",::FastCGIExeFullPath)
-                        // SendToDebugView("Marker 2",left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
-                        // SendToDebugView("Remote Kill of "+::FastCGIExeFullPath)
+                    if lKillMarkerPresent
                         ::Print("Remote Kill")
-                        ::Finish()
                         lValidRequest   := .t.
                         lProcessRequest := .f.
                     else
                         ::Print("Invalid Kill Request")
-                        ::Finish()
                         lValidRequest   := .f.  // Will stay in this method and not try to build a web page
                         lProcessRequest := .f.
                     endif
+                    ::ProcessingRequest := .t. //Since issued ::Print()
+                    ::Finish()
                 else
-                    lValidRequest   := .t.
-                    lProcessRequest := .t.
+                    if lKillMarkerPresent
+                        // altd()
+                        nPos := hb_RAt("\",::FastCGIExeFullPath)   // _M_ Make this non Windows ready
+                        if empty(nPos)
+                            ::Print([Site is down. Could not locate "down.html".])
+                        else
+                            cDownFileName = left(::FastCGIExeFullPath,nPos)+"down.html"
+                            if file(cDownFileName)
+                                ::Print(hb_MemoRead(cDownFileName))
+                            else
+                                ::Print([Site is down. Add a "down.html" file.])
+                            endif
+                        endif
+                        lValidRequest   := .t.
+                        lProcessRequest := .f.
+                        ::ProcessingRequest := .t. //Since issued ::Print()
+                        ::Finish()
+                    else
+                        ::RequestCount++
+                        lValidRequest   := .t.
+                        lProcessRequest := .t.
+                    endif
                 endif
+        
             else
                 // Add code to log why the wait failed. Use the variable iWaitResult
                 lValidRequest   := .t.
@@ -143,6 +166,16 @@ method Wait() class hb_Fcgi
     enddo
 
     ::ProcessingRequest = lProcessRequest
+
+    if ::ProcessingRequest
+        if ::RequestCount == 1
+            ::OnFirstRequest()
+        endif
+    else
+        if ::RequestCount > 0
+            ::OnShutdown()
+        endif
+    endif
 
 return lProcessRequest
 //-----------------------------------------------------------------------------------------------------------------

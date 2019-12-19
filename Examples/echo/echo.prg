@@ -4,14 +4,15 @@
 
 Function Main()
 
-local iInputLength := 0
-local cInput := ""
+local iInputLength  := 0
+local cInput        := ""
 local cQUERY_STRING := ""
 local cVar
 
 SendToDebugView("Starting echo")
 
-oFcgi := hb_Fcgi():New()
+// oFcgi := hb_Fcgi():New()
+oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 
 do while oFcgi:Wait()
     oFcgi:Print("<h1>FastCGI echo</h1>")
@@ -46,4 +47,18 @@ SendToDebugView("Done")
 return nil
 
 //=================================================================================================================
+
+class MyFcgi from hb_Fcgi
+    method OnFirstRequest()
+    method OnShutdown()
+endclass
+
+method OnFirstRequest class MyFcgi
+    SendToDebugView("Called from method OnFirstRequest")
+return nil 
+
+method OnShutdown class MyFcgi
+    SendToDebugView("Called from method OnShutdown")
+return nil 
+
 //=================================================================================================================

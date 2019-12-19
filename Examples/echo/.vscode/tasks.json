@@ -63,7 +63,7 @@
             "label":"SoftKillFcgiExe",
             "type": "shell",
             "command":"${workspaceFolder}\\..\\..\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe",
-            "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","FCGIecho",""]
+            "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""]
         }
     ]
 }
