@@ -96,30 +96,29 @@ function Main()
          aListExeToMarkAsKill := hb_Directory(cFcgiFolder+cFcgiExeName+"*.exe")
          for each aExeToMarkAsKill in aListExeToMarkAsKill
             cExeFileName := aExeToMarkAsKill[1]
-            // if lower(right(cExeFileName,4)) == ".exe"
-               cKillFileName := left(cExeFileName,len(cExeFileName)-3)+"kill"
-               if !File(cFcgiFolder+cKillFileName)
-                  hb_MemoWrit(cFcgiFolder+cKillFileName,"ShutdownMarker")
-               endif
-            // endif
+            cKillFileName := left(cExeFileName,len(cExeFileName)-3)+"kill"
+            if !File(cFcgiFolder+cKillFileName)
+               hb_MemoWrit(cFcgiFolder+cKillFileName,"ShutdownMarker")
+            endif
          endfor
 
       case cAction == "ACTIVATE"
+         //Blindly try to delete the .kill marker file
+         DeleteFile(cFcgiFolder+cFcgiExeName+cFcgiVersion+".kill")
+
          //Will mark the EXE as default FastCGI exe
          cConfig := 'FallbackResource '+cWebsiteFolder+cFcgiExeName+cFcgiVersion+'.exe' + CRLF
          cConfig += 'FcgidWrapper "'+cFcgiFolder+cFcgiExeName+cFcgiVersion+'.exe" .mainexe virtual'
          hb_MemoWrit(cFcgiFolder+".htaccess",cConfig)
+
+         WaitPeriod(50)  //Wait 0.5 seconds, to ensure Apache will detech changes and redirect request to the activated version
 
          //Will stop any other versions
          aListExeToMarkAsKill := hb_Directory(cFcgiFolder+cFcgiExeName+"*.exe")
          for each aExeToMarkAsKill in aListExeToMarkAsKill
             cExeFileName  := aExeToMarkAsKill[1]
             cKillFileName := left(cExeFileName,len(cExeFileName)-3)+"kill"
-            if lower(cExeFileName) == lower(cFcgiExeName+cFcgiVersion+".exe")
-               //Found the exe we are trying to activate
-               //Blindly try to delete the .kill marker file
-               DeleteFile(cFcgiFolder+cKillFileName)               
-            else
+            if lower(cExeFileName) <> lower(cFcgiExeName+cFcgiVersion+".exe")
                if !File(cFcgiFolder+cKillFileName)
                   hb_MemoWrit(cFcgiFolder+cKillFileName,"ShutdownMarker")
                endif
@@ -147,10 +146,10 @@ function Main()
          
          for each oProcess in oListOfProcess
             cProcessName := oProcess:Name()
-            if upper(left(cProcessName,len(cFcgiExeName))) <> upper(cFcgiExeName)
+            if lower(left(cProcessName,len(cFcgiExeName))) <> lower(cFcgiExeName)  // Not our FCGI App.
                loop
             endif
-            if lower(right(cProcessName,4)) == ".exe"
+            if lower(right(cProcessName,4)) == ".exe"  //  Windows specific (.exe)
                cProcessName := left(cProcessName,len(cProcessName)-4)
             endif
             
@@ -167,16 +166,13 @@ function Main()
 
             endif
             try
-               oHttp:Open( "GET", cURL+cProcessName+".kill", .f. )   // .f. = Synchronous
+               oHttp:Open( "GET", cURL+cProcessName+".exe", .f. )   // .f. = Synchronous  And Windows specific (.exe)
                oHttp:Send()
             catch oError
                ? [Failed to execute HTTP GET. Error message: ]+oError:Description
                loop
             endtry
             
-            //Maybe Add logic to repeat this multiple time, until all exe instances are do and could delete the exe, EXCEPT if the exe ends with the suffix
-            // cListOfProcessToRemoteKill += cProcessName + CRLF
-
          endfor
 
          oHttp := nil
@@ -187,10 +183,6 @@ function Main()
          //Will re-enable the FastCGI EXE
          //Blindly try to delete the .kill marker file
          DeleteFile(cFcgiFolder+cFcgiExeName+cFcgiVersion+".kill")
-         
-         // cConfig := 'FallbackResource '+cWebsiteFolder+cFcgiExeName+cFcgiVersion+'.exe' + CRLF
-         // cConfig += 'FcgidWrapper "'+cFcgiFolder+cFcgiExeName+cFcgiVersion+'.exe" .mainexe virtual'
-         // hb_MemoWrit(cFcgiFolder+".htaccess",cConfig)
 
       case cAction == "DOWN"
          cConfig := 'RewriteRule "^" "'+cWebsiteFolder+'down.html" [END]'
@@ -203,14 +195,9 @@ function Main()
    
    endif
 
-
-   // SendToClipboard(cListOfProcessToRemoteKill)
-   // Altd()
-
-  
 return nil
 //=================================================================================================================
-function SendToClipboard(cText)
-   wvt_SetClipboard(cText)
-return .T.
+// function SendToClipboard(cText)
+//    wvt_SetClipboard(cText)
+// return .T.
 //=================================================================================================================

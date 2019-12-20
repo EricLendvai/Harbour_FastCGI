@@ -63,6 +63,7 @@ class hb_Fcgi
 
 endclass
 
+
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
     hb_hSetCaseMatch( ::QueryString, .f. )
@@ -77,10 +78,8 @@ return Self
 method Wait() class hb_Fcgi
     //Used to wait for the next page request
     local lProcessRequest      //If web page should be built
-    local lValidRequest := .f.
     local cREQUEST_URI
     local iWaitResult
-    local lKillMarkerPresent
     local cDownFileName
     local nPos
 
@@ -88,82 +87,60 @@ method Wait() class hb_Fcgi
         ::Finish()
     endif
 
-    do while !lValidRequest  //Needed a loop in case processed invalid .kill requests
-        if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
-            //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
-            lValidRequest   := .t.
-            lProcessRequest := .f.
-        else
-            if (iWaitResult := hb_Fcgx_Wait()) >= 0
-                ::TransmittedContentType   := ""
-                ::LoadedRequestEnvironment := .f.
-                ::LoadedQueryString        := .f.
-                ::LoadedInput              := .f.
-                ::LoadedHeader             := .f.
-        
-                hb_HClear(::RequestEnvironment)
-                hb_HClear(::QueryString)
-                hb_HClear(::Input)
-                hb_HClear(::Header)
-        
-                ::InputLength              := -1
-                ::InputRaw                 := ""
-        
-                ::RequestMethod           := ""
-        
-                if ::ReloadConfigAtEveryRequest .or. !::LoadedAppConfig
-                    ::LoadAppConfig()
-                endif
-        
-                cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
-                // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
-
-                lKillMarkerPresent := file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
-
-                if right(cREQUEST_URI,5) == ".kill"
-                    if lKillMarkerPresent
-                        ::Print("Remote Kill")
-                        lValidRequest   := .t.
-                        lProcessRequest := .f.
-                    else
-                        ::Print("Invalid Kill Request")
-                        lValidRequest   := .f.  // Will stay in this method and not try to build a web page
-                        lProcessRequest := .f.
-                    endif
-                    ::ProcessingRequest := .t. //Since issued ::Print()
-                    ::Finish()
-                else
-                    if lKillMarkerPresent
-                        // altd()
-                        nPos := hb_RAt("\",::FastCGIExeFullPath)   // _M_ Make this non Windows ready
-                        if empty(nPos)
-                            ::Print([Site is down. Could not locate "down.html".])
-                        else
-                            cDownFileName = left(::FastCGIExeFullPath,nPos)+"down.html"
-                            if file(cDownFileName)
-                                ::Print(hb_MemoRead(cDownFileName))
-                            else
-                                ::Print([Site is down. Add a "down.html" file.])
-                            endif
-                        endif
-                        lValidRequest   := .t.
-                        lProcessRequest := .f.
-                        ::ProcessingRequest := .t. //Since issued ::Print()
-                        ::Finish()
-                    else
-                        ::RequestCount++
-                        lValidRequest   := .t.
-                        lProcessRequest := .t.
-                    endif
-                endif
-        
-            else
-                // Add code to log why the wait failed. Use the variable iWaitResult
-                lValidRequest   := .t.
-                lProcessRequest := .f.
+    if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
+        //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
+        lProcessRequest := .f.
+    else
+        if (iWaitResult := hb_Fcgx_Wait()) >= 0
+            ::TransmittedContentType   := ""
+            ::LoadedRequestEnvironment := .f.
+            ::LoadedQueryString        := .f.
+            ::LoadedInput              := .f.
+            ::LoadedHeader             := .f.
+    
+            hb_HClear(::RequestEnvironment)
+            hb_HClear(::QueryString)
+            hb_HClear(::Input)
+            hb_HClear(::Header)
+            
+            ::InputLength              := -1
+            ::InputRaw                 := ""
+    
+            ::RequestMethod           := ""
+    
+            if ::ReloadConfigAtEveryRequest .or. !::LoadedAppConfig
+                ::LoadAppConfig()
             endif
+    
+            cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
+            // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
+
+            if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
+                // altd()
+                nPos := hb_RAt("\",::FastCGIExeFullPath)   // _M_ Make this non Windows ready
+                if empty(nPos)
+                    ::Print([Site is down. Could not locate "down.html".])
+                else
+                    cDownFileName = left(::FastCGIExeFullPath,nPos)+"down.html"
+                    if file(cDownFileName)
+                        ::Print(hb_MemoRead(cDownFileName))
+                    else
+                        ::Print([Site is down. Add a "down.html" file.])
+                    endif
+                endif
+                lProcessRequest := .f.
+                ::ProcessingRequest := .t. //Since issued ::Print()
+                ::Finish()
+            else
+                ::RequestCount++
+                lProcessRequest := .t.
+            endif
+    
+        else
+            // Add code to log why the wait failed. Use the variable iWaitResult
+            lProcessRequest := .f.
         endif
-    enddo
+    endif
 
     ::ProcessingRequest = lProcessRequest
 

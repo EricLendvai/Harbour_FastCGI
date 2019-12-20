@@ -58,7 +58,7 @@ do while oFcgi:Wait()
 
     ? "<p>FirstName = "+oFcgi:GetInputValue("FirstName")+"</p>"
 
-    //Extra the prg name that was asked for
+    //Extract the prg name that was asked for
     cPRGName := ""
     nPos := rat("/",cURL)
     if !empty(nPos)
@@ -127,7 +127,7 @@ do while oFcgi:Wait()
                         else
                             hb_vfErase(cFileName_hrb)
                             hb_MemoWrit(cFileName_hrb, oHrb)
-                            hb_FSetDateTime( cFileName_hrb, t_fileTime_prg )
+                            hb_FSetDateTime(cFileName_hrb, t_fileTime_prg)
                         endif
                     else
                         oHrb = hb_MemoRead(cFileName_hrb)
