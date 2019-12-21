@@ -15,8 +15,10 @@ SendToDebugView("Starting echo")
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 
 do while oFcgi:Wait()
+    SendToDebugView("Request Counter",oFcgi:RequestCount)
+    
     oFcgi:Print("<h1>FastCGI echo</h1>")
-    // altd()
+    //altd()
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
     oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
     oFcgi:Print("<p>REQUEST_URI   = "+oFcgi:GetEnvironment("REQUEST_URI")+"</p>")
