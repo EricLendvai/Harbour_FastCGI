@@ -14,7 +14,7 @@
                     "BuildMode":"release",
                     "HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
+                    "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
             "dependsOrder": "sequence",
@@ -39,7 +39,7 @@
                     "BuildMode":"debug",
 					"HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\Harbour_websites\\fcgi_echo\\"
+                    "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
             },
             "dependsOrder": "sequence",

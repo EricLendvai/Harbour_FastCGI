@@ -14,7 +14,7 @@
                     "BuildMode":"release",
 					"HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
+                    "SiteRootFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
                 }
             },
             "presentation": {
@@ -37,7 +37,7 @@
                     "BuildMode":"debug",
 					"HB_COMPILER":"msvc64",
                     "WebsiteDrive":"R:",
-                    "WebsiteFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
+                    "SiteRootFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
                 }
             },
             "presentation": {

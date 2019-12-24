@@ -30,6 +30,26 @@
 		"local-history.path": "R:\\VSCode_History\\Harbour_FastCGI",
 		"local-history.treeLocation": "localHistory",
 		"local-history.daysLimit": 0,
-		"local-history.maxDisplay": 5
+		"local-history.maxDisplay": 5,
+		"actionButtons": {
+			"defaultColor": "white", // Can also use string color names.
+			"loadNpmCommands":false, // Disables automatic generation of actions for npm commands.
+			"reloadButton":"♻️", // Custom reload button text or icon (default ↻). null value enables automatic reload on configuration change
+			"commands": [
+				{
+					"name": "<Down>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe down http localhost 8164 /fcgi_mod_harbour/ R:/Harbour_websites/fcgi_mod_harbour/ mod_harbour"
+				},
+				{
+					"name": "<Activate mod_harbour>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_mod_harbour/ R:/Harbour_websites/fcgi_mod_harbour/ mod_harbour"
+				},
+				{
+					"name": "<Kill mod_harbour>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe kill http localhost 8164 /fcgi_mod_harbour/ R:/Harbour_websites/fcgi_mod_harbour/ mod_harbour"
+				}
+			]
 		}
+
+	}
 }

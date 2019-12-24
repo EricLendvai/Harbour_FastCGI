@@ -8,9 +8,9 @@
             "type": "harbour-dbg",
             "request": "attach",
             "name": "Attach Program mod_harbour.exe",
-            "program": "R:\\Harbour_websites\\fcgi_mod_harbour\\FCGImod_harbour.exe",
+            "program": "R:\\Harbour_websites\\fcgi_mod_harbour\\backend\\FCGImod_harbour.exe",
 //            "sourcePaths": ["${workspaceFolder}"],
-            "sourcePaths": ["${workspaceFolder}","R:\\Harbour_websites\\fcgi_mod_harbour\\samples"],
+            "sourcePaths": ["${workspaceFolder}","R:\\Harbour_websites\\fcgi_mod_harbour\\backend\\samples"],
             "preLaunchTask": "TurnOnMod_HarbourDebugger",
             "postDebugTask": "TurnOffMod_HarbourDebugger"
         }

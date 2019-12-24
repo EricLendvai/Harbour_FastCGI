@@ -1,4 +1,2 @@
-
-FallbackResource /fcgi_echo/FCGIecho.exe
-FcgidWrapper "R:/Harbour_websites/fcgi_echo/FCGIecho.exe" .mainexe virtual
-
+FallbackResource /fcgi_echo/AnyFile.fcgiexe
+FcgidWrapper "R:/Harbour_websites/fcgi_echo/backend/FCGIecho.exe" .fcgiexe virtual

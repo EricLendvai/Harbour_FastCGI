@@ -16,9 +16,10 @@ oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 
 do while oFcgi:Wait()
     SendToDebugView("Request Counter",oFcgi:RequestCount)
-    
+
+    oFcgi:Print([<!DOCTYPE html><html><body>])
+
     oFcgi:Print("<h1>FastCGI echo</h1>")
-    //altd()
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
     oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
     oFcgi:Print("<p>REQUEST_URI   = "+oFcgi:GetEnvironment("REQUEST_URI")+"</p>")
@@ -41,6 +42,7 @@ do while oFcgi:Wait()
     // oFcgi:SaveInputFileContent("File2","d:\281\"+oFcgi:GetInputFileName("File2"))
     // oFcgi:SaveInputFileContent("File3","d:\281\"+oFcgi:GetInputFileName("File3"))
     // oFcgi:SaveInputFileContent("File4","d:\281\"+oFcgi:GetInputFileName("File4"))
+    oFcgi:Print([</body></html>])
 
 enddo
 

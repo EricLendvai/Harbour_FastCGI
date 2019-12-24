@@ -8,7 +8,7 @@
 
 class hb_Fcgi
     hidden:
-        data   DefaultContentType         init "Content-type: text/html"
+        data   DefaultContentType         init "Content-type: text/html; charset=UTF-8"
         data   TransmittedContentType     init ""
 
         data   LoadedRequestEnvironment   init .f.
@@ -405,7 +405,7 @@ method LoadAppConfig() class hb_Fcgi
     local cValue
     local iNumberOfConfigs := 0
     //The configuration file is purposely not with a .txt extension to block users from accessing it.
-    cConfigText := hb_MemoRead(hb_DirBase()+"config.fcgi")
+    cConfigText := hb_MemoRead(hb_DirBase()+"config.txt")
     cConfigText := StrTran(StrTran(cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
     for each cLine in hb_ATokens(cConfigText,chr(10),.f.,.f.)
         nPos := at("=",cLine)

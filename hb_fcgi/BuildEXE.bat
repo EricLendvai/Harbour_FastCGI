@@ -2,7 +2,7 @@
 
 if %EXEName%. == . goto MissingEnvironmentVariables
 if %BuildMode%. == . goto MissingEnvironmentVariables
-if %WebsiteFolder%. ==. goto MissingEnvironmentVariables
+if %SiteRootFolder%. ==. goto MissingEnvironmentVariables
 if %HB_COMPILER%. ==. goto MissingEnvironmentVariables
 
 if not exist %EXEName%.hbp (
@@ -55,18 +55,18 @@ if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 		echo.
 		echo No Errors
 
-		del %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe
+		del %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 
-		if exist %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe (
-			echo Failed to delete previous version of %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe
+		if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
+			echo Failed to delete previous version of %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 			goto End
 		)
 
-		copy %HB_COMPILER%\%BuildMode%\%EXEName%.exe %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe
-		if exist %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe (
-			echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe
+		copy %HB_COMPILER%\%BuildMode%\%EXEName%.exe %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+		if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
+			echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 		) else (
-			echo Failed to update file %WebsiteDrive%%WebsiteFolder%FCGI%EXEName%.exe
+			echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 		)
 
 		echo.

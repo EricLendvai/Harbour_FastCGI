@@ -16,8 +16,10 @@ function Main()
    local cProtocol
    local cPort
    local cDomain
-   local cWebsiteFolder
-   local cFcgiFolder
+   local cURLPath
+   local cSiteRootFolder
+   local cSiteBackendFolder
+   local cSiteWebsiteFolder
    local cFcgiAppName
    local cFcgiExeName
    local cFcgiVersion
@@ -32,14 +34,14 @@ function Main()
    local aListExeToMarkAsKill,aExeToMarkAsKill
    local cExeFileName,cKillFileName
  
-   cAction        := upper(hb_argv(1))
-   cProtocol      := hb_argv(2)
-   cDomain        := hb_argv(3)
-   cPort          := hb_argv(4)
-   cWebsiteFolder := hb_argv(5)
-   cFcgiFolder    := hb_argv(6)
-   cFcgiAppName   := hb_argv(7)
-   cFcgiVersion   := hb_argv(8)
+   cAction         := upper(hb_argv(1))
+   cProtocol       := hb_argv(2)
+   cDomain         := hb_argv(3)
+   cPort           := hb_argv(4)
+   cURLPath        := hb_argv(5)
+   cSiteRootFolder := hb_argv(6)
+   cFcgiAppName    := hb_argv(7)
+   cFcgiVersion    := hb_argv(8)
 
    if empty(cAction)
       ? [Missing "Action"]
@@ -63,14 +65,20 @@ function Main()
       elseif val(cPort) < 80
          ? ["Port" must be a numeric >= 80]
          cAction := ""
-      elseif empty(cWebsiteFolder)
-         ? [Missing "WebsiteFolder". Use "/" for root.]
+      elseif empty(cURLPath)
+         ? [Missing "URLPath". Use "/" for root.]
          cAction := ""
-      elseif empty(cFcgiFolder)
-         ? [Missing "FcgiFolder"]
+      elseif empty(cSiteRootFolder)
+         ? [Missing "SiteRootFolder"]
          cAction := ""
-      elseif !hb_DirExists(cFcgiFolder)
-         ? [Invalid "FcgiFolder"]
+      elseif !hb_DirExists(cSiteRootFolder)
+         ? [Missing Directory "SiteRootFolder"]
+         cAction := ""
+      elseif !hb_DirExists(cSiteRootFolder+"backend\")
+         ? [Missing Directory "SiteBackendFolder"]
+         cAction := ""
+      elseif !hb_DirExists(cSiteRootFolder+"website\")
+         ? [Missing Directory "SiteWebsiteFolder"]
          cAction := ""
       elseif empty(cFcgiAppName)
          ? [Missing "FcgiAppName"]
@@ -79,48 +87,51 @@ function Main()
    endif
 
    if !empty(cAction)
+      cSiteBackendFolder := strtran(cSiteRootFolder+"backend\","/","\")
+      cSiteWebsiteFolder := strtran(cSiteRootFolder+"website\","/","\")
+
       cFcgiExeName := "FCGI"+cFcgiAppName
 
       //Later will try to use curl instead.
-      cURL := cProtocol+"://"+cDomain+":"+cPort+cWebsiteFolder
+      cURL := cProtocol+"://"+cDomain+":"+cPort+cURLPath
       
       do case
       case cAction == "KILL"
          //Will mark to Stop the specfic EXE
-         hb_MemoWrit(cFcgiFolder+cFcgiExeName+cFcgiVersion+".kill","ShutdownMarker")
+         hb_MemoWrit(cSiteBackendFolder+cFcgiExeName+cFcgiVersion+".kill","ShutdownMarker")
 
       case cAction == "DOWN"
          //On purpose don't force all to down.html yet, since the "kills" have to be processed.
 
          //Will mark to Stop all EXEs
-         aListExeToMarkAsKill := hb_Directory(cFcgiFolder+cFcgiExeName+"*.exe")
+         aListExeToMarkAsKill := hb_Directory(cSiteBackendFolder+cFcgiExeName+"*.exe")
          for each aExeToMarkAsKill in aListExeToMarkAsKill
             cExeFileName := aExeToMarkAsKill[1]
             cKillFileName := left(cExeFileName,len(cExeFileName)-3)+"kill"
-            if !File(cFcgiFolder+cKillFileName)
-               hb_MemoWrit(cFcgiFolder+cKillFileName,"ShutdownMarker")
+            if !File(cSiteBackendFolder+cKillFileName)
+               hb_MemoWrit(cSiteBackendFolder+cKillFileName,"ShutdownMarker")
             endif
          endfor
 
       case cAction == "ACTIVATE"
          //Blindly try to delete the .kill marker file
-         DeleteFile(cFcgiFolder+cFcgiExeName+cFcgiVersion+".kill")
+         DeleteFile(cSiteBackendFolder+cFcgiExeName+cFcgiVersion+".kill")
 
          //Will mark the EXE as default FastCGI exe
-         cConfig := 'FallbackResource '+cWebsiteFolder+cFcgiExeName+cFcgiVersion+'.exe' + CRLF
-         cConfig += 'FcgidWrapper "'+cFcgiFolder+cFcgiExeName+cFcgiVersion+'.exe" .mainexe virtual'
-         hb_MemoWrit(cFcgiFolder+".htaccess",cConfig)
-
+         cConfig := 'FallbackResource '+cURLPath+'AnyFile.fcgiexe' + CRLF
+         cConfig += 'FcgidWrapper "'+strtran(cSiteBackendFolder,"\","/")+cFcgiExeName+cFcgiVersion+'.exe" .fcgiexe virtual'
+         hb_MemoWrit(cSiteWebsiteFolder+".htaccess",cConfig)
+         
          WaitPeriod(50)  //Wait 0.5 seconds, to ensure Apache will detech changes and redirect request to the activated version
 
          //Will stop any other versions
-         aListExeToMarkAsKill := hb_Directory(cFcgiFolder+cFcgiExeName+"*.exe")
+         aListExeToMarkAsKill := hb_Directory(cSiteBackendFolder+cFcgiExeName+"*.exe")
          for each aExeToMarkAsKill in aListExeToMarkAsKill
             cExeFileName  := aExeToMarkAsKill[1]
             cKillFileName := left(cExeFileName,len(cExeFileName)-3)+"kill"
             if lower(cExeFileName) <> lower(cFcgiExeName+cFcgiVersion+".exe")
-               if !File(cFcgiFolder+cKillFileName)
-                  hb_MemoWrit(cFcgiFolder+cKillFileName,"ShutdownMarker")
+               if !File(cSiteBackendFolder+cKillFileName)
+                  hb_MemoWrit(cSiteBackendFolder+cKillFileName,"ShutdownMarker")
                endif
             endif
          endfor
@@ -182,11 +193,11 @@ function Main()
       case cAction == "KILL"
          //Will re-enable the FastCGI EXE
          //Blindly try to delete the .kill marker file
-         DeleteFile(cFcgiFolder+cFcgiExeName+cFcgiVersion+".kill")
+         DeleteFile(cSiteBackendFolder+cFcgiExeName+cFcgiVersion+".kill")
 
       case cAction == "DOWN"
-         cConfig := 'RewriteRule "^" "'+cWebsiteFolder+'down.html" [END]'
-         hb_MemoWrit(cFcgiFolder+".htaccess",cConfig)
+         cConfig := 'RewriteRule "^" "'+cURLPath+'down.html" [END]'
+         hb_MemoWrit(cSiteWebsiteFolder+".htaccess",cConfig)
          
       case cAction == "ACTIVATE"
          //Already did to all the correct setups before the down loop

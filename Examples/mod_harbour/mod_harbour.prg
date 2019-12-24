@@ -36,6 +36,8 @@ ErrorBlock( { | o | OnError( o ) } )
 oFcgi := hb_Fcgi():New()
 
 do while oFcgi:Wait()
+    ? "<!DOCTYPE html>"
+
     ? "<h1>FastCGI mod_harbour 008</h1>"
 
     ? "<p>Request Count = "+Trans( oFcgi:RequestCount )+"</p>"
