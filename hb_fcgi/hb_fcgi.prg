@@ -117,11 +117,11 @@ method Wait() class hb_Fcgi
 
             if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
                 // altd()
-                nPos := hb_RAt("\",::FastCGIExeFullPath)   // _M_ Make this non Windows ready
+                nPos := hb_RAt("\backend\",lower(::FastCGIExeFullPath))   // _M_ Make this non Windows ready
                 if empty(nPos)
                     ::Print([Site is down. Could not locate "down.html".])
                 else
-                    cDownFileName = left(::FastCGIExeFullPath,nPos)+"down.html"
+                    cDownFileName = left(::FastCGIExeFullPath,nPos)+"website\down.html"
                     if file(cDownFileName)
                         ::Print(hb_MemoRead(cDownFileName))
                     else
