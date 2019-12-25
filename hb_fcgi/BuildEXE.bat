@@ -42,7 +42,7 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 
 if %BuildMode% == debug (
 	copy ..\..\fcgi\debugger_on.hbm ..\..\fcgi\debugger.hbm
-	hbmk2 %EXEName%.hbp -b
+	hbmk2 %EXEName%.hbp -b /p
 ) else (
 	copy ..\..\fcgi\debugger_off.hbm ..\..\fcgi\debugger.hbm
 	hbmk2 %EXEName%.hbp

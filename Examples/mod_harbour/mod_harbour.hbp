@@ -1,6 +1,6 @@
-#-inc
-
 -hbexe
+-inc
+-workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
 
 -prgflag=-DINAPACHE
 

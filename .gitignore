@@ -5,7 +5,10 @@
 *.tmp
 *.bak
 *.hrb
+*.ppo
+*.ppt
 .history
 .hbmk
 *.NotInGit
 Thumbs.db
+hbmk2
