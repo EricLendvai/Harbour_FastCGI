@@ -1,3 +1,5 @@
+//Copyright (c) 2020 Eric Lendvai MIT License
+
 #include "hb_fcgi.ch"
 
 //=================================================================================================================
@@ -19,6 +21,8 @@ do while oFcgi:Wait()
 
     oFcgi:Print([<!DOCTYPE html><html><body>])
 
+    // altd()
+
     oFcgi:Print("<h1>FastCGI echo</h1>")
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
     oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
@@ -27,7 +31,6 @@ do while oFcgi:Wait()
     oFcgi:Print("<p>QUERY_STRING  = "+oFcgi:GetEnvironment("QUERY_STRING")+"</p>")
     oFcgi:Print("<p>Request Count = "+Trans( oFcgi:RequestCount )+"</p>")
     oFcgi:Print("<p>Input Length  = "+Trans( oFcgi:GetInputLength() )+"</p>")
-
     oFcgi:Print("<p>Request Environment:</p>")
     oFcgi:Print(oFcgi:ListEnvironment())
 

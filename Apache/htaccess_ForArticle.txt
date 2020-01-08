@@ -5,6 +5,12 @@ DirectoryIndex default.html
 RewriteCond %{REQUEST_FILENAME} default\.html$
 RewriteRule "^" "AnyFile.fcgiexe" [END]
 
+# Will detect for request to a plain htlm file, while not specifying the extension.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.+)$ %{REQUEST_URI}.html [R=301,L]
+
 # Non present files becides a FastCGI exe will be redirected to the FastCGI current version.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

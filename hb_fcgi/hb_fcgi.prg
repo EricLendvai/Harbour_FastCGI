@@ -1,4 +1,4 @@
-//Copyright (c) 2019 Eric Lendvai MIT License
+//Copyright (c) 2020 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
@@ -26,7 +26,6 @@ class hb_Fcgi
         data   LoadedHeader               init .f.    // TODO
         data   Header                     init {=>}
 
-        data   LoadedAppConfig            init .f.
         data   ReloadConfigAtEveryRequest init .f.
         data   AppConfig                  init {=>}   // Will be set to case insensitive keys
         method LoadAppConfig()
@@ -61,18 +60,50 @@ class hb_Fcgi
         method OnFirstRequest() inline nil
         method OnShutdown()     inline nil
 
+        data   OSPathSeparator            init hb_ps() READONLY
+        data   PathBackend                init ""      READONLY   //Folder of FastCGI exe and any other run support files
+        data   PathData                   init ""      READONLY   //Folder with Tables *Under Development*
+        data   PathWebsite                init ""      READONLY   //website Folder
+        data   PathSession                init ""      READONLY   //Folder of Session files
 endclass
 
 
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
+    local cRootPath
+    local cAppValue
+
     hb_hSetCaseMatch( ::QueryString, .f. )
     hb_hSetCaseMatch( ::AppConfig, .f. )
 
     // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
     ::FastCGIExeFullPath := hb_argV(0)
+    cRootPath := left(::FastCGIExeFullPath,rat(::OSPathSeparator,::FastCGIExeFullPath)-1)
+    cRootPath := left(cRootPath,rat(::OSPathSeparator,cRootPath))
+
+    ::PathBackend := cRootPath+"backend"+::OSPathSeparator
+    ::PathWebsite := cRootPath+"website"+::OSPathSeparator
+    
+    ::LoadAppConfig()
+
+    cAppValue := ::GetAppConfig("PathData")
+    if empty(cAppValue)
+        ::PathData    := cRootPath+"data"+::OSPathSeparator     //Default Location
+    else
+        ::PathData    := hb_DirSepAdd(cAppValue)
+    endif
+
+    cAppValue := ::GetAppConfig("PathSession")
+    if empty(cAppValue)
+        ::PathSession := cRootPath+"session"+::OSPathSeparator  //Default Location
+    else
+        ::PathSession := hb_DirSepAdd(cAppValue)
+    endif
 
     hb_Fcgx_Init()
+
+    set exact on
+    
 return Self
 //-----------------------------------------------------------------------------------------------------------------
 method Wait() class hb_Fcgi
@@ -81,8 +112,7 @@ method Wait() class hb_Fcgi
     local cREQUEST_URI
     local iWaitResult
     local cDownFileName
-    local nPos
-
+    
     if ::ProcessingRequest
         ::Finish()
     endif
@@ -91,6 +121,10 @@ method Wait() class hb_Fcgi
         //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
         lProcessRequest := .f.
     else
+        if ::RequestCount > 0
+            hb_gcAll()         //Since web apps have no inkey() or user input idle time, trigger the garbage collector.
+        endif
+
         if (iWaitResult := hb_Fcgx_Wait()) >= 0
             ::TransmittedContentType   := ""
             ::LoadedRequestEnvironment := .f.
@@ -108,7 +142,7 @@ method Wait() class hb_Fcgi
     
             ::RequestMethod           := ""
     
-            if ::ReloadConfigAtEveryRequest .or. !::LoadedAppConfig
+            if ::ReloadConfigAtEveryRequest
                 ::LoadAppConfig()
             endif
     
@@ -117,16 +151,11 @@ method Wait() class hb_Fcgi
 
             if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
                 // altd()
-                nPos := hb_RAt("\backend\",lower(::FastCGIExeFullPath))   // _M_ Make this non Windows ready
-                if empty(nPos)
-                    ::Print([Site is down. Could not locate "down.html".])
+                cDownFileName = ::PathWebsite+"down.html"
+                if file(cDownFileName)
+                    ::Print(hb_MemoRead(cDownFileName))
                 else
-                    cDownFileName = left(::FastCGIExeFullPath,nPos)+"website\down.html"
-                    if file(cDownFileName)
-                        ::Print(hb_MemoRead(cDownFileName))
-                    else
-                        ::Print([Site is down. Add a "down.html" file.])
-                    endif
+                    ::Print([Site is down. Add a "down.html" file.])
                 endif
                 lProcessRequest := .f.
                 ::ProcessingRequest := .t. //Since issued ::Print()
@@ -405,7 +434,7 @@ method LoadAppConfig() class hb_Fcgi
     local cValue
     local iNumberOfConfigs := 0
     //The configuration file is purposely not with a .txt extension to block users from accessing it.
-    cConfigText := hb_MemoRead(hb_DirBase()+"config.txt")
+    cConfigText := hb_MemoRead(::PathBackend+"config.txt")
     cConfigText := StrTran(StrTran(cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
     for each cLine in hb_ATokens(cConfigText,chr(10),.f.,.f.)
         nPos := at("=",cLine)
@@ -424,7 +453,6 @@ method LoadAppConfig() class hb_Fcgi
     endfor
     ::MaxRequestToProcess        := val(hb_HGetDef(::AppConfig,"MaxRequestPerFCGIProcess","0"))
     ::ReloadConfigAtEveryRequest := (hb_HGetDef(::AppConfig,"ReloadConfigAtEveryRequest","false") == "true")
-    ::LoadedAppConfig            := .t.
     // Altd()
 return iNumberOfConfigs
 //-----------------------------------------------------------------------------------------------------------------

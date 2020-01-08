@@ -14,7 +14,11 @@
 		},
 		{
 			"path": "c:\\apache24-64\\conf"
+		},
+		{
+			"path": "R:\\Harbour_websites\\fcgi_echo\\backend"
 		}
+
 	],
 	"settings": {
 		"files.autoSave": "onFocusChange",

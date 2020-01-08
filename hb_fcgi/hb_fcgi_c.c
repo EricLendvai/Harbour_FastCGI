@@ -1,6 +1,6 @@
 static const char rcsid[] = "$Id: hb_fcgi.c,v 1.5 2019/11/16 08:08:00 Eric Lendvai Exp $";
 
-//Copyright (c) 2019 Eric Lendvai MIT License
+//Copyright (c) 2020 Eric Lendvai MIT License
 
 #include "fcgi_config.h"
 

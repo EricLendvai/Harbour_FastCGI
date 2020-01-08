@@ -1,3 +1,5 @@
+//Copyright (c) 2020 Eric Lendvai MIT License
+
 #xcommand TRY => BEGIN SEQUENCE WITH __BreakBlock()
 #xcommand CATCH [<!oErr!>] => RECOVER [USING <oErr>] <-oErr->
 #xcommand FINALLY => ALWAYS
@@ -185,6 +187,12 @@ function Main()
          cConfig += 'RewriteCond %{REQUEST_FILENAME} default\.html$'+CRLF
          cConfig += 'RewriteRule "^" "AnyFile.fcgiexe'+cFcgiVersion+'" [END]'+CRLF+CRLF
          
+         cConfig += '# Will detect for request to a plain htlm file, while not specifying the extension.'+CRLF
+         cConfig += 'RewriteCond %{REQUEST_FILENAME} !-f'+CRLF
+         cConfig += 'RewriteCond %{REQUEST_FILENAME} !-d'+CRLF
+         cConfig += 'RewriteCond %{REQUEST_FILENAME}\.html -f'+CRLF
+         cConfig += 'RewriteRule ^(.+)$ %{REQUEST_URI}.html [R=301,L]'+CRLF+CRLF
+
          cConfig += '# Non present files becides a FastCGI exe will be redirected to the FastCGI current version.'+CRLF
          cConfig += 'RewriteCond %{REQUEST_FILENAME} !-f'+CRLF
          cConfig += 'RewriteCond %{REQUEST_FILENAME} !-d'+CRLF

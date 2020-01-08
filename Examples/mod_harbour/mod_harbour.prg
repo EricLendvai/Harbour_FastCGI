@@ -1,3 +1,5 @@
+//Copyright (c) 2020 Eric Lendvai MIT License
+
 #include "hb_fcgi.ch"
 #include "hbhrb.ch"
 
