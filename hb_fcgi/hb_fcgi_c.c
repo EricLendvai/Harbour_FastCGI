@@ -138,7 +138,7 @@ HB_FUNC( HB_FCGI_PRINTENVIRONMENT )  //Only usefull to test FastCGI development 
 
 HB_FUNC( HB_FCGX_INIT )
 {
-    sprintf(cDebugStringBuffer, "[Harbour] Init \n");
+    sprintf(cDebugStringBuffer, "[Harbour] Fcgi Init \n");
     OutputDebugString(cDebugStringBuffer);
 
     // signal(SIGTERM, handle_sigint);    // Signals not work in Apache and IIS

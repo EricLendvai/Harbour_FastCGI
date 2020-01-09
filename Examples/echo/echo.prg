@@ -6,10 +6,7 @@
 
 Function Main()
 
-local iInputLength  := 0
-local cInput        := ""
-local cQUERY_STRING := ""
-local cVar
+// local cCrash  // To test the error handler
 
 SendToDebugView("Starting echo")
 
@@ -22,6 +19,7 @@ do while oFcgi:Wait()
     oFcgi:Print([<!DOCTYPE html><html><body>])
 
     // altd()
+    //cCrash++    // To test the error handler
 
     oFcgi:Print("<h1>FastCGI echo</h1>")
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
@@ -60,11 +58,11 @@ class MyFcgi from hb_Fcgi
     method OnShutdown()
 endclass
 
-method OnFirstRequest class MyFcgi
+method OnFirstRequest() class MyFcgi
     SendToDebugView("Called from method OnFirstRequest")
 return nil 
 
-method OnShutdown class MyFcgi
+method OnShutdown() class MyFcgi
     SendToDebugView("Called from method OnShutdown")
 return nil 
 

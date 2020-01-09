@@ -50,13 +50,14 @@ class hb_Fcgi
         method GetRawInput()                           // To be only available during development
         method GetInputValue(cName)
         method GetInputFileName(cName)
-        method GetInputFileContentType(par_Name)
-        method GetInputFileContent(par_Name)
-        method SaveInputFileContent(par_Name,par_FileFullPath)
+        method GetInputFileContentType(cName)
+        method GetInputFileContent(cName)
+        method SaveInputFileContent(cName,cFileFullPath)
         method IsGet()                              SETGET   //Used to query if the page was sent as a GET request
         method IsPost()                             SETGET   //Used to query if the page was sent as a POST request
         //_M_ method GetHeader(cName)  // TODO
 
+        method OnError(oError)
         method OnFirstRequest() inline nil
         method OnShutdown()     inline nil
 
@@ -67,14 +68,27 @@ class hb_Fcgi
         data   PathSession                init ""      READONLY   //Folder of Session files
 endclass
 
+//-----------------------------------------------------------------------------------------------------------------
+method OnError(par_oError) class hb_Fcgi
+    SendToDebugView("In hb_Fcgi:OnError")
+    try
+        oFcgi:Print(FcgiGetErrorInfo(par_oError))
+        oFcgi:Finish()
+    catch
+    endtry
+    
+    BREAK
 
+return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
     local cRootPath
     local cAppValue
 
-    hb_hSetCaseMatch( ::QueryString, .f. )
-    hb_hSetCaseMatch( ::AppConfig, .f. )
+    ErrorBlock({|o|oFcgi:OnError(o)})
+
+    hb_hSetCaseMatch(::QueryString,.f.)
+    hb_hSetCaseMatch(::AppConfig,.f.)
 
     // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
     ::FastCGIExeFullPath := hb_argV(0)
@@ -255,10 +269,6 @@ method LoadInput() class hb_Fcgi
     local cInputValue
     local cToken
     local lFoundFormData
-
-    local lDebug
-    // local lcrash
-    // lcrash++
 
     if !::LoadedInput
         ::LoadedInput := .t.
@@ -534,5 +544,79 @@ FUNCTION hb_StrTranI( cSource, cRepl, cTrans )  // from https://groups.google.co
         cSource := SUBSTR( cSource, nPos + LEN( cRepl ) )
       ENDDO
      
-    RETURN cTarget
+RETURN cTarget
+//=================================================================================================================
+function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
+
+    local n, cInfo := "Error: " + oError:description + "<br>"
+    local cProcname
+
+    if ! Empty( oError:operation )
+        cInfo += "operation: " + oError:operation + "<br>"
+    endif   
+
+    if ! Empty( oError:filename )
+        cInfo += "filename: " + oError:filename + "<br>"
+    endif   
+
+    if ValType( oError:Args ) == "A"
+        for n = 1 to Len( oError:Args )
+            cInfo += "[" + Str( n, 4 ) + "] = " + ValType( oError:Args[ n ] ) + ;
+                    "   " + FcgiValToChar( oError:Args[ n ] ) + "<br>"
+        next
+    endif	
+        
+    n = 1
+    while .t.
+        cProcname := upper(ProcName( n ))
+        do case
+        case empty(cProcname)
+            exit
+        case right(cProcname,8) == ":ONERROR"
+        case cProcname == "ERRORBLOCKCODE"  
+        case right(cProcname,10) == "__DBGENTRY"
+        case right(cProcname,11) == "HB_FCGI_NEW"
+        otherwise
+            cInfo += "Called From: " + If( ! Empty( ProcFile( n ) ), ProcFile( n ) + ", ", "" ) + ;
+            cProcname + ", line: " + ;
+            AllTrim( Str( ProcLine( n ) ) ) + "<br>"
+        endcase
+        n++
+    end
+
+ return cInfo
+//=================================================================================================================
+function FcgiValToChar( u )  //Adapted From mod_harbour <-> apache.prg
+    local cResult
+ 
+    switch ValType( u )
+        case "C"
+            cResult = u
+            exit
+        case "D"
+            cResult = DToC( u )
+            exit
+        case "L"
+            cResult = If( u, ".T.", ".F." )
+            exit
+        case "N"
+            cResult = AllTrim( Str( u ) )
+            exit
+        case "A"
+            cResult = hb_ValToExp( u )
+            exit
+        case "P"
+            cResult = "(P)" 
+            exit
+        case "H"
+            cResult = hb_ValToExp( u )
+            exit
+        case "U"
+            cResult = "nil"
+            exit
+        otherwise
+            cResult = "type not supported yet in function ValToChar()"
+    endswitch
+ 
+ return cResult   
 //=================================================================================================================

@@ -33,11 +33,10 @@ local uRet
 
 SendToDebugView("Starting mod_harbour")
 
-ErrorBlock( { | o | OnError( o ) } )
-
 oFcgi := hb_Fcgi():New()
 
 do while oFcgi:Wait()
+
     ? "<!DOCTYPE html>"
 
     ? "<h1>FastCGI mod_harbour 008</h1>"
@@ -168,78 +167,4 @@ oFcgi := NIL
 
 return NIL
 
-//=================================================================================================================
-static procedure OnError( oError )  //From mod_harbour <-> apache.prg
-    SendToDebugView("In OnError" )
-    try
-        ?( GetErrorInfo( oError ) )
-        oFcgi:Finish()
-    catch
-    endtry
-
-    BREAK
-//=================================================================================================================
-function GetErrorInfo( oError )  //From mod_harbour <-> apache.prg
-
-    local n, cInfo := "Error: " + oError:description + "<br>"
-
-    if ! Empty( oError:operation )
-        cInfo += "operation: " + oError:operation + "<br>"
-    endif   
-
-    if ! Empty( oError:filename )
-        cInfo += "filename: " + oError:filename + "<br>"
-    endif   
-
-    if ValType( oError:Args ) == "A"
-        for n = 1 to Len( oError:Args )
-            cInfo += "[" + Str( n, 4 ) + "] = " + ValType( oError:Args[ n ] ) + ;
-                    "   " + ValToChar( oError:Args[ n ] ) + "<br>"
-        next
-    endif	
-        
-    n = 2
-    while ! Empty( ProcName( n ) )  
-        cInfo += "called from: " + If( ! Empty( ProcFile( n ) ), ProcFile( n ) + ", ", "" ) + ;
-                ProcName( n ) + ", line: " + ;
-                AllTrim( Str( ProcLine( n ) ) ) + "<br>"
-        n++
-    end
-
- return cInfo
-//=================================================================================================================
-function ValToChar( u )  //Adapted From mod_harbour <-> apache.prg
-    local cResult
- 
-    switch ValType( u )
-        case "C"
-            cResult = u
-            exit
-        case "D"
-            cResult = DToC( u )
-            exit
-        case "L"
-            cResult = If( u, ".T.", ".F." )
-            exit
-        case "N"
-            cResult = AllTrim( Str( u ) )
-            exit
-        case "A"
-            cResult = hb_ValToExp( u )
-            exit
-        case "P"
-            cResult = "(P)" 
-            exit
-        case "H"
-            cResult = hb_ValToExp( u )
-            exit
-        case "U"
-            cResult = "nil"
-            exit
-        otherwise
-            cResult = "type not supported yet in function ValToChar()"
-    endswitch
- 
- return cResult   
-//=================================================================================================================
 //=================================================================================================================
