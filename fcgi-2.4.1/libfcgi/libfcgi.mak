@@ -27,10 +27,10 @@ NULL=nul
 
 !IF  "$(CFG)" == "release"
 
-OUTDIR=.\..\libfcgi\Release
-INTDIR=.\..\libfcgi\Release
+OUTDIR=.\..\libfcgi\release\msvc
+INTDIR=.\..\libfcgi\release\msvc
 # Begin Custom Macros
-OutDir=.\..\libfcgi\Release
+OutDir=.\..\libfcgi\release\msvc
 # End Custom Macros
 
 ALL : "$(OUTDIR)\libfcgi.dll"

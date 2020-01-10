@@ -3,13 +3,24 @@
 -hbdyn
 
 -cpp
--olibfcgi
+
+#Had to specify CompilerCode Folder name before "release", due issues with Visual Studio
+-olibfcgi\${HB_COMPILER}\release\libfcgi
 
 -cflag=-DNDEBUG
 -cflag=-DWIN32
 -cflag=-D_CONSOLE
 -cflag=-D_CRT_SECURE_NO_WARNINGS
 -cflag=-D_SCL_SECURE_NO_WARNINGS
+-cflag=-Wwrite-strings
+-cflag=-Wunused-but-set-variable
+-cflag=-Wsign-compare
+-cflag=-Wunknown-pragmas
+-cflag=-fpermissive
+-cflag=-Wdangling-else
+-cflag=-Wno-implicit-fallthrough
+-cflag=-Wno-cast-function-type
+-cflag=-Wno-misleading-indentation
 
 -I.\include
 

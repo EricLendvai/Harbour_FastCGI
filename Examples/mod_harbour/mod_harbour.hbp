@@ -1,5 +1,5 @@
 -hbexe
--inc
+#-inc
 -workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
 
 -prgflag=-DINAPACHE
@@ -11,6 +11,7 @@ hbct.hbc
 hbwin.hbc
 hbhpdf.hbc
 #hbcurl.hbc
+hbmisc.hbc
 
 harbour.def
 

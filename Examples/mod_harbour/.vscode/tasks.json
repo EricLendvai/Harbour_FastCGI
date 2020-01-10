@@ -12,7 +12,7 @@
                 "env": {
                     "EXEName":"mod_harbour",
                     "BuildMode":"release",
-					"HB_COMPILER":"msvc64",
+					"HB_COMPILER":"${input:CCompiler}",
                     "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
                 }
@@ -35,7 +35,7 @@
                 "env": {
                     "EXEName":"mod_harbour",
                     "BuildMode":"debug",
-					"HB_COMPILER":"msvc64",
+					"HB_COMPILER":"${input:CCompiler}",
                     "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_mod_harbour\\"
                 }
@@ -106,5 +106,14 @@
             }
         }
 
+    ],
+    "inputs": [
+        {
+            "id": "CCompiler",
+            "type": "pickString",
+            "description": "Select C Compiler",
+            "options": ["mingw64","msvc64"],
+            "default": "mingw64"
+        }
     ]
 }

@@ -12,7 +12,7 @@
                 "env": {
                     "EXEName":"echo",
                     "BuildMode":"release",
-                    "HB_COMPILER":"msvc64",
+                    "HB_COMPILER":"${input:CCompiler}",
                     "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
@@ -37,7 +37,7 @@
                 "env": {
                     "EXEName":"echo",
                     "BuildMode":"debug",
-					"HB_COMPILER":"msvc64",
+					"HB_COMPILER":"${input:CCompiler}",
                     "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 }
@@ -62,8 +62,17 @@
         {
             "label":"SoftKillFcgiExe",
             "type": "shell",
-            "command":"${workspaceFolder}\\..\\..\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe",
+            "command":"${workspaceFolder}\\..\\..\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe",
             "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "CCompiler",
+            "type": "pickString",
+            "description": "Select C Compiler",
+            "options": ["mingw64","msvc64"],
+            "default": "mingw64"
         }
     ]
 }

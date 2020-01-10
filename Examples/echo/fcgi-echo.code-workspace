@@ -22,7 +22,7 @@
 	],
 	"settings": {
 		"files.autoSave": "onFocusChange",
-		"harbour.compilerExecutable": "C:\\Harbour\\bin\\win\\msvc64\\harbour.exe",
+		"harbour.compilerExecutable": "C:\\Harbour\\bin\\win\\mingw64\\harbour.exe",
 		"harbour.extraOptions": "-iC:\\Harbour\\include",
 		"harbour.extraIncludePaths":["C:\\Harbour\\include\\",
 			                          "R:\\Harbour_FastCGI\\hb_fcgi\\"],
@@ -39,27 +39,27 @@
 			"commands": [
 				{
 					"name": "<Down>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
 				},
 				{
 					"name": "<Activate echo>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
 				},
-				{
-					"name": "<Activate echo1>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 1"
-				},
-				{
-					"name": "<Activate echo2>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 2"
-				},
-				{
-					"name": "<Activate echo3>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 3"
-				},
+				// {
+				// 	"name": "<Activate echo1>",
+				// 	"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 1"
+				// },
+				// {
+				// 	"name": "<Activate echo2>",
+				// 	"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 2"
+				// },
+				// {
+				// 	"name": "<Activate echo3>",
+				// 	"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo 3"
+				// },
 				{
 					"name": "<Kill echo>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\msvc64\\release\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
 				}
 			]
 		}

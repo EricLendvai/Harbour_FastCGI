@@ -12,7 +12,7 @@
                 "env": {
                     "EXEName":"FCGITaskManager",
                     "BuildMode":"debug",
-					"HB_COMPILER":"msvc64"
+					"HB_COMPILER":"${input:CCompiler}"
                 }
             },
             "presentation": {
@@ -33,7 +33,7 @@
                 "env": {
                     "EXEName":"FCGITaskManager",
                     "BuildMode":"release",
-					"HB_COMPILER":"msvc64"
+					"hb_compiler":"${input:CCompiler}"
                 }
             },
             "presentation": {
@@ -44,6 +44,15 @@
                 "showReuseMessage": false,
                 "clear": false
             }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "CCompiler",
+            "type": "pickString",
+            "description": "Select C Compiler",
+            "options": ["mingw64","msvc64"],
+            "default": "mingw64"
         }
     ]
 }

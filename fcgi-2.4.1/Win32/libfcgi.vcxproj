@@ -20,6 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F82ABE4E-26B2-402C-B7D4-FD27467B83AA}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -77,8 +78,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\libfcgi\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\..\libfcgi\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\libfcgi\msvc64\Release/</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\libfcgi\msvc64\Intermediate/</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -245,10 +246,10 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\..\libfcgi\Release/libfcgi.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\..\libfcgi\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\..\libfcgi\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\..\libfcgi\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>.\..\libfcgi\msvc64\release\other/libfcgi.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\..\libfcgi\msvc64\release\other/</AssemblerListingLocation>
+      <ObjectFileName>.\..\libfcgi\msvc64\release\object/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\libfcgi\msvc64\release\other/</ProgramDataBaseFileName>
       <BrowseInformation>
       </BrowseInformation>
       <BrowseInformationFile>
@@ -262,17 +263,18 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\..\libfcgi\Release/libfcgi.dll</OutputFile>
+      <OutputFile>.\..\libfcgi\msvc64\release/libfcgi.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>.\..\libfcgi\Release/libfcgi.lib</ImportLibrary>
+      <ImportLibrary>.\..\libfcgi\msvc64\Release/libfcgi.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
+      <ShowProgress>LinkVerboseLib</ShowProgress>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\..\libfcgi\Release/libfcgi.bsc</OutputFile>
+      <OutputFile>.\..\libfcgi\msvc64\release\other/libfcgi.bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>

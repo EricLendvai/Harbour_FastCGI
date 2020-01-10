@@ -23,6 +23,8 @@ taskkill /IM FCGI%EXEName%.exe /f /t 2>nul
 
 if %HB_COMPILER% == msvc64 call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
 
+if %HB_COMPILER% == mingw64 set PATH=C:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin;%PATH%
+
 set HB_PATH=C:\Harbour
 
 set PATH=%HB_PATH%\bin\win\%HB_COMPILER%;C:\HarbourTools;%PATH%
@@ -42,10 +44,12 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 
 if %BuildMode% == debug (
 	copy ..\..\fcgi\debugger_on.hbm ..\..\fcgi\debugger.hbm
-	hbmk2 %EXEName%.hbp -b /p
+::	hbmk2 %EXEName%.hbp -b /p /w3
+	hbmk2 %EXEName%.hbp -b /w3
 ) else (
 	copy ..\..\fcgi\debugger_off.hbm ..\..\fcgi\debugger.hbm
-	hbmk2 %EXEName%.hbp
+::	hbmk2 %EXEName%.hbp /w3 /gc3
+	hbmk2 %EXEName%.hbp /w3
 )
 
 if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
@@ -62,12 +66,22 @@ if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 			goto End
 		)
 
-		copy %HB_COMPILER%\%BuildMode%\%EXEName%.exe %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+		rem Extra files needed if compiled with mingw64
+		if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libstdc++-6.dll"    "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
+		if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libgcc_s_seh-1.dll" "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
+
+		if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
+		if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
+
+		copy "%HB_COMPILER%\%BuildMode%\%EXEName%.exe" "%WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe"
+
 		if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
 			echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 		) else (
 			echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 		)
+
+		copy ..\..\fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
 
 		echo.
 		echo Ready            BuildMode = %BuildMode%

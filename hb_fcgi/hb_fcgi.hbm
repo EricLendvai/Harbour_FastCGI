@@ -12,7 +12,7 @@ hb_fcgi.prg
 -i.
 -i..\fcgi-2.4.1\include
 
--L..\fcgi-2.4.1\libfcgi\Release
+-L..\fcgi-2.4.1\libfcgi\${HB_COMPILER}\release\
 -llibfcgi
 
 gtwvg.hbc
