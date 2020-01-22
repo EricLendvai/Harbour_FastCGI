@@ -1,0 +1,47 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "..\\..\\hb_fcgi"
+		},
+		{
+			"path": "c:\\apache24-64\\conf"
+		}
+	],
+	"settings": {
+		"files.autoSave": "onFocusChange",
+		"harbour.compilerExecutable": "C:\\Harbour\\bin\\win\\mingw64\\harbour.exe",
+		"harbour.extraOptions": "-iC:\\Harbour\\include",
+		"harbour.extraIncludePaths":["C:\\Harbour\\include\\",
+			                          "R:\\Harbour_FastCGI\\hb_fcgi\\"],
+		"harbour.warningLevel":1,
+		"harbour.decorator":true,
+		"local-history.path": "R:\\VSCode_History\\Harbour_FastCGI",
+		"local-history.treeLocation": "localHistory",
+		"local-history.daysLimit": 0,
+		"local-history.maxDisplay": 5,
+		"actionButtons": {
+			"defaultColor": "white", // Can also use string color names.
+			"loadNpmCommands":false, // Disables automatic generation of actions for npm commands.
+			"reloadButton":"♻️", // Custom reload button text or icon (default ↻). null value enables automatic reload on configuration change
+			"commands": [
+				{
+					"name": "<Down>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+				},
+				{
+					"name": "<Activate LocalSandbox>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+				},
+				{
+					"name": "<Kill LocalSandbox>",
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+				}
+			]
+		}
+	
+
+	}
+}
