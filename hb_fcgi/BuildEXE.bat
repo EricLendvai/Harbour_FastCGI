@@ -1,5 +1,10 @@
 @echo off
 
+:: echo EXEName = %EXEName%
+:: echo BuildMode = %BuildMode%
+:: echo SiteRootFolder = %SiteRootFolder%
+:: echo HB_COMPILER = %HB_COMPILER%
+
 if %EXEName%. == . goto MissingEnvironmentVariables
 if %BuildMode%. == . goto MissingEnvironmentVariables
 if %SiteRootFolder%. ==. goto MissingEnvironmentVariables
@@ -33,22 +38,27 @@ echo HB_PATH     = %HB_PATH%
 echo HB_COMPILER = %HB_COMPILER%
 echo PATH        = %PATH%
 
-md %HB_COMPILER%
-md %HB_COMPILER%\%BuildMode%
+md %HB_COMPILER% 2>nul
+md %HB_COMPILER%\%BuildMode% 2>nul
+md %HB_COMPILER%\%BuildMode%\hbmk2 2>nul
 
-del %HB_COMPILER%\%BuildMode%\%EXEName%.exe
+del %HB_COMPILER%\%BuildMode%\%EXEName%.exe 2>nul
 if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 	echo Could not delete previous version of %EXEName%.exe
 	goto End
 )
 
+::	-b        = debug
+::  /w3       = warn for variable declarations
+::  /es2      = process warning as errors
+::  /gc3      = Pure C code with no HVM
+::  /p        = Leave generated ppo files
+
 if %BuildMode% == debug (
-	copy ..\..\fcgi\debugger_on.hbm ..\..\fcgi\debugger.hbm
-::	hbmk2 %EXEName%.hbp -b /p /w3
-	hbmk2 %EXEName%.hbp -b /w3
+	copy ..\..\hb_fcgi\debugger_on.hbm ..\..\hb_fcgi\debugger.hbm
+	hbmk2 %EXEName%.hbp -b /p /w3
 ) else (
-	copy ..\..\fcgi\debugger_off.hbm ..\..\fcgi\debugger.hbm
-::	hbmk2 %EXEName%.hbp /w3 /gc3
+	copy ..\..\hb_fcgi\debugger_off.hbm ..\..\hb_fcgi\debugger.hbm
 	hbmk2 %EXEName%.hbp /w3
 )
 

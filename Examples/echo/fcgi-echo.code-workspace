@@ -7,12 +7,6 @@
 			"path": "..\\..\\hb_fcgi"
 		},
 		{
-			"path": "..\\..\\fcgi-2.4.1\\libfcgi"
-		},
-		{
-			"path": "..\\..\\fcgi-2.4.1\\include"
-		},
-		{
 			"path": "c:\\apache24-64\\conf"
 		},
 		{

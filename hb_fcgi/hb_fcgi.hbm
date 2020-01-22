@@ -4,6 +4,10 @@
 #had to have a different name for the .c file and .prg, because at some point a .obj is created, and there was a name clash.
 hb_fcgi_c.c
 hb_fcgi.prg
+vfp_strtran.c
+vfp_StrReplace.c
+
+#hb_fcgi_includes.c
 
 ##Ensure to update the following prg when the harbour VSCODE extension is updated. 
 #vscode_debugger.prg

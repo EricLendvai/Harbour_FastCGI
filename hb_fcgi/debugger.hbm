@@ -1,2 +1,2 @@
-#Ensure to update the following prg when the harbour VSCODE extension is updated. 
-vscode_debugger.prg
+#This file will be copied to debugger.hbm when release build was selected
+#No inclusion of the vscode_debugger.prg

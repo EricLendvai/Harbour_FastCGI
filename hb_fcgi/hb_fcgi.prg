@@ -2,6 +2,8 @@
 
 #include "hb_fcgi.ch"
 
+#include "fileio.ch"
+
 // #define DEVELOPMENTMODE
 // #ifdef DEVELOPMENTMODE
 // #endif
@@ -40,24 +42,24 @@ class hb_Fcgi
         method New() constructor
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
-        method Print()
-        method SetContentType()
-        method GetEnvironment(cName)
+        method Print(par_html)
+        method SetContentType(par_type)
+        method GetEnvironment(par_cName)               // Web Server (Type) Specific Environment
         method ListEnvironment()                       // Just to assist development
-        method GetAppConfig(cName)
-        method GetQueryString(cName)
+        method GetAppConfig(par_cName)
+        method GetQueryString(par_cName)
         method GetInputLength()
         method GetRawInput()                           // To be only available during development
-        method GetInputValue(cName)
-        method GetInputFileName(cName)
-        method GetInputFileContentType(cName)
-        method GetInputFileContent(cName)
-        method SaveInputFileContent(cName,cFileFullPath)
+        method GetInputValue(par_cName)
+        method GetInputFileName(par_cName)
+        method GetInputFileContentType(par_cName)
+        method GetInputFileContent(par_cName)
+        method SaveInputFileContent(par_cName,par_cFileFullPath)
         method IsGet()                              SETGET   //Used to query if the page was sent as a GET request
         method IsPost()                             SETGET   //Used to query if the page was sent as a POST request
         //_M_ method GetHeader(cName)  // TODO
 
-        method OnError(oError)
+        method OnError(par_oError)
         method OnFirstRequest() inline nil
         method OnShutdown()     inline nil
 
@@ -66,9 +68,11 @@ class hb_Fcgi
         data   PathData                   init ""      READONLY   //Folder with Tables *Under Development*
         data   PathWebsite                init ""      READONLY   //website Folder
         data   PathSession                init ""      READONLY   //Folder of Session files
+        data   RequestSettings            init {=>}    READONLY   //Used to assist parsing the Request URL aka Full URI (not the way apache defines URI, see https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
 endclass
 
 //-----------------------------------------------------------------------------------------------------------------
+
 method OnError(par_oError) class hb_Fcgi
     SendToDebugView("In hb_Fcgi:OnError")
     try
@@ -78,8 +82,7 @@ method OnError(par_oError) class hb_Fcgi
     endtry
     
     BREAK
-
-return NIL
+return nil
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
     local cRootPath
@@ -123,9 +126,13 @@ return Self
 method Wait() class hb_Fcgi
     //Used to wait for the next page request
     local lProcessRequest      //If web page should be built
-    local cREQUEST_URI
+    // local cREQUEST_URI
     local iWaitResult
     local cDownFileName
+    local cSitePath
+    local cPath
+    local cPage
+    local nPos
     
     if ::ProcessingRequest
         ::Finish()
@@ -160,7 +167,7 @@ method Wait() class hb_Fcgi
                 ::LoadAppConfig()
             endif
     
-            cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
+            // cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
             // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
 
             if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
@@ -181,11 +188,38 @@ method Wait() class hb_Fcgi
     
         else
             // Add code to log why the wait failed. Use the variable iWaitResult
+            if iWaitResult == 0 //To full the compiler. It will be used later.
+            endif
+
             lProcessRequest := .f.
         endif
     endif
 
     ::ProcessingRequest = lProcessRequest
+
+    // Initialize ::URIInfo To provide easy access to 
+    cSitePath := ::GetEnvironment("CONTEXT_PREFIX")
+    if len(cSitePath) == 0
+        cSitePath := "/"
+    endif
+
+    cPath := substr(::GetEnvironment("REDIRECT_URL"),len(cSitePath)+1)
+    nPos  := hb_RAt("/",cPath)
+    cPage := substr(cPath,nPos+1)
+    if cPage == "default.html"
+        cPage := ""  //Work Around the behaviour of Apache's work around to deal with root file access
+    endif
+    cPath := left(cPath,nPos)
+
+    ::RequestSettings["Protocol"]    := ::GetEnvironment("REQUEST_SCHEME")
+    ::RequestSettings["Port"]        := val(::GetEnvironment("SERVER_PORT"))
+    ::RequestSettings["Host"]        := ::GetEnvironment("SERVER_NAME")
+    ::RequestSettings["SitePath"]    := cSitePath
+    ::RequestSettings["Path"]        := cPath
+    ::RequestSettings["Page"]        := cPage
+    ::RequestSettings["QueryString"] := ::GetEnvironment("REDIRECT_QUERY_STRING")
+    ::RequestSettings["WebServerIP"] := ::GetEnvironment("SERVER_ADDR")
+    ::RequestSettings["ClienIP"]     := ::GetEnvironment("REMOTE_ADDR")
 
     if ::ProcessingRequest
         if ::RequestCount == 1
@@ -220,11 +254,11 @@ method SetContentType(par_type) class hb_Fcgi
     endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
-method GetEnvironment(par_Name) class hb_Fcgi
+method GetEnvironment(par_cName) class hb_Fcgi
     if !::LoadedRequestEnvironment
         ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
     endif
-return hb_HGetDef(::RequestEnvironment, par_Name, "")
+return hb_HGetDef(::RequestEnvironment, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method ListEnvironment() class hb_Fcgi
     local cEnvironment
@@ -238,10 +272,10 @@ method ListEnvironment() class hb_Fcgi
     endfor
 return cHtml
 //-----------------------------------------------------------------------------------------------------------------
-method GetAppConfig(par_Name) class hb_Fcgi
-return hb_HGetDef(::AppConfig, par_Name, "")
+method GetAppConfig(par_cName) class hb_Fcgi
+return hb_HGetDef(::AppConfig, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
-method GetQueryString(par_Name) class hb_Fcgi
+method GetQueryString(par_cName) class hb_Fcgi
     local cParameter
     local nPos
     if !::LoadedQueryString
@@ -253,7 +287,7 @@ method GetQueryString(par_Name) class hb_Fcgi
             endif
         endfor
     endif
-return hb_HGetDef(::QueryString, par_Name, "")
+return hb_HGetDef(::QueryString, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method LoadInput() class hb_Fcgi
     local cInput
@@ -266,14 +300,13 @@ method LoadInput() class hb_Fcgi
     local lFoundAllLines
     local cInputName
     local cFileName
-    local cInputValue
     local cToken
     local lFoundFormData
 
     if !::LoadedInput
         ::LoadedInput := .t.
         ::InputRaw := hb_Fcgx_GetInput(::GetInputLength())  //Will return a buffer that could have chr(0) in it
-
+        // SendToClipboard(::InputRaw)  // Used during testing
         // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
 
         cContentType := ::GetEnvironment("CONTENT_TYPE")
@@ -324,7 +357,7 @@ method LoadInput() class hb_Fcgi
                         lFoundFormData := .f.
                         cInputName     := ""
                         cFileName      := ""
-                        cContentType   := ""
+                        // cContentType   := ""
 
                         //Process Line 1
                         for each cToken in hb_ATokens(cLine1,";",.f.,.f.)
@@ -390,47 +423,47 @@ method GetRawInput() class hb_Fcgi
     endif
 return ::InputRaw
 //-----------------------------------------------------------------------------------------------------------------
-method GetInputValue(par_Name) class hb_Fcgi
+method GetInputValue(par_cName) class hb_Fcgi
     local aResult
     if !::LoadedInput
         ::LoadInput()
     endif
-    aResult := hb_HGetDef(::Input, par_Name, {1,""})
+    aResult := hb_HGetDef(::Input, par_cName, {1,""})
 return aResult[2]
 //-----------------------------------------------------------------------------------------------------------------
-method GetInputFileName(par_Name) class hb_Fcgi
+method GetInputFileName(par_cName) class hb_Fcgi
     local aResult
     if !::LoadedInput
         ::LoadInput()
     endif
-    aResult := hb_HGetDef(::Input, par_Name, {1,""})
+    aResult := hb_HGetDef(::Input, par_cName, {1,""})
 return iif(aResult[1]=2,aResult[3],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
-method GetInputFileContentType(par_Name) class hb_Fcgi
+method GetInputFileContentType(par_cName) class hb_Fcgi
     local aResult
     if !::LoadedInput
         ::LoadInput()
     endif
-    aResult := hb_HGetDef(::Input, par_Name, {1,""})
+    aResult := hb_HGetDef(::Input, par_cName, {1,""})
 return iif(aResult[1]=2,aResult[4],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
-method GetInputFileContent(par_Name) class hb_Fcgi
+method GetInputFileContent(par_cName) class hb_Fcgi
     local aResult
     if !::LoadedInput
         ::LoadInput()
     endif
-    aResult := hb_HGetDef(::Input, par_Name, {1,""})
+    aResult := hb_HGetDef(::Input, par_cName, {1,""})
 return iif(aResult[1]=2,aResult[5],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
-method SaveInputFileContent(par_Name,par_FileFullPath) class hb_Fcgi
+method SaveInputFileContent(par_cName,par_cFileFullPath) class hb_Fcgi
     local aResult
     local lResult := .f.
     if !::LoadedInput
         ::LoadInput()
     endif
-    aResult := hb_HGetDef(::Input, par_Name, {1,""})
+    aResult := hb_HGetDef(::Input, par_cName, {1,""})
     try 
-        hb_MemoWrit(par_FileFullPath,iif(aResult[1]=2,aResult[5],""))
+        hb_MemoWrit(par_cFileFullPath,iif(aResult[1]=2,aResult[5],""))
         lResult := .t.
     catch
     endtry
@@ -531,26 +564,10 @@ function SendToClipboard(cText)
     wvt_SetClipboard(cText)
 return .T.
 //=================================================================================================================
-FUNCTION hb_StrTranI( cSource, cRepl, cTrans )  // from https://groups.google.com/forum/#!topic/harbour-users/NMKwSSX7TtU
-    LOCAL cTarget := ""
-    LOCAL nPos
-     
-    do while len( cSource ) > 0
-        IF ( nPos := hb_AtI( cRepl, cSource ) ) == 0  // nor more fun
-          cTarget += cSource
-          EXIT
-        ENDIF
-        cTarget += LEFT( cSource, nPos - 1 ) + cTrans
-        cSource := SUBSTR( cSource, nPos + LEN( cRepl ) )
-      ENDDO
-     
-RETURN cTarget
-//=================================================================================================================
 function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
 
     local n, cInfo := "Error: " + oError:description + "<br>"
     local cProcname
-
     if ! Empty( oError:operation )
         cInfo += "operation: " + oError:operation + "<br>"
     endif   
@@ -577,9 +594,7 @@ function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
         case right(cProcname,10) == "__DBGENTRY"
         case right(cProcname,11) == "HB_FCGI_NEW"
         otherwise
-            cInfo += "Called From: " + If( ! Empty( ProcFile( n ) ), ProcFile( n ) + ", ", "" ) + ;
-            cProcname + ", line: " + ;
-            AllTrim( Str( ProcLine( n ) ) ) + "<br>"
+            cInfo += "Called From: " + If( ! Empty( ProcFile( n ) ), ProcFile( n ) + ", ", "" ) + cProcname + ", line: " + AllTrim( Str( ProcLine( n ) ) ) + "<br>"
         endcase
         n++
     end
@@ -619,4 +634,152 @@ function FcgiValToChar( u )  //Adapted From mod_harbour <-> apache.prg
     endswitch
  
  return cResult   
+//=================================================================================================================
+function FcgiPrepFieldForValue( par_FieldValue ) 
+// for now calling vfp_StrReplace, which is case insensitive ready version of hb_StrReplace
+return vfp_StrReplace(par_FieldValue,{;
+                                        [&lt;] => [&amp;lt;] ,;
+                                        [&gt;] => [&amp;gt;] ,;
+                                        ["]    => [&quot;]   ,;
+                                        [<]    => [&lt;]     ,;
+                                        [>]    => [&gt;]     ,;
+                                        chr(9) => [&#9;]      ;
+                                     },,1)
+//=================================================================================================================
+//The VFP_ScanStack is to be used in conjuntion with the "#command SCAN" and "#command ENDSCAN"
+function VFP_ScanStack(par_action)    //action = "push" "pop" "scan" , "clear" (empty the entire stack)
+local xResult := nil
+static iTop   := 0
+static aStack := {}
+
+hb_default( @par_action, "scan" )
+
+switch par_action
+    case "push"
+        iTop++
+        if len(aStack) < iTop
+            ASize( aStack, iTop )
+        endif
+        aStack[iTop] := {select(),.t.} // Record the current work area and flag to know during "scan" calls if they are going to be the initial "locate" or should be "continue"
+        xResult := nil
+        exit
+    case "pop"
+        iTop--
+        //No need to reduce the size of aStack since will most likely be increased again
+        exit
+    case "clear"
+        iTop   := 0
+        ASize( aStack, 0 )
+        exit
+    otherwise
+        select (aStack[iTop,1])
+        xResult := aStack[iTop,2]
+        aStack[iTop,2] := .f.
+        exit
+endswitch
+
+return xResult
+//=================================================================================================================
+function vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
+
+local lAdditive
+local nBytesWritten := 0
+local nFileHandle
+
+lAdditive := hb_defaultValue(par_lAdditive,.f.)
+
+if hb_FileExists(par_cFileName)
+    if lAdditive
+        nFileHandle := FOpen(par_cFileName,FO_WRITE)
+        FSeek(nFileHandle,0,FS_END)  // go to the end of file
+    else
+        if ferase(par_cFileName) == 0
+            nFileHandle := FCreate(par_cFileName)
+        else
+            nFileHandle := -1
+        endif
+    endif
+else
+    nFileHandle := FCreate(par_cFileName)
+endif
+
+if nFileHandle >= 0
+    nBytesWritten := fwrite(nFileHandle,par_cExpression)
+    fclose(nFileHandle)
+endif
+
+return nBytesWritten
+//=================================================================================================================
+//The following a modified version of the "uhttpd_URLDecode" function from extras\httpsrv\_cgifunc.prg   Copyright 2009 Francesco Saverio Giudice <info / at / fsgiudice.com>
+//under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2, or (at your option) * any later version.
+
+function DecodeURIComponent(par_cString)
+
+#ifdef HB_USE_HBTIP
+	RETURN TIPENCODERURL_DECODE( par_cString )
+#else
+    local cRet := ""
+    local i
+    local cChar
+
+	FOR i := 1 TO Len( par_cString )
+		cChar := SubStr( par_cString, i, 1 )
+		DO CASE
+		CASE cChar == "+"
+			cRet += " "
+
+		CASE cChar == "%"
+			i++
+			cRet += Chr( hb_HexToNum( SubStr( par_cString, i, 2 ) ) )
+			i++
+
+		OTHERWISE
+			cRet += cChar
+
+		ENDCASE
+
+	NEXT
+
+	return cRet
+#endif
+
+//=================================================================================================================
+//The following a modified version of the "uhttpd_URLEncode" function from extras\httpsrv\_cgifunc.prg   Copyright 2009 Francesco Saverio Giudice <info / at / fsgiudice.com>
+//under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2, or (at your option) * any later version.
+
+function EncodeURIComponent(par_cString,par_lComplete)
+
+#ifdef HB_USE_HBTIP
+
+	__defaultNIL( @par_lComplete, .T. )
+
+	RETURN TIPENCODERURL_ENCODE( cpar_cStringString, par_lComplete )
+#else
+	local cRet := "", i, nVal, cChar
+
+	__defaultNIL( @par_lComplete, .T. )
+
+	for i := 1 to Len( par_cString )
+		cChar := SubStr( par_cString, i, 1 )
+		DO CASE
+		CASE cChar == " "
+			cRet += "+"
+
+		CASE ( cChar >= "A" .AND. cChar <= "Z" ) .OR. ;
+				( cChar >= "a" .AND. cChar <= "z" ) .OR. ;
+				( cChar >= "0" .AND. cChar <= "9" ) .OR. ;
+				cChar == "." .OR. cChar == "," .OR. cChar == "&" .OR. ;
+				cChar == "/" .OR. cChar == ";" .OR. cChar == "_"
+			cRet += cChar
+
+		CASE iif( ! par_lComplete, cChar == ":" .OR. cChar == "?" .OR. cChar == "=", .F. )
+			cRet += cChar
+
+		OTHERWISE
+			nVal := Asc( cChar )
+			cRet += "%" + hb_NumToHex( nVal )
+		ENDCASE
+	NEXT
+
+	RETURN cRet
 //=================================================================================================================

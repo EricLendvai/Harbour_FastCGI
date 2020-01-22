@@ -141,7 +141,7 @@ HB_FUNC( HB_FCGX_INIT )
     sprintf(cDebugStringBuffer, "[Harbour] Fcgi Init \n");
     OutputDebugString(cDebugStringBuffer);
 
-    // signal(SIGTERM, handle_sigint);    // Signals not work in Apache and IIS
+    // signal(SIGTERM, handle_sigint);    // Signals not working in Apache and IIS
     
 }
 
@@ -215,3 +215,4 @@ HB_FUNC( AP_FILENAME )   // Used to assist the debugging of mod_harbour.exe
 }
 
 //=================================================================================================================
+

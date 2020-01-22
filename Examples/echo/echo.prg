@@ -6,6 +6,7 @@
 
 Function Main()
 
+local cHtml
 // local cCrash  // To test the error handler
 
 SendToDebugView("Starting echo")
@@ -18,17 +19,35 @@ do while oFcgi:Wait()
 
     oFcgi:Print([<!DOCTYPE html><html><body>])
 
+    // Following can be used to test the VSCODE debugger
     // altd()
     //cCrash++    // To test the error handler
 
     oFcgi:Print("<h1>FastCGI echo</h1>")
     oFcgi:Print("<p>FastCGI EXE   = "+oFcgi:FastCGIExeFullPath+"</p>")
-    oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
-    oFcgi:Print("<p>REQUEST_URI   = "+oFcgi:GetEnvironment("REQUEST_URI")+"</p>")
-    oFcgi:Print("<p>REDIRECT_URL  = "+oFcgi:GetEnvironment("REDIRECT_URL")+"</p>")
-    oFcgi:Print("<p>QUERY_STRING  = "+oFcgi:GetEnvironment("QUERY_STRING")+"</p>")
+
+    cHtml := [<table border="1" cellpadding="3" cellspacing="0">]
+    cHtml += [<tr><td>Protocol</td>]     +[<td>]+oFcgi:RequestSettings["Protocol"]+[</td></tr>]
+    cHtml += [<tr><td>Port</td>]         +[<td>]+trans(oFcgi:RequestSettings["Port"])+[</td></tr>]
+    cHtml += [<tr><td>Host</td>]         +[<td>]+oFcgi:RequestSettings["Host"]+[</td></tr>]
+    cHtml += [<tr><td>Site Path</td>]    +[<td>]+oFcgi:RequestSettings["SitePath"]+[</td></tr>]
+    cHtml += [<tr><td>Path</td>]         +[<td>]+oFcgi:RequestSettings["Path"]+[</td></tr>]
+    cHtml += [<tr><td>Page</td>]         +[<td>]+oFcgi:RequestSettings["Page"]+[</td></tr>]
+    cHtml += [<tr><td>Query String</td>] +[<td>]+oFcgi:RequestSettings["QueryString"]+[</td></tr>]
+    cHtml += [<tr><td>Web Server IP</td>]+[<td>]+oFcgi:RequestSettings["WebServerIP"]+[</td></tr>]
+    cHtml += [<tr><td>Clien IP</td>]     +[<td>]+oFcgi:RequestSettings["ClienIP"]+[</td></tr>]
+    cHtml += [</table>]
+    oFcgi:Print(cHtml)
+ 
+
+    // oFcgi:Print("<p>SCRIPT_NAME   = "+oFcgi:GetEnvironment("SCRIPT_NAME")+"</p>")
+    // oFcgi:Print("<p>REQUEST_URI   = "+oFcgi:GetEnvironment("REQUEST_URI")+"</p>")
+    // oFcgi:Print("<p>REDIRECT_URL  = "+oFcgi:GetEnvironment("REDIRECT_URL")+"</p>")
+    // oFcgi:Print("<p>QUERY_STRING  = "+oFcgi:GetEnvironment("QUERY_STRING")+"</p>")
     oFcgi:Print("<p>Request Count = "+Trans( oFcgi:RequestCount )+"</p>")
     oFcgi:Print("<p>Input Length  = "+Trans( oFcgi:GetInputLength() )+"</p>")
+
+    // Following will be abstracted to assist in making FastCGI platform independent.
     oFcgi:Print("<p>Request Environment:</p>")
     oFcgi:Print(oFcgi:ListEnvironment())
 
