@@ -143,6 +143,7 @@ method Wait() class hb_Fcgi
         lProcessRequest := .f.
     else
         if ::RequestCount > 0
+            FcgiLogger(1)
             hb_gcAll()         //Since web apps have no inkey() or user input idle time, trigger the garbage collector.
         endif
 
@@ -782,4 +783,33 @@ function EncodeURIComponent(par_cString,par_lComplete)
 	NEXT
 
 	RETURN cRet
+//=================================================================================================================
+function FcgiLogger(par_nAction,par_cString)
+//par_nAction, 1=Reset,2=Add Line,3=Append To Line,4=Save to File,5=Save to File and Reset
+//par_cString, if par_nAction = 2 or 3 the text to send out, if par_nAction = 4 the full file name to write out.
+
+static cBuffer := ""
+
+switch par_nAction
+case 1  // Reset
+    cBuffer := ""
+    exit
+case 2  // Add Line, same as ? <expr>
+    if len(cBuffer) > 0
+        cBuffer += chr(13)+chr(10)
+    endif
+    cBuffer += par_cString
+    exit
+case 3  // Append to Line, same as ?? <expr>
+    cBuffer += par_cString
+    exit
+case 4
+case 5
+    vfp_StrToFile(cBuffer,par_cString)
+    if par_nAction == 5
+        cBuffer := ""
+    endif
+endswitch
+
+return nil
 //=================================================================================================================

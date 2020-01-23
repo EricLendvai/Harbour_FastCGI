@@ -135,7 +135,12 @@ method OnFirstRequest() class MyFcgi
     __pp_addRule( v_hPP, "#xcommand ENDDO => END" )
     //    __pp_addRule( v_hPP, "#xcommand DEFAULT <v1> TO <x1> [, <vn> TO <xn> ] => ;" + ;
     //                       "IF <v1> == NIL ; <v1> := <x1> ; END [; IF <vn> == NIL ; <vn> := <xn> ; END ]" )
-    __pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => vfp_StrToFile( <explist> + CRLF , 'result.txt' , .T. )" )
+
+    //__pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => vfp_StrToFile( <explist> + CRLF , 'result.txt' , .T. )" )
+    __pp_addRule( v_hPP, "#xcommand ? [<explist>] => FcgiLogger( 2, <explist> )" )
+    __pp_addRule( v_hPP, "#xcommand ?? [<explist>] => FcgiLogger( 3, <explist> )" )
+
+
 
     // vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 
@@ -457,6 +462,7 @@ if OpenTable("sandprog",.t.,.f.)
 
                         //Current directory
                         FErase(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
+                        FcgiLogger( 1 )
 
                         cSourceCodePPO = __pp_process( v_hPP, cSourceCode )
                         hb_MemoWrit("main.ppo",cSourceCodePPO)  // Using while testing this routine
@@ -476,6 +482,7 @@ if OpenTable("sandprog",.t.,.f.)
 
                             try
                                 uRet = hb_HrbDo(pHbPCode, )
+                                FcgiLogger( 4, oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt" )
                             catch oError
                                 hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt",FcgiGetErrorInfo(oError))
                             endtry
