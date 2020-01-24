@@ -2,15 +2,21 @@
 
 -trace
 
+#To enabled progressing recompilation uncomment the following line
 #-inc
 
 -workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
 
+#To also create a list of all the object files linked uncomment the following line
+#-map
+
+#List any contribs to also include. You must also update the LoadAllHarbourAPI.prg to include the related .hbx file
+hbfoxpro.hbc
 
 -o${HB_COMPILER}\${BuildMode}\${EXEName}
 
 LocalSandbox.prg
-
+LoadAllHarbourAPI.prg
 
 ..\..\hb_fcgi\hb_fcgi.hbm
 ..\..\hb_fcgi\debugger.hbm

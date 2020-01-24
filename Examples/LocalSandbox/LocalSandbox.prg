@@ -8,7 +8,7 @@ request DBFCDX
 request DBFFPT
 request HB_CODEPAGE_EN
 //request HB_CODEPAGE_UTF8
-
+memvar v_hPP
 //=================================================================================================================
 Function Main()
 
@@ -51,6 +51,10 @@ do while oFcgi:Wait()
     cHtml += [<body>]
 
     cHtml += GetPageHeader()
+
+    if empty(oFcgi:GetAppConfig("HarbourPath"))
+        cHtml += [<h1>MISSING HarbourPath in config.txt<br>Add "HarbourPath=C:\Harbour\" for example.<h1>]
+    endif
 
     cHtml += [<div>]
 
@@ -110,8 +114,9 @@ method OnFirstRequest() class MyFcgi
     // From Mod_harbour repo function AddPPRules()
 
     v_hPP = __pp_init()
-    __pp_path( v_hPP, "~/harbour/include" )
-    __pp_path( v_hPP, "c:\harbour\include" )
+    // __pp_path( v_hPP, "~/harbour/include" )
+    __pp_path( v_hPP, ::GetAppConfig("HarbourPath")+"include" )
+
     // if ! Empty( hb_GetEnv( "HB_INCLUDE" ) )
     //     __pp_path( v_hPP, hb_GetEnv( "HB_INCLUDE" ) )
     // endif 	 
@@ -464,18 +469,26 @@ if OpenTable("sandprog",.t.,.f.)
                         FErase(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
                         FcgiLogger( 1 )
 
-                        cSourceCodePPO = __pp_process( v_hPP, cSourceCode )
-                        hb_MemoWrit("main.ppo",cSourceCodePPO)  // Using while testing this routine
-
                         try
-                            oHrb = HB_CompileFromBuf( cSourceCodePPO, .T., "-n","-I"+cHBheaders1, "-I"+cHBheaders2,"-I"+hb_GetEnv( "HB_INCLUDE" ) )
-                            hb_MemoWrit("main.hrb",oHrb)
+                            cSourceCodePPO = __pp_process( v_hPP, cSourceCode )
+                            hb_MemoWrit("main.ppo",cSourceCodePPO)  // Using while testing this routine
                         catch oError
+                            hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Preprocessor Error")
+                            cSourceCodePPO := ""
                             oHrb := ""
-                            hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Compilation Error")
                         endtry
 
-                        if !Empty(oHrb)
+                        if !empty(cSourceCodePPO)
+                            try
+                                oHrb = HB_CompileFromBuf( cSourceCodePPO, .T., "-n","-I"+cHBheaders1, "-I"+cHBheaders2,"-I"+hb_GetEnv( "HB_INCLUDE" ) )
+                                hb_MemoWrit("main.hrb",oHrb)
+                            catch oError
+                                oHrb := ""
+                                hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Compilation Error")
+                            endtry
+                        endif
+
+                        if !empty(oHrb)
                             pHbPCode := hb_HrbLoad(1,oHrb)
 
                             // Set_AP_FileName(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"main.prg")
