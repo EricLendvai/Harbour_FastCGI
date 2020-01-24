@@ -162,7 +162,7 @@ method Wait() class hb_Fcgi
             ::InputLength              := -1
             ::InputRaw                 := ""
     
-            ::RequestMethod           := ""
+            ::RequestMethod            := ""
     
             if ::ReloadConfigAtEveryRequest
                 ::LoadAppConfig()
@@ -779,6 +779,7 @@ function EncodeURIComponent(par_cString,par_lComplete)
 		OTHERWISE
 			nVal := Asc( cChar )
 			cRet += "%" + hb_NumToHex( nVal )
+            
 		ENDCASE
 	NEXT
 
