@@ -1,0 +1,12 @@
+-hbexe
+-gtcgi
+
+-o${HB_COMPILER}\${BuildMode}\${EXEName}
+
+hbwin.hbc
+gtwvg.hbc
+hbct.hbc
+
+FCGITaskManager.prg
+
+..\hb_fcgi\vscode_debugger.prg

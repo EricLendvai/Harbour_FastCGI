@@ -1,0 +1,59 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CompileDebug",
+            "type": "shell",
+            "command": "${workspaceFolder}\\BuildEXE.bat",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "EXEName": "FCGITaskManager",
+                    "BuildMode": "debug",
+                    "HB_COMPILER": "${input:CCompiler}"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "CompileRelease",
+            "type": "shell",
+            "command": "${workspaceFolder}\\BuildEXE.bat",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "EXEName": "FCGITaskManager",
+                    "BuildMode": "release",
+                    "hb_compiler": "${input:CCompiler}"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "CCompiler",
+            "type": "pickString",
+            "description": "Select C Compiler",
+            "options": ["mingw64","msvc64"],
+            "default": "mingw64"
+        }
+    ]
+}

@@ -29,15 +29,15 @@
 			"commands": [
 				{
 					"name": "<Down>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
 				},
 				{
 					"name": "<Activate LocalSandbox>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
 				},
 				{
 					"name": "<Kill LocalSandbox>",
-					"command": "R:\\Harbour_FastCGI\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
+					"command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
 				}
 			]
 		}

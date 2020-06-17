@@ -10,8 +10,8 @@
 
 class hb_Fcgi
     hidden:
-        data   DefaultContentType         init "Content-type: text/html; charset=UTF-8"
-        data   TransmittedContentType     init ""
+        data   DefaultContentType         init "text/html; charset=UTF-8"
+        data   ContentType                init ""
 
         data   LoadedRequestEnvironment   init .f.
         data   RequestEnvironment         init {=>}
@@ -19,14 +19,14 @@ class hb_Fcgi
         data   LoadedQueryString          init .f.
         data   QueryString                init {=>}   // Will be set to case insensitive keys
 
+        data   LoadedRequestCookies       init .f.
+        data   RequestCookies             init {=>}   // Will be set to case insensitive keys
+
         data   LoadedInput                init .f.
         data   Input                      init {=>}   //TODO  Hash with FieldName as Key, and an array as value. Array as follows: {nType(1=Field,2=File),cInputValue,cFileName,cContentType,Content}
         data   InputLength                init -1     // -1 Means not loaded
         data   InputRaw                   init ""
         method LoadInput()
-
-        data   LoadedHeader               init .f.    // TODO
-        data   Header                     init {=>}
 
         data   ReloadConfigAtEveryRequest init .f.
         data   AppConfig                  init {=>}   // Will be set to case insensitive keys
@@ -34,6 +34,10 @@ class hb_Fcgi
 
         data   RequestMethod              init ""
         data   ProcessingRequest          init .f.    // To determine if the :Finish() method should be called.
+
+        data   ResponseHeader             init {=>}   //Using a hash in case the same header value is being set more than once
+        data   OutputBuffer               init ""     //Needed since response header is before the actual response content
+        method WriteOutput()                          //Write out the ResponseHeader and OutputBuffer
 
     exported:
         data   RequestCount               init 0    READONLY
@@ -43,6 +47,7 @@ class hb_Fcgi
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
         method Print(par_html)
+        method GetContentType()
         method SetContentType(par_type)
         method GetEnvironment(par_cName)               // Web Server (Type) Specific Environment
         method ListEnvironment()                       // Just to assist development
@@ -57,10 +62,14 @@ class hb_Fcgi
         method SaveInputFileContent(par_cName,par_cFileFullPath)
         method IsGet()                              SETGET   //Used to query if the page was sent as a GET request
         method IsPost()                             SETGET   //Used to query if the page was sent as a POST request
-        //_M_ method GetHeader(cName)  // TODO
+        method GetHeaderValue(par_cName)
+        method SetHeaderValue(par_cName,par_cValue)
+        method GetCookieValue(par_cName)
+        method SetCookieValue(par_cName,par_cValue)
 
         method OnError(par_oError)
         method OnFirstRequest() inline nil
+        method OnRequest()      inline nil
         method OnShutdown()     inline nil
 
         data   OSPathSeparator            init hb_ps() READONLY
@@ -91,6 +100,7 @@ method New() class hb_Fcgi
     ErrorBlock({|o|oFcgi:OnError(o)})
 
     hb_hSetCaseMatch(::QueryString,.f.)
+    hb_hSetCaseMatch(::RequestCookies,.f.)
     hb_hSetCaseMatch(::AppConfig,.f.)
 
     // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
@@ -148,17 +158,20 @@ method Wait() class hb_Fcgi
         endif
 
         if (iWaitResult := hb_Fcgx_Wait()) >= 0
-            ::TransmittedContentType   := ""
+            ::ContentType              := ""
             ::LoadedRequestEnvironment := .f.
             ::LoadedQueryString        := .f.
+            ::LoadedRequestCookies     := .f.
             ::LoadedInput              := .f.
-            ::LoadedHeader             := .f.
     
             hb_HClear(::RequestEnvironment)
             hb_HClear(::QueryString)
+            hb_HClear(::RequestCookies)
             hb_HClear(::Input)
-            hb_HClear(::Header)
-            
+            hb_HClear(::ResponseHeader)
+
+            ::OutputBuffer             := ""
+
             ::InputLength              := -1
             ::InputRaw                 := ""
     
@@ -236,23 +249,21 @@ return lProcessRequest
 //-----------------------------------------------------------------------------------------------------------------
 method Finish() class hb_Fcgi
     if ::ProcessingRequest
+        ::WriteOutput()
         ::ProcessingRequest := .f.
         hb_Fcgx_Finish()
     endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Print(par_html) class hb_Fcgi
-    if empty(::TransmittedContentType)
-        ::SetContentType(::DefaultContentType)
-    endif
-    hb_Fcgx_Print(par_html)
+    ::OutputBuffer += par_html
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
+method GetContentType() class hb_Fcgi
+return ::GetEnvironment("CONTENT_TYPE")
+//-----------------------------------------------------------------------------------------------------------------
 method SetContentType(par_type) class hb_Fcgi
-    if empty(::TransmittedContentType) //Technique used to ensure the type is not resent
-        hb_Fcgx_ContentType(par_type)
-        ::TransmittedContentType := par_type
-    endif
+    ::ContentType = par_type
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetEnvironment(par_cName) class hb_Fcgi
@@ -280,6 +291,7 @@ method GetQueryString(par_cName) class hb_Fcgi
     local cParameter
     local nPos
     if !::LoadedQueryString
+        ::LoadedQueryString := .t.
         // Important: It seems that under IIS if have parameters like   "name1=val1&name2=val2"  it get converted name not repeating "name" and just having the number. More research needed here.
         for each cParameter in hb_ATokens(::GetEnvironment("QUERY_STRING"),"&",.f.,.f.)
             nPos := at("=",cParameter)
@@ -310,7 +322,7 @@ method LoadInput() class hb_Fcgi
         // SendToClipboard(::InputRaw)  // Used during testing
         // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
 
-        cContentType := ::GetEnvironment("CONTENT_TYPE")
+        cContentType := ::GetContentType()
 
         do case
         case cContentType == "application/x-www-form-urlencoded"
@@ -497,7 +509,6 @@ method LoadAppConfig() class hb_Fcgi
     endfor
     ::MaxRequestToProcess        := val(hb_HGetDef(::AppConfig,"MaxRequestPerFCGIProcess","0"))
     ::ReloadConfigAtEveryRequest := (hb_HGetDef(::AppConfig,"ReloadConfigAtEveryRequest","false") == "true")
-    // Altd()
 return iNumberOfConfigs
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputLength() class hb_Fcgi
@@ -518,6 +529,55 @@ method IsPost() class hb_Fcgi
     endif
 return (::RequestMethod == "POST")
 //-----------------------------------------------------------------------------------------------------------------
+method GetHeaderValue(par_cName) class hb_Fcgi
+return allt(::GetEnvironment("HTTP_"+upper(par_cName)))
+//-----------------------------------------------------------------------------------------------------------------
+method SetHeaderValue(par_cName,par_cValue) class hb_Fcgi
+    ::ResponseHeader[par_cName] := par_cValue
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method GetCookieValue(par_cName)
+    local cCookie
+    local nPos
+    if !::LoadedRequestCookies
+        ::LoadedRequestCookies := .t.
+        for each cCookie in hb_ATokens(::GetEnvironment("HTTP_COOKIE"),";",.f.,.f.)
+            nPos := at("=",cCookie)
+            if nPos > 1  // Name may not be empty
+                ::RequestCookies[allt(left(cCookie,nPos-1))] := allt(substr(cCookie,nPos+1))
+            endif
+        endfor
+    endif
+return hb_HGetDef(::RequestCookies, par_cName, "")
+//-----------------------------------------------------------------------------------------------------------------
+method SetCookieValue(par_cName,par_cValue,par_iExpireDays,par_cPath)
+    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    //Will mark the cookie to expire 364 days from now and site root path
+    
+    hb_default(@par_iExpireDays,365)
+    hb_default(@par_cPath,"/")
+    
+    //Added the cookie name to the Header Name since using a Hash array
+    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+"; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+par_iExpireDays)+"; Path="+par_cPath)
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method WriteOutput() class hb_Fcgi
+    local cHeader
+    local cHeaderName
+    local nPos
+    hb_Fcgx_Print("Content-type: "+iif(empty(::ContentType),::DefaultContentType,::ContentType)+CRLF)
+    for each cHeader in ::ResponseHeader
+        cHeaderName := cHeader:__enumKey()
+        nPos := at("~",cHeaderName)  // To handle multiple Set-Cookies header entries
+        if nPos > 0
+            cHeaderName := left(cHeaderName,nPos-1)
+        endif
+        hb_Fcgx_Print(cHeaderName+": "+cHeader:__enumValue()+CRLF)
+    endfor
+    hb_Fcgx_Print(CRLF)
+    hb_Fcgx_Print(::OutputBuffer)
+    ::OutputBuffer = ""
+return NIL
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
     local cTypeOfxValue
@@ -813,4 +873,21 @@ case 5
 endswitch
 
 return nil
+//=================================================================================================================
+function FcgiCookieTimeToExpires(tDateTime)
+local cUTCGMT
+local cDow
+local dDate
+local cMonth
+local cTime := ""
+// See https://stackoverflow.com/questions/11136372/which-date-formats-can-i-use-when-specifying-the-expiry-date-when-setting-a-cook
+dDate = hb_TtoD(hb_TSToUTC(tDateTime),@cTime,"hh:mm:ss")
+cDow   := {"Sun","Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}[dow(dDate)]
+cMonth := {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}[Month(dDate)]
+
+cUTCGMT := cDow + ", " + Trans(Day(dDate)) + " " + cMonth + " " + Trans(Year(dDate)) + " " + cTime + " GMT"
+
+//  UTC/GMT format is required by cookies e.g. Sun, 15 Jul 2012 00:00:01 GMT
+
+return cUTCGMT
 //=================================================================================================================

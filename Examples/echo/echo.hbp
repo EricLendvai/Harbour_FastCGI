@@ -1,5 +1,5 @@
 -hbexe
--inc
+#-inc
 -workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
 
 -o${HB_COMPILER}\${BuildMode}\${EXEName}

@@ -107,12 +107,6 @@ HB_FUNC( HB_FCGX_GETENVIRONMENT )  // Not used anymore. Preloaded an entire hash
     }
 }
 
-HB_FUNC( HB_FCGX_CONTENTTYPE )   // Used internally by hb_fcgi function
-{
-    FCGX_FPrintF(g_out, hb_parc( 1 ) );
-    FCGX_FPrintF(g_out, "\r\n\r\n");
-}
-
 HB_FUNC( HB_FCGX_PRINT )   // Used internally by hb_fcgi function
 {
     int iResult ;
@@ -120,6 +114,10 @@ HB_FUNC( HB_FCGX_PRINT )   // Used internally by hb_fcgi function
     if ( HB_ISCHAR( 1 ) )
     {
     	FCGX_FPrintF(g_out, hb_parc( 1 ) );
+
+    sprintf(cDebugStringBuffer, "[Harbour] HB_FCGX_PRINT \n");
+    OutputDebugString(cDebugStringBuffer);
+
         iResult = 1;
     } else {
         iResult = -1;

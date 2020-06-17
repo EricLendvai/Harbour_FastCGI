@@ -12,14 +12,10 @@ memvar v_hPP
 //=================================================================================================================
 Function Main()
 
-local cHtml := ""
-local cPageName
-
 public v_hPP
-
 v_hPP := nil
 
-SendToDebugView("Starting echo")
+SendToDebugView("Starting LocalSandbox")
 
 //hb_cdpSelect("UTF8")
 hb_cdpSelect("EN")
@@ -27,71 +23,7 @@ hb_cdpSelect("EN")
 // oFcgi := hb_Fcgi():New()
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 do while oFcgi:Wait()
-    SendToDebugView("Request Counter",oFcgi:RequestCount)
-    
-    cHtml := ""
-    cHtml += [<!DOCTYPE html>]
-    cHtml += [<html>]
-    
-    cHtml += [<head>]
-    cHtml += [<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">]
-
-    cHtml += [<meta http-equiv="X-UA-Compatible" content="IE=edge" />]
-    cHtml += [<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >]
-    cHtml += [<title>Local Harbour Sandbox</title>]
-
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
-    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
-
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
-
-    cHtml += [</head>]
-
-    cHtml += [<body>]
-
-    cHtml += GetPageHeader()
-
-    if empty(oFcgi:GetAppConfig("HarbourPath"))
-        cHtml += [<h1>MISSING HarbourPath in config.txt<br>Add "HarbourPath=C:\Harbour\" for example.<h1>]
-    endif
-
-    cHtml += [<div>]
-
-    //cHtml += "<h2>"+GET_FILE_TEST002_HTML()+"</h2>"
-
-    cPageName := oFcgi:RequestSettings["Page"]
-
-    if empty(cPageName)
-        cPageName := "home"
-    endif
-
-    switch lower(cPageName)
-        case "home"
-            cHtml += BuildPageHome()
-            exit
-        otherwise
-            cHtml += [<table border="1" cellpadding="3" cellspacing="0">]
-            cHtml += [<tr><td>Protocol</td>]     +[<td>]+oFcgi:RequestSettings["Protocol"]+[</td></tr>]
-            cHtml += [<tr><td>Port</td>]         +[<td>]+trans(oFcgi:RequestSettings["Port"])+[</td></tr>]
-            cHtml += [<tr><td>Host</td>]         +[<td>]+oFcgi:RequestSettings["Host"]+[</td></tr>]
-            cHtml += [<tr><td>Site Path</td>]    +[<td>]+oFcgi:RequestSettings["SitePath"]+[</td></tr>]
-            cHtml += [<tr><td>Path</td>]         +[<td>]+oFcgi:RequestSettings["Path"]+[</td></tr>]
-            cHtml += [<tr><td>Page</td>]         +[<td>]+oFcgi:RequestSettings["Page"]+[</td></tr>]
-            cHtml += [<tr><td>Query String</td>] +[<td>]+oFcgi:RequestSettings["QueryString"]+[</td></tr>]
-            cHtml += [<tr><td>Web Server IP</td>]+[<td>]+oFcgi:RequestSettings["WebServerIP"]+[</td></tr>]
-            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+oFcgi:RequestSettings["ClienIP"]+[</td></tr>]
-            cHtml += [</table>]
-
-            cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
-    endswitch
-
-    cHtml += [</body>]
-
-    cHtml += [</html>]
-
-    oFcgi:Print(cHtml)
-  
+    oFcgi:OnRequest()
 enddo
 
 SendToDebugView("Done")
@@ -100,11 +32,12 @@ return nil
 //=================================================================================================================
 class MyFcgi from hb_Fcgi
     method OnFirstRequest()
+    method OnRequest()
     method OnShutdown()
     method OnError(par_oError)
 
 endclass
-
+//-----------------------------------------------------------------------------------------------------------------
 method OnFirstRequest() class MyFcgi
     SendToDebugView("Called from method OnFirstRequest")
     set delete on
@@ -150,11 +83,79 @@ method OnFirstRequest() class MyFcgi
     // vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 
 return nil 
+//-----------------------------------------------------------------------------------------------------------------
+method OnRequest() class MyFcgi
+    local cHtml := ""
+    local cPageName
 
+    SendToDebugView("Request Counter",::RequestCount)
+    
+    cHtml := ""
+    cHtml += [<!DOCTYPE html>]
+    cHtml += [<html>]
+    
+    cHtml += [<head>]
+    cHtml += [<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">]
+
+    cHtml += [<meta http-equiv="X-UA-Compatible" content="IE=edge" />]
+    cHtml += [<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >]
+    cHtml += [<title>Local Harbour Sandbox</title>]
+
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
+    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
+
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
+
+    cHtml += [</head>]
+
+    cHtml += [<body>]
+
+    cHtml += GetPageHeader()
+
+    if empty(::GetAppConfig("HarbourPath"))
+        cHtml += [<h1>MISSING HarbourPath in config.txt<br>Add "HarbourPath=C:\Harbour\" for example.<h1>]
+    endif
+
+    cHtml += [<div>]
+
+    cPageName := ::RequestSettings["Page"]
+
+    if empty(cPageName)
+        cPageName := "home"
+    endif
+
+    switch lower(cPageName)
+        case "home"
+            cHtml += BuildPageHome()
+            exit
+        otherwise
+            cHtml += [<table border="1" cellpadding="3" cellspacing="0">]
+            cHtml += [<tr><td>Protocol</td>]     +[<td>]+::RequestSettings["Protocol"]+[</td></tr>]
+            cHtml += [<tr><td>Port</td>]         +[<td>]+trans(::RequestSettings["Port"])+[</td></tr>]
+            cHtml += [<tr><td>Host</td>]         +[<td>]+::RequestSettings["Host"]+[</td></tr>]
+            cHtml += [<tr><td>Site Path</td>]    +[<td>]+::RequestSettings["SitePath"]+[</td></tr>]
+            cHtml += [<tr><td>Path</td>]         +[<td>]+::RequestSettings["Path"]+[</td></tr>]
+            cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
+            cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
+            cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
+            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+            cHtml += [</table>]
+
+            cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
+    endswitch
+    
+    cHtml += [</body>]
+
+    cHtml += [</html>]
+
+    ::Print(cHtml)
+return nil
+//-----------------------------------------------------------------------------------------------------------------
 method OnShutdown() class MyFcgi
     SendToDebugView("Called from method OnShutdown")
 return nil 
-
+//-----------------------------------------------------------------------------------------------------------------
 method OnError(par_oError)
      SendToDebugView("Called from MyFcgi OnError")
      ::Print("<h1>Error Occurred</h1>")

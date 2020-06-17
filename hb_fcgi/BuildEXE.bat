@@ -1,9 +1,9 @@
 @echo off
-
-:: echo EXEName = %EXEName%
-:: echo BuildMode = %BuildMode%
-:: echo SiteRootFolder = %SiteRootFolder%
-:: echo HB_COMPILER = %HB_COMPILER%
+::echo on
+::echo EXEName = %EXEName%
+::echo BuildMode = %BuildMode%
+::echo SiteRootFolder = %SiteRootFolder%
+::echo HB_COMPILER = %HB_COMPILER%
 
 if %EXEName%. == . goto MissingEnvironmentVariables
 if %BuildMode%. == . goto MissingEnvironmentVariables
@@ -56,7 +56,14 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 
 if %BuildMode% == debug (
 	copy ..\..\hb_fcgi\debugger_on.hbm ..\..\hb_fcgi\debugger.hbm
-	hbmk2 %EXEName%.hbp -b /p /w3
+    rem	hbmk2 %EXEName%.hbp -b /p /w3    linux version does not like the  /  use   - instead
+
+    hbmk2 %EXEName%.hbp -b -b -w3
+
+    rem hbmk2 %EXEName%.hbp -b -prgflag=p     does not work
+
+  
+
 ) else (
 	copy ..\..\hb_fcgi\debugger_off.hbm ..\..\hb_fcgi\debugger.hbm
 	hbmk2 %EXEName%.hbp /w3

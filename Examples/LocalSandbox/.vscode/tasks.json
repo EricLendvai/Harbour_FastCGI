@@ -62,7 +62,7 @@
         {
             "label":"SoftKillFcgiExe",
             "type": "shell",
-            "command":"${workspaceFolder}\\..\\..\\FCGITaskManager\\mingw64\\release\\FCGITaskManager.exe",
+            "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
             "args": ["kill","http","localhost","8164","/fcgi_LocalSandbox/","R:/Harbour_websites/fcgi_LocalSandbox/","LocalSandbox",""]
         }
     ],
