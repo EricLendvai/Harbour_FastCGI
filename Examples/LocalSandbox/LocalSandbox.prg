@@ -54,7 +54,6 @@ method OnFirstRequest() class MyFcgi
     //     __pp_path( v_hPP, hb_GetEnv( "HB_INCLUDE" ) )
     // endif 	 
 
-
     //    __pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => AP_RPuts( '<br>' [,<explist>] )" )
     //    __pp_addRule( v_hPP, "#xcommand ?? [<explist,...>] => AP_RPuts( [<explist>] )" )
     __pp_addRule( v_hPP, "#define CRLF chr(13)+chr(10)" )
@@ -78,8 +77,6 @@ method OnFirstRequest() class MyFcgi
     __pp_addRule( v_hPP, "#xcommand ? [<explist>] => FcgiLogger( 2, <explist> )" )
     __pp_addRule( v_hPP, "#xcommand ?? [<explist>] => FcgiLogger( 3, <explist> )" )
 
-
-
     // vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 
 return nil 
@@ -101,11 +98,20 @@ method OnRequest() class MyFcgi
     cHtml += [<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >]
     cHtml += [<title>Local Harbour Sandbox</title>]
 
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
-    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
+    // The following 4 lines was when not using jQuery UI.
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
+    // cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
 
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+    // Also using jQuery UI to handle resizing of the mono editor
+    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/jQueryUI_1_12_1_NoTooltip/Themes/smoothness/jqueryui.css">]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
     cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
+    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+    cHtml += [<script>$.fn.bootstrapBtn = $.fn.button.noConflict();</script>]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQueryUI_1_12_1_NoTooltip/jquery-ui.min.js"></script>]
 
     cHtml += [</head>]
 
@@ -317,6 +323,10 @@ local cPRGFLAGS := ""
 local oError
 local bOldErrorHandler
 local l_TimeStamp1,l_TimeStamp2
+local bPreviousErrorHandler
+local lHRBDOErrorOccurred := .t.
+static ModuleCounter := 0
+local cHRBName := "Main"+trans(ModuleCounter++)   //Later could make the file name unique across instances of the FastCFGI exe. Also refactor use of file "result.txt"
 
 if OpenTable("sandprog",.t.,.f.)
 
@@ -433,14 +443,25 @@ if OpenTable("sandprog",.t.,.f.)
                 cSourceCode := DecodeURIComponent( oFcgi:GetInputValue("EditorValue") )
 
                 if empty(cSourceCode)
-                    cSourceCode := "function main()" + CRLF
+                    cSourceCode := [#include "hbclass.ch"] + CRLF
+                    cSourceCode += "function main()" + CRLF
                     cSourceCode += "local nloop" + CRLF
+                    cSourceCode += "local oLocation := Location()" + CRLF
                     cSourceCode += CRLF
                     cSourceCode += "for nloop = 1 to 5" + CRLF
                     cSourceCode += '	?"Hello World "+ltrim(str(nloop))' + CRLF
                     cSourceCode += "endfor" + CRLF
                     cSourceCode += CRLF
+                    cSourceCode += [?"Location = "+oLocation:cCountry+", "+oLocation:cState+", "+oLocation:cCity] + CRLF
+                    cSourceCode += CRLF
                     cSourceCode += "return nil"
+                    cSourceCode += CRLF
+                    cSourceCode += "class Location" + CRLF
+                    cSourceCode += "    //Extra Line after class to work around bug definition" + CRLF
+                    cSourceCode += [    DATA cCity    init "Seattle"] + CRLF
+                    cSourceCode += [    DATA cState   init "Washington"] + CRLF
+                    cSourceCode += [    DATA cCountry init "United States of America"] + CRLF
+                    cSourceCode += "endclass" + CRLF
                     
                 else
                     cErrorText := [Remove any source code before using the "Demo" option.]
@@ -449,21 +470,21 @@ if OpenTable("sandprog",.t.,.f.)
                 cHtml += BuildPageHome_BuildEditForm(iKey,cErrorText,cName,cSourceCode,cRunResult)
 
             case cActionOnSubmit == "Run"
-
+                oFcgi:ShutDownFastCGIEXEAfterResponse()   //Needed in case the code defined some new classes
                 l_TimeStamp1 := hb_DateTime()
 
                 cName       := allt(oFcgi:GetInputValue("TextName"))
                 cSourceCode := DecodeURIComponent( oFcgi:GetInputValue("EditorValue") )
                 cRunResult  := ""
 
-                //Todo: Make this multi fcgi instance aware.
+                // _M_ Todo: Make this multi fcgi instance aware.
 
                 if hb_DirBuild(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator)
 
                     if empty(cSourceCode)
                         cErrorText := [Enter some source code first, or use the "Demo" button.]
                     else
-                        hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"main.prg",cSourceCode)  // For debugging
+                        hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+cHRBName+".prg",cSourceCode)  // For debugging
                         cCurrentDir := hb_cwd(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator)
 
                         //Current directory
@@ -472,7 +493,7 @@ if OpenTable("sandprog",.t.,.f.)
 
                         try
                             cSourceCodePPO = __pp_process( v_hPP, cSourceCode )
-                            hb_MemoWrit("main.ppo",cSourceCodePPO)  // Using while testing this routine
+                            hb_MemoWrit(cHRBName+".ppo",cSourceCodePPO)  // Using while testing this routine
                         catch oError
                             hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Preprocessor Error")
                             cSourceCodePPO := ""
@@ -482,36 +503,52 @@ if OpenTable("sandprog",.t.,.f.)
                         if !empty(cSourceCodePPO)
                             try
                                 oHrb = HB_CompileFromBuf( cSourceCodePPO, .T., "-n","-I"+cHBheaders1, "-I"+cHBheaders2,"-I"+hb_GetEnv( "HB_INCLUDE" ) )
-                                hb_MemoWrit("main.hrb",oHrb)
+                                hb_MemoWrit(cHRBName+".hrb",oHrb)
                             catch oError
                                 oHrb := ""
-                                hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Compilation Error")
+                                hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","<b>Compilation Error:</b><br>"+FcgiGetErrorInfo(oError))
                             endtry
                         endif
 
                         if !empty(oHrb)
-                            pHbPCode := hb_HrbLoad(1,oHrb)
 
-                            // Set_AP_FileName(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"main.prg")
-
+                            //Will be passing cSourceCode by reference since would be out of scope otherwise
                             try
-                                uRet = hb_HrbDo(pHbPCode, )
-                                FcgiLogger( 4, oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt" )
+                                pHbPCode := hb_HrbLoad(1,oHrb)
+                                // Set_AP_FileName(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+cHRBName+".prg")  // Was testing debugging with VSCODE
+
+                                //Have to use the ErrorBlock() construct to catch the line number of the underlying PRG
+                                try
+                                    bPreviousErrorHandler := ErrorBlock( { | oError | hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt", "<b>Execution Run Error:</b><br>"+FcgiGetErrorInfo( oError, @cSourceCode ,2 ) ), Break(oError) } )
+                                    uRet = hb_HrbDo(pHbPCode, )
+                                    FcgiLogger( 4, oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt" )
+                                    lHRBDOErrorOccurred := .f.
+                                catch oError
+                                    // hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Execution Error<br>"+FcgiGetErrorInfo(oError,@cSourceCode))
+                                endtry
+                                ErrorBlock(bPreviousErrorHandler)
+
+                                hb_hrbUnload(pHbPCode)
+
                             catch oError
-                                hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt",FcgiGetErrorInfo(oError))
+                                hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","<b>Execution Load Error:</b><br>"+FcgiGetErrorInfo(oError,@cSourceCode))
+
                             endtry
 
-                            hb_hrbUnload(pHbPCode)
                         endif
 
                         if file(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
-                            cRunResult := "Run Result:"+CRLF
+                            cRunResult := iif(lHRBDOErrorOccurred,"","<b>Run Result:</b><br>")
                             cRunResult += hb_MemoRead(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
                             // altd()
                             cRunResult := strtran(cRunResult,CRLF,"<br>")
 
                         endif
                     endif
+
+                    hb_FileDelete(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+cHRBName+".prg")
+                    hb_FileDelete(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+cHRBName+".ppo")
+                    hb_FileDelete(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+cHRBName+".hrb")
 
                     hb_cwd(cCurrentDir)
                 else
@@ -604,6 +641,8 @@ local iNumberOfLines
 local iLineCounter
 local cMonacoValue := ""
 
+//altd()
+
 cHtml += [<form action="" method="post" name="form" enctype="multipart/form-data">] //Since there are text fields entry fields, encode as multipart/form-data
 cHtml += [<input type="hidden" name="formname" value="Edit">]
 cHtml += [<input type="hidden" id="ActionOnSubmit" name="ActionOnSubmit" value="">]
@@ -617,8 +656,9 @@ iNumberOfLines := len(aLines)
 for iLineCounter := 1 to iNumberOfLines
     cLine := aLines[iLineCounter]
 
+    cLine := strtran(cLine,"\"   ,"\\")
     cLine := strtran(cLine,chr(9),"\t")
-    cLine := strtran(cLine,"'","\'")
+    cLine := strtran(cLine,"'"   ,"\'")
 
     cMonacoValue += space(8)+"'"+cLine+iif(iLineCounter < iNumberOfLines,"',"+ CRLF,"'")
 
@@ -632,13 +672,8 @@ cHtml += [<div class="m-2">]
     cHtml += [<div>]
     cHtml += [<span><input type="button" class="btn btn-primary" value="Save" onclick="$('#ActionOnSubmit').val('Save');$('#EditorValue').val( encodeURIComponent(window.var1.getValue()) );document.form.submit();" role="button"></span>]
     cHtml += [&nbsp;<span><input type="button" class="btn btn-primary" value="Save And Stay" onclick="$('#ActionOnSubmit').val('SaveAndStay');$('#EditorValue').val( encodeURIComponent(window.var1.getValue()) );document.form.submit();" role="button"></span>]
-
-    // if empty(cSourceCode)
-        cHtml += [&nbsp;<span><input type="button" class="btn btn-primary" value="Demo" onclick="$('#ActionOnSubmit').val('Demo');$('#EditorValue').val( encodeURIComponent(window.var1.getValue()) );document.form.submit();" role="button"></span>]
-    // endif
-
+    cHtml += [&nbsp;<span><input type="button" class="btn btn-primary" value="Demo" onclick="$('#ActionOnSubmit').val('Demo');$('#EditorValue').val( encodeURIComponent(window.var1.getValue()) );document.form.submit();" role="button"></span>]
     cHtml += [&nbsp;<span><input type="button" class="btn btn-primary" value="Cancel" onclick="$('#ActionOnSubmit').val('Cancel');document.form.submit();" role="button"></span>]
-
     cHtml += replicate([&nbsp;],5) +[<span><input type="button" class="btn btn-primary" value="Run" onclick="$('#ActionOnSubmit').val('Run');$('#EditorValue').val( encodeURIComponent(window.var1.getValue()) );document.form.submit();" role="button"></span>&nbsp;]
 
     cHtml += [</div>]
@@ -654,13 +689,13 @@ cHtml += [<div class="m-2">]
     else
         cHtml += [<table border="0" cellpadding="0" cellspacing="0"><tr>]
         cHtml += [<td valign="top"><div id="container" style="width:800px;height:600px;border:1px solid grey"></div></td>]
-
         cHtml += [<td valign="top" class="pl-2"><div class="p-3 bg-light"><div>]
         cHtml += cLastRunResult
         cHtml += [</div></td>]
         cHtml += [</tr></table>]
-         
     endif
+
+    cHtml += [<script>$('#container').resizable();</script>]
     
 cHtml += [</div>]
 
@@ -675,6 +710,7 @@ cHtml += "    value: [" + CRLF
 cHtml += cMonacoValue
 cHtml += "    ].join('\n')," + CRLF
 cHtml += "    language: 'plaintext'," + CRLF
+cHtml += "    automaticLayout: true," + CRLF  //To make it follow the resizing
 cHtml += "    wordBasedSuggestions: false" + CRLF
 cHtml += "});" + CRLF
 cHtml += "window.var1 = editor;" + CRLF

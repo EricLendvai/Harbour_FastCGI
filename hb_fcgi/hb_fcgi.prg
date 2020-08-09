@@ -46,6 +46,7 @@ class hb_Fcgi
         method New() constructor
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
+        method ShutDownFastCGIEXEAfterResponse()       // To gracefully end the FastCGI Exe. Needed to release all classes for example
         method Print(par_html)
         method GetContentType()
         method SetContentType(par_type)
@@ -253,6 +254,11 @@ method Finish() class hb_Fcgi
         ::ProcessingRequest := .f.
         hb_Fcgx_Finish()
     endif
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method ShutDownFastCGIEXEAfterResponse() class hb_Fcgi
+::MaxRequestToProcess := 1
+::RequestCount++
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Print(par_html) class hb_Fcgi
@@ -625,10 +631,17 @@ function SendToClipboard(cText)
     wvt_SetClipboard(cText)
 return .T.
 //=================================================================================================================
-function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
+function FcgiGetErrorInfo( oError,cCode ,nProgramStackStart)  //From mod_harbour <-> apache.prg
 
-    local n, cInfo := "Error: " + oError:description + "<br>"
+    local n
+    local cInfo := "Error: " + oError:description + "<br>"
     local cProcname
+    local aLines
+    local nLine
+    local lPrintedSourceHeader := .f.
+
+    hb_default(@nProgramStackStart ,1)
+    
     if ! Empty( oError:operation )
         cInfo += "operation: " + oError:operation + "<br>"
     endif   
@@ -644,11 +657,11 @@ function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
         next
     endif	
         
-    n = 1
+    n = nProgramStackStart
     while .t.
         cProcname := upper(ProcName( n ))
         do case
-        case empty(cProcname)
+        case empty(cProcname) .or. cProcname == "HB_HRBDO" 
             exit
         case right(cProcname,8) == ":ONERROR"
         case cProcname == "ERRORBLOCKCODE"  
@@ -660,7 +673,51 @@ function FcgiGetErrorInfo( oError )  //From mod_harbour <-> apache.prg
         n++
     end
 
+    if ! Empty( cCode )
+        aLines = hb_ATokens( cCode, Chr( 10 ) )
+        n = 1
+        nLine := 0
+        while( nLine := ProcLine( ++n ) ) == 0   //The the line number in the last on the stack of programs
+        end   
+        if nLine > 0
+            for n = Max( nLine - 2, 1 ) to Min( nLine + 2, Len( aLines ) )
+                if !lPrintedSourceHeader
+                    cInfo += "<br><b>Source:</b><br>"
+                    lPrintedSourceHeader := .t.
+                endif
+                cInfo += "<nobr>"+StrZero( n, 5 ) + If( n == nLine, " =>", ": " ) + FcgiGetErrorInfo_HtmlEncode( aLines[ n ] ) + "</nobr><br>" //+ CRLF
+            next
+        endif
+    endif      
+
  return cInfo
+
+function FcgiGetErrorInfo_HtmlEncode( cString )
+   
+   local cChar, cResult := "" 
+
+   for each cChar in cString
+      do case
+      case cChar == "<"
+            cChar = "&lt;"
+
+      case cChar == '>'
+            cChar = "&gt;"     
+            
+      case cChar == "&"
+            cChar = "&amp;"     
+
+      case cChar == '"'
+            cChar = "&quot;"    
+            
+      case cChar == " "
+            cChar = "&nbsp;"               
+      endcase
+      cResult += cChar 
+   next
+    
+return cResult   
+
 //=================================================================================================================
 function FcgiValToChar( u )  //Adapted From mod_harbour <-> apache.prg
     local cResult
