@@ -36,6 +36,7 @@ method OnShutdown() class MyFcgi
 return nil 
 //-----------------------------------------------------------------------------------------------------------------
 method OnRequest() class MyFcgi
+    local cHtml
     SendToDebugView("Request Counter",::RequestCount)
 
     ::Print([<!DOCTYPE html><html><body>])
@@ -46,7 +47,6 @@ method OnRequest() class MyFcgi
 
     ::Print("<h1>FastCGI echo</h1>")
     ::Print("<p>FastCGI EXE = "+::FastCGIExeFullPath+"</p>")
-
     cHtml := [<table border="1" cellpadding="3" cellspacing="0">]
     cHtml += [<tr><td>Protocol</td>]     +[<td>]+::RequestSettings["Protocol"]+[</td></tr>]
     cHtml += [<tr><td>Port</td>]         +[<td>]+trans(::RequestSettings["Port"])+[</td></tr>]
@@ -56,10 +56,10 @@ method OnRequest() class MyFcgi
     cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
     cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
     cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
-    cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+    cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
     cHtml += [</table>]
     ::Print(cHtml)
- 
+altd()
     // ::Print("<p>SCRIPT_NAME   = "+::GetEnvironment("SCRIPT_NAME")+"</p>")
     // ::Print("<p>REQUEST_URI   = "+::GetEnvironment("REQUEST_URI")+"</p>")
     // ::Print("<p>REDIRECT_URL  = "+::GetEnvironment("REDIRECT_URL")+"</p>")

@@ -38,7 +38,12 @@
 				{
 					"name": "<Kill LocalSandbox>",
 					"command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox"
-				}
+				},
+                {
+                    "name":"<del *.ppo>",
+                    "cwd": "${workspaceFolder}",
+                    "command" : "del *.ppo"
+                }
 			]
 		}
 	

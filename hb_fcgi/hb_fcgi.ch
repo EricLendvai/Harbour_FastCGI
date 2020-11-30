@@ -13,7 +13,7 @@
 #xtranslate Allt( <x> )    => alltrim( <x> )
 #xtranslate Trans( <x> )    => alltrim( str(<x>,10) )
 
-#command ? [<cText,...>] => oFcgi:Print( <cText> )
+#command ? [<cText,...>] => oFcgi:Print( [<cText>] )
 
 #define CRLF chr(13)+chr(10)
 

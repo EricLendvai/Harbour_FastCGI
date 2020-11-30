@@ -54,8 +54,6 @@ method OnFirstRequest() class MyFcgi
     //     __pp_path( v_hPP, hb_GetEnv( "HB_INCLUDE" ) )
     // endif 	 
 
-    //    __pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => AP_RPuts( '<br>' [,<explist>] )" )
-    //    __pp_addRule( v_hPP, "#xcommand ?? [<explist,...>] => AP_RPuts( [<explist>] )" )
     __pp_addRule( v_hPP, "#define CRLF chr(13)+chr(10)" )
     //    __pp_addRule( v_hPP, "#xcommand TEXT <into:TO,INTO> <v> => #pragma __cstream|<v>:=%s" )
     //    __pp_addRule( v_hPP, "#xcommand TEXT <into:TO,INTO> <v> ADDITIVE => #pragma __cstream|<v>+=%s" )
@@ -73,9 +71,8 @@ method OnFirstRequest() class MyFcgi
     //    __pp_addRule( v_hPP, "#xcommand DEFAULT <v1> TO <x1> [, <vn> TO <xn> ] => ;" + ;
     //                       "IF <v1> == NIL ; <v1> := <x1> ; END [; IF <vn> == NIL ; <vn> := <xn> ; END ]" )
 
-    //__pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => vfp_StrToFile( <explist> + CRLF , 'result.txt' , .T. )" )
-    __pp_addRule( v_hPP, "#xcommand ? [<explist>] => FcgiLogger( 2, <explist> )" )
-    __pp_addRule( v_hPP, "#xcommand ?? [<explist>] => FcgiLogger( 3, <explist> )" )
+    __pp_addRule( v_hPP, "#xcommand ? [<explist,...>] => FcgiLogger( 2[,<explist>] )" )
+    __pp_addRule( v_hPP, "#xcommand ?? [<explist,...>] => FcgiLogger( 3[,<explist>] )" )
 
     // vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 
@@ -536,7 +533,6 @@ if OpenTable("sandprog",.t.,.f.)
                             endtry
 
                         endif
-
                         if file(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
                             cRunResult := iif(lHRBDOErrorOccurred,"","<b>Run Result:</b><br>")
                             cRunResult += hb_MemoRead(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt")
@@ -711,8 +707,11 @@ cHtml += cMonacoValue
 cHtml += "    ].join('\n')," + CRLF
 cHtml += "    language: 'plaintext'," + CRLF
 cHtml += "    automaticLayout: true," + CRLF  //To make it follow the resizing
+cHtml += "    insertSpaces: true," + CRLF
+cHtml += "    tabSize: 4," + CRLF
 cHtml += "    wordBasedSuggestions: false" + CRLF
 cHtml += "});" + CRLF
+cHtml += "editor.updateOptions({});" + CRLF
 cHtml += "window.var1 = editor;" + CRLF
 cHtml += "});" + CRLF
 

@@ -58,7 +58,7 @@ if %BuildMode% == debug (
 	copy ..\..\hb_fcgi\debugger_on.hbm ..\..\hb_fcgi\debugger.hbm
     rem	hbmk2 %EXEName%.hbp -b /p /w3    linux version does not like the  /  use   - instead
 
-    hbmk2 %EXEName%.hbp -b -b -w3
+    hbmk2 %EXEName%.hbp -b -p -w3
 
     rem hbmk2 %EXEName%.hbp -b -prgflag=p     does not work
 

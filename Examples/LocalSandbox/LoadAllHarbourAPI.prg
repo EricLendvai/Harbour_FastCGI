@@ -6,5 +6,8 @@
 
 
 //List contrib libraries and all of their objects to be linked. You must also update the LocalSandbox.hbp to add the related .hbc files
-#include "C:\Harbour\contrib\hbfoxpro\hbfoxpro.hbx"
+//VSCode will complain about the location of the *.hbx files, but the build will still resolve this.
 
+#include "C:\Harbour\contrib\hbfoxpro\hbfoxpro.hbx"
+#include "c:\harbour\contrib\hbct\hbct.hbx"
+#include "c:\harbour\contrib\hbmisc\hbmisc.hbx"

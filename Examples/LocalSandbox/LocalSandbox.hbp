@@ -13,6 +13,10 @@
 #List any contribs to also include. You must also update the LoadAllHarbourAPI.prg to include the related .hbx file
 hbfoxpro.hbc
 
+#To load additional contrib libraries
+hbct.hbc
+hbmisc.hbc
+
 -o${HB_COMPILER}\${BuildMode}\${EXEName}
 
 LocalSandbox.prg

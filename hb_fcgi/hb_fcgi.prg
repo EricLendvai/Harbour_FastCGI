@@ -47,7 +47,7 @@ class hb_Fcgi
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
         method ShutDownFastCGIEXEAfterResponse()       // To gracefully end the FastCGI Exe. Needed to release all classes for example
-        method Print(par_html)
+        method Print(...)
         method GetContentType()
         method SetContentType(par_type)
         method GetEnvironment(par_cName)               // Web Server (Type) Specific Environment
@@ -135,7 +135,7 @@ method New() class hb_Fcgi
 return Self
 //-----------------------------------------------------------------------------------------------------------------
 method Wait() class hb_Fcgi
-    //Used to wait for the next page request
+    //Used to wait for the next page request 
     local lProcessRequest      //If web page should be built
     // local cREQUEST_URI
     local iWaitResult
@@ -261,8 +261,14 @@ method ShutDownFastCGIEXEAfterResponse() class hb_Fcgi
 ::RequestCount++
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
-method Print(par_html) class hb_Fcgi
-    ::OutputBuffer += par_html
+method Print(...) class hb_Fcgi
+    local nPCount
+    for nPCount := 1 to pcount()
+        if nPCount > 1
+            ::OutputBuffer += " "
+        endif
+        ::OutputBuffer += hb_ValToStr(hb_PValue(nPCount)) //par_html
+    endfor
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetContentType() class hb_Fcgi
@@ -798,7 +804,7 @@ endswitch
 
 return xResult
 //=================================================================================================================
-function vfp_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
+function VFP_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 
 local lAdditive
 local nBytesWritten := 0
@@ -902,11 +908,14 @@ function EncodeURIComponent(par_cString,par_lComplete)
 
 	RETURN cRet
 //=================================================================================================================
-function FcgiLogger(par_nAction,par_cString)
+function FcgiLogger(par_nAction,par_cString,...)
 //par_nAction, 1=Reset,2=Add Line,3=Append To Line,4=Save to File,5=Save to File and Reset
 //par_cString, if par_nAction = 2 or 3 the text to send out, if par_nAction = 4 the full file name to write out.
 
 static cBuffer := ""
+local nPCount
+local cCallBuffer
+local nPos,nByte
 
 switch par_nAction
 case 1  // Reset
@@ -916,10 +925,20 @@ case 2  // Add Line, same as ? <expr>
     if len(cBuffer) > 0
         cBuffer += chr(13)+chr(10)
     endif
-    cBuffer += par_cString
-    exit
 case 3  // Append to Line, same as ?? <expr>
-    cBuffer += par_cString
+    for nPCount := 2 to pcount()
+        if nPCount > 2
+            cBuffer += " "
+        endif
+        cCallBuffer := hb_ValToStr(hb_PValue(nPCount))
+        for nPos := 1 to len(cCallBuffer)
+            nByte := hb_BPeek(cCallBuffer,nPos)
+            if nByte < 32 .or. nByte > 126
+                hb_BPoke(@cCallBuffer,nPos,63)   // to replace invalid html char with "?"
+            endif
+        endfor
+        cBuffer += cCallBuffer
+    endfor
     exit
 case 4
 case 5
