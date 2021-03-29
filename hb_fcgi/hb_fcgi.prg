@@ -100,9 +100,9 @@ method New() class hb_Fcgi
 
     ErrorBlock({|o|oFcgi:OnError(o)})
 
-    hb_hSetCaseMatch(::QueryString,.f.)
-    hb_hSetCaseMatch(::RequestCookies,.f.)
-    hb_hSetCaseMatch(::AppConfig,.f.)
+    hb_HCaseMatch(::QueryString,.f.)
+    hb_HCaseMatch(::RequestCookies,.f.)
+    hb_HCaseMatch(::AppConfig,.f.)
 
     // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
     ::FastCGIExeFullPath := hb_argV(0)

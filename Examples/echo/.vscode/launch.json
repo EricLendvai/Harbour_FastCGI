@@ -9,7 +9,7 @@
             "type": "harbour-dbg",
             "request": "attach",
             "name": "Attach Program echo.exe",
-            "program": "R:\\Harbour_websites\\fcgi_echo\\backend\\FCGIecho.exe",
+            "program": "C:\\Harbour_websites\\fcgi_echo\\backend\\FCGIecho.exe",
             "sourcePaths": [
                 "${workspaceFolder}"
             ]

@@ -4,21 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "CompileRelease",
-            "type": "shell",
-            "command": "${workspaceFolder}\\..\\..\\hb_fcgi\\BuildEXE.bat",
+            "label": "RunDebug",
+            "command": "${command:workbench.action.debug.start}",
             "options": {
                 "cwd": "${workspaceFolder}",
-                "env": {
-                    "EXEName":"LocalSandbox",
-                    "BuildMode":"release",
-                    "HB_COMPILER":"${input:CCompiler}",
-                    "WebsiteDrive":"R:",
-                    "SiteRootFolder":"\\Harbour_websites\\fcgi_LocalSandbox\\"
-                }
+                "statusbar": {"label" : "<Compile and Debug>","hide" : false}
             },
-            "dependsOrder": "sequence",
-            "dependsOn":["SoftKillFcgiExe"],
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -38,9 +29,36 @@
                     "EXEName":"LocalSandbox",
                     "BuildMode":"debug",
 					"HB_COMPILER":"${input:CCompiler}",
-                    "WebsiteDrive":"R:",
+                    "WebsiteDrive":"C:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_LocalSandbox\\"
-                }
+                },
+                "statusbar": {"label" : "<Compile Debug>","hide" : false}
+            },
+            "dependsOrder": "sequence",
+            "dependsOn":["SoftKillFcgiExe"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "CompileRelease",
+            "type": "shell",
+            "command": "${workspaceFolder}\\..\\..\\hb_fcgi\\BuildEXE.bat",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "EXEName":"LocalSandbox",
+                    "BuildMode":"release",
+                    "HB_COMPILER":"${input:CCompiler}",
+                    "WebsiteDrive":"C:",
+                    "SiteRootFolder":"\\Harbour_websites\\fcgi_LocalSandbox\\"
+                },
+                "statusbar": {"label" : "<Compile Release and Run>","hide" : false}
             },
             "dependsOrder": "sequence",
             "dependsOn":["SoftKillFcgiExe"],
@@ -57,13 +75,74 @@
             "label":"KillFcgiExe",
             "type": "shell",
             "command":"taskkill",
-            "args": ["/IM","FCGILocalSandbox.exe","/f","/t"]
+            "args": ["/IM","FCGILocalSandbox.exe","/f","/t"],
+            "options": {
+                "statusbar": {"label" : "<Kill Fcgi Exe>","hide" : false}
+            }
         },
         {
             "label":"SoftKillFcgiExe",
             "type": "shell",
             "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
-            "args": ["kill","http","localhost","8164","/fcgi_LocalSandbox/","R:/Harbour_websites/fcgi_LocalSandbox/","LocalSandbox",""]
+            "args": ["kill","http","localhost","8164","/fcgi_LocalSandbox/","C:/Harbour_websites/fcgi_LocalSandbox/","LocalSandbox",""],
+            "options": {
+                "statusbar": {"label" : "<Soft Kill Fcgi Exe>","hide" : true}
+            }
+        },
+        {
+            "label": "DelAllPPO",
+            "type": "shell",
+            "command": "del *.ppo",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Del All PPO>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
+        },
+        {
+            "label": "Down",
+            "type": "shell",
+            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Down>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
+        },
+        {
+            "label": "ActivateLocalSandbox",
+            "type": "shell",
+            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Activate LocalSandbox>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
+        },
+        {
+            "label": "KillLocalSandbox",
+            "type": "shell",
+            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Kill LocalSandbox>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
+        },
+        {
+            "label": "BrowseLocalSandbox",
+            "type": "shell",
+            "command": "C:\\Tools\\f.bat http://localhost:8164/fcgi_localsandbox/",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Browse Local Sandbox>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         }
     ],
     "inputs": [
