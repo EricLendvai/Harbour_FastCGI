@@ -8,7 +8,7 @@
             "command": "${command:workbench.action.debug.start}",
             "options": {
                 "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Compile and Debug>","hide" : false}
+                "statusbar": {"label" : "<Debug>","hide" : false}
             },
             "presentation": {
                 "echo": true,
@@ -29,7 +29,7 @@
                     "EXEName":"echo",
                     "BuildMode":"debug",
 					"HB_COMPILER":"${input:CCompiler}",
-                    "WebsiteDrive":"C:",
+                    "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 },
                 "statusbar": {"label" : "<Compile Debug>","hide" : false}
@@ -55,10 +55,10 @@
                     "EXEName":"echo",
                     "BuildMode":"release",
                     "HB_COMPILER":"${input:CCompiler}",
-                    "WebsiteDrive":"C:",
+                    "WebsiteDrive":"R:",
                     "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                 },
-                "statusbar": {"label" : "<Compile Release and Run>","hide" : false}
+                "statusbar": {"label" : "<Compile Release>","hide" : false}
             },
             "dependsOrder": "sequence",
             "dependsOn":["SoftKillFcgiExe"],
@@ -85,7 +85,7 @@
             "label":"SoftKillFcgiExe",
             "type": "shell",
             "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
-            "args": ["kill","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
+            "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
             "options": {
                 "statusbar": {"label" : "<Soft Kill Fcgi Exe>","hide" : true}
             }
@@ -104,7 +104,7 @@
         {
             "label": "Down",
             "type": "shell",
-            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+            "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo",
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}",
@@ -115,7 +115,7 @@
         {
             "label": "ActivateEcho",
             "type": "shell",
-            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+            "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo",
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}",
@@ -126,7 +126,7 @@
         {
             "label": "KillEcho",
             "type": "shell",
-            "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+            "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo",
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}",

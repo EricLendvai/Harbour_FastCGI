@@ -4,6 +4,22 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "RunDebug",
+            "command": "${command:workbench.action.debug.start}",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Compile and Debug>","hide" : false}
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
             "label": "CompileDebug",
             "type": "shell",
             "command": "${workspaceFolder}\\BuildEXE.bat",
@@ -13,7 +29,8 @@
                     "EXEName": "FCGITaskManager",
                     "BuildMode": "debug",
                     "HB_COMPILER": "${input:CCompiler}"
-                }
+                },
+                "statusbar": {"label" : "<Compile Debug>","hide" : false}
             },
             "presentation": {
                 "echo": true,
@@ -34,7 +51,8 @@
                     "EXEName": "FCGITaskManager",
                     "BuildMode": "release",
                     "hb_compiler": "${input:CCompiler}"
-                }
+                },
+                "statusbar": {"label" : "<Compile Release and Run>","hide" : false}
             },
             "presentation": {
                 "echo": true,
@@ -45,6 +63,17 @@
                 "clear": false
             },
             "problemMatcher": []
+        },
+        {
+            "label": "DelAllPPO",
+            "type": "shell",
+            "command": "del *.ppo",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Del All PPO>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         }
     ],
     "inputs": [

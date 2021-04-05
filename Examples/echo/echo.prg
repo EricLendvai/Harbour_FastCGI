@@ -83,5 +83,9 @@ altd()
     // ::SaveInputFileContent("File3","d:\281\"+::GetInputFileName("File3"))
     // ::SaveInputFileContent("File4","d:\281\"+::GetInputFileName("File4"))
     ::Print([</body></html>])
+
+    //::SetCookieValue("MyCookie1","123",0)
+    // ::SetCookieValue("MyCookie2","456a")
+
 return nil
 //=================================================================================================================

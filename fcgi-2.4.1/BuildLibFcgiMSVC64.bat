@@ -7,7 +7,7 @@ if NOT %HB_COMPILER%. == msvc64. goto InvalidHB_COMPILER
 :: echo Using -comp=msvc64
 
 ::hbmk2 libfcgi.hbp -comp=msvc64 -b
-Echo No support yet for back command build. Open Solution .\Win32\FastCGI.sln with Visual Studion 2019 and do a 64-bit release build
+Echo No support yet for back command build. Open Solution .\Win32\FastCGI.sln with Visual Studio 2019 and do a 64-bit release build
 
 
 goto End

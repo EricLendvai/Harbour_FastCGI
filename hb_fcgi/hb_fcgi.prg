@@ -66,7 +66,7 @@ class hb_Fcgi
         method GetHeaderValue(par_cName)
         method SetHeaderValue(par_cName,par_cValue)
         method GetCookieValue(par_cName)
-        method SetCookieValue(par_cName,par_cValue)
+        method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)    // By default par_iExpireDays is 365. Setting to 0 will make it a session only cookie
 
         method OnError(par_oError)
         method OnFirstRequest() inline nil
@@ -562,15 +562,16 @@ method GetCookieValue(par_cName)
     endif
 return hb_HGetDef(::RequestCookies, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
-method SetCookieValue(par_cName,par_cValue,par_iExpireDays,par_cPath)
+method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)
     //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
     //Will mark the cookie to expire 364 days from now and site root path
-    
-    hb_default(@par_iExpireDays,365)
-    hb_default(@par_cPath,"/")
+    local nExpireDays := hb_defaultValue(par_nExpireDays,365)
+    local cPath       := hb_defaultValue(@par_cPath,"/")
     
     //Added the cookie name to the Header Name since using a Hash array
-    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+"; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+par_iExpireDays)+"; Path="+par_cPath)
+    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+                     iif(empty(nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+nExpireDays))+;
+                     iif(empty(cPath),"","; Path="+cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method WriteOutput() class hb_Fcgi

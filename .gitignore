@@ -6,9 +6,14 @@
 *.bak
 *.hrb
 *.ppo
-*.ppt
+*.log
 .history
 .hbmk
 *.NotInGit
 Thumbs.db
+*_rnd.*
+hb_out.log
+* - Copy*
+*caster*
+*mod_harbour*
 hbmk2
