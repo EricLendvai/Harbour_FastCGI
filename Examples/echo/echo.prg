@@ -37,6 +37,7 @@ return nil
 //-----------------------------------------------------------------------------------------------------------------
 method OnRequest() class MyFcgi
     local cHtml
+
     SendToDebugView("Request Counter",::RequestCount)
 
     ::Print([<!DOCTYPE html><html><body>])
@@ -46,6 +47,7 @@ method OnRequest() class MyFcgi
     //cCrash++    // To test the error handler
 
     ::Print("<h1>FastCGI echo</h1>")
+    
     ::Print("<p>FastCGI EXE = "+::FastCGIExeFullPath+"</p>")
     cHtml := [<table border="1" cellpadding="3" cellspacing="0">]
     cHtml += [<tr><td>Protocol</td>]     +[<td>]+::RequestSettings["Protocol"]+[</td></tr>]
@@ -59,7 +61,9 @@ method OnRequest() class MyFcgi
     cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
     cHtml += [</table>]
     ::Print(cHtml)
-altd()
+
+// altd()
+
     // ::Print("<p>SCRIPT_NAME   = "+::GetEnvironment("SCRIPT_NAME")+"</p>")
     // ::Print("<p>REQUEST_URI   = "+::GetEnvironment("REQUEST_URI")+"</p>")
     // ::Print("<p>REDIRECT_URL  = "+::GetEnvironment("REDIRECT_URL")+"</p>")
@@ -68,8 +72,7 @@ altd()
     ::Print("<p>Input Length  = "+Trans( ::GetInputLength() )+"</p>")
 
     // Following will be abstracted to assist in making FastCGI platform independent.
-    ::Print("<p>Request Environment:</p>")
-    ::Print(::ListEnvironment())
+
 
     ::Print([<p>Input Field "FirstName" = ]+::GetInputValue("FirstName")+[</p>])
     ::Print([<p>Input Field "LastName" = ]+::GetInputValue("LastName")+[</p>])
@@ -82,10 +85,20 @@ altd()
     // ::SaveInputFileContent("File2","d:\281\"+::GetInputFileName("File2"))
     // ::SaveInputFileContent("File3","d:\281\"+::GetInputFileName("File3"))
     // ::SaveInputFileContent("File4","d:\281\"+::GetInputFileName("File4"))
+
+    ::Print("<p>Request Environment:</p>")
+    ::Print(::ListEnvironment())
+
+    ::Print([<p>Build Info: ]+hb_buildinfo()+[</p>])
+
     ::Print([</body></html>])
 
     //::SetCookieValue("MyCookie1","123",0)
     // ::SetCookieValue("MyCookie2","456a")
 
 return nil
+//=================================================================================================================
+function hb_buildinfo()
+#include "BuildInfo.txt"
+return l_cBuildInfo
 //=================================================================================================================

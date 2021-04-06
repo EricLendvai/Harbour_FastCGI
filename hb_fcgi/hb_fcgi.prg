@@ -287,12 +287,14 @@ return hb_HGetDef(::RequestEnvironment, par_cName, "")
 method ListEnvironment() class hb_Fcgi
     local cEnvironment
     local cHtml := ""
+    local cValue
     
     if !::LoadedRequestEnvironment
         ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
     endif
     for each cEnvironment in ::RequestEnvironment
-        cHtml += "<div>"+cEnvironment:__enumKey()+" - "+cEnvironment:__enumValue()+"</div>"
+        cValue := strtran(cEnvironment:__enumValue(),"%","&#37;")   // Not Certain why had to convert the % character
+        cHtml += "<div>"+cEnvironment:__enumKey()+" - "+cValue+"</div>"
     endfor
 return cHtml
 //-----------------------------------------------------------------------------------------------------------------

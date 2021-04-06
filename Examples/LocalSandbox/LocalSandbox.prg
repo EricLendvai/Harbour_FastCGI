@@ -148,6 +148,7 @@ method OnRequest() class MyFcgi
             cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
     endswitch
     
+    cHtml += [<div>&nbsp;Build Info: ]+hb_buildinfo()+[</div>]
     cHtml += [</body>]
 
     cHtml += [</html>]
@@ -784,4 +785,8 @@ TEXT TO VAR cHtml
 ENDTEXT
 
 return cHtml
+//=================================================================================================================
+function hb_buildinfo()
+#include "BuildInfo.txt"
+return l_cBuildInfo
 //=================================================================================================================

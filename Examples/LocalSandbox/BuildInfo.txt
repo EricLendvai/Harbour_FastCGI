@@ -1,0 +1,1 @@
+local l_cBuildInfo := "mingw64 release 04/05/2021 23:44:01.13"

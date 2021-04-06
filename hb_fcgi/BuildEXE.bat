@@ -1,4 +1,7 @@
 @echo off
+
+set FastCGIRootPath=..\..\
+
 ::echo on
 ::echo EXEName = %EXEName%
 ::echo BuildMode = %BuildMode%
@@ -42,6 +45,11 @@ md %HB_COMPILER% 2>nul
 md %HB_COMPILER%\%BuildMode% 2>nul
 md %HB_COMPILER%\%BuildMode%\hbmk2 2>nul
 
+rem the following will output the current datetime
+for /F "tokens=2" %%i in ('date /t') do set mydate=%%i
+set mytime=%time%
+echo local l_cBuildInfo := "%HB_COMPILER% %BuildMode% %mydate% %mytime%">BuildInfo.txt
+
 del %HB_COMPILER%\%BuildMode%\%EXEName%.exe 2>nul
 if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 	echo Could not delete previous version of %EXEName%.exe
@@ -55,7 +63,7 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 ::  /p        = Leave generated ppo files
 
 if %BuildMode% == debug (
-	copy ..\..\hb_fcgi\debugger_on.hbm ..\..\hb_fcgi\debugger.hbm
+	copy %FastCGIRootPath%hb_fcgi\debugger_on.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
     rem	hbmk2 %EXEName%.hbp -b /p /w3    linux version does not like the  /  use   - instead
 
     hbmk2 %EXEName%.hbp -b -p -w3
@@ -65,9 +73,11 @@ if %BuildMode% == debug (
   
 
 ) else (
-	copy ..\..\hb_fcgi\debugger_off.hbm ..\..\hb_fcgi\debugger.hbm
+	copy %FastCGIRootPath%hb_fcgi\debugger_off.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
 	hbmk2 %EXEName%.hbp /w3
 )
+
+echo Current time is %mydate% %mytime%
 
 if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 	echo Failed To build %EXEName%.exe
@@ -98,7 +108,7 @@ if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 			echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 		)
 
-		copy ..\..\fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
+		copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
 
 		echo.
 		echo Ready            BuildMode = %BuildMode%
