@@ -93,7 +93,14 @@ method OnRequest() class MyFcgi
 
     ::Print([</body></html>])
 
-    //::SetCookieValue("MyCookie1","123",0)
+    // ::SetCookieValue("MyCookie1","123",1,)
+    // ::SetCookieValue("MyCookie2","456",2,"/Bogus/")
+
+    // ::DeleteCookie("MyCookie1")
+    // ::DeleteCookie("MyCookie2","/Bogus/")
+
+
+//    ::SetCookieValue("MyCookie2","123",1,"/Bogus/")
     // ::SetCookieValue("MyCookie2","456a")
 
 return nil

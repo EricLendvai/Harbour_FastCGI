@@ -26,6 +26,7 @@
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
+                    "FastCGIRootPath":"..\\..\\",
                     "EXEName":"echo",
                     "BuildMode":"debug",
 					"HB_COMPILER":"${input:CCompiler}",
@@ -52,6 +53,7 @@
             "options": {
                 "cwd": "${workspaceFolder}",
                 "env": {
+                    "FastCGIRootPath":"..\\..\\",
                     "EXEName":"echo",
                     "BuildMode":"release",
                     "HB_COMPILER":"${input:CCompiler}",

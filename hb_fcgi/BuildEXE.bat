@@ -1,13 +1,13 @@
 @echo off
 
-set FastCGIRootPath=..\..\
-
 ::echo on
+::echo FastCGIRootPath = %FastCGIRootPath%
 ::echo EXEName = %EXEName%
 ::echo BuildMode = %BuildMode%
 ::echo SiteRootFolder = %SiteRootFolder%
 ::echo HB_COMPILER = %HB_COMPILER%
 
+if %FastCGIRootPath%. == . goto MissingEnvironmentVariables
 if %EXEName%. == . goto MissingEnvironmentVariables
 if %BuildMode%. == . goto MissingEnvironmentVariables
 if %SiteRootFolder%. ==. goto MissingEnvironmentVariables

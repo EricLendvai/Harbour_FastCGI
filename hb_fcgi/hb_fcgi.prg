@@ -65,9 +65,10 @@ class hb_Fcgi
         method IsPost()                             SETGET   //Used to query if the page was sent as a POST request
         method GetHeaderValue(par_cName)
         method SetHeaderValue(par_cName,par_cValue)
-        method GetCookieValue(par_cName)
-        method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)    // By default par_iExpireDays is 365. Setting to 0 will make it a session only cookie
-
+        method GetCookieValue(par_cName)   // _M_ Not certain how can make a different regarding Paths
+        method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)    // By default par_iExpireDays is 365. par_nExpireDays should be between 1 and 365
+        method SetSessionCookieValue(par_cName,par_cValue,par_cPath)             // A session cookie, also called a transient cookie, is a cookie that is erased when you end the browser session.
+        method DeleteCookie(par_cName,par_cPath)                            // Will delete regular and transient cookies by blanking their values and making cookies transient (will be removed when browser closes).
         method OnError(par_oError)
         method OnFirstRequest() inline nil
         method OnRequest()      inline nil
@@ -573,6 +574,27 @@ method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)
     //Added the cookie name to the Header Name since using a Hash array
     ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
                      iif(empty(nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+nExpireDays))+;
+                     iif(empty(cPath),"","; Path="+cPath) )
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method SetSessionCookieValue(par_cName,par_cValue,par_cPath)
+    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    //Will mark the cookie to expire 364 days from now and site root path
+    local cPath       := hb_defaultValue(@par_cPath,"/")
+    
+    //Added the cookie name to the Header Name since using a Hash array
+    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+                     iif(empty(cPath),"","; Path="+cPath) )
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method DeleteCookie(par_cName,par_cPath)
+    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    //Will mark the cookie to expire 364 days from now and site root path
+    local cPath       := hb_defaultValue(@par_cPath,"/")
+    
+    //Added the cookie name to the Header Name since using a Hash array
+    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+;
+                     "; Expires=0"+;
                      iif(empty(cPath),"","; Path="+cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
