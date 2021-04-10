@@ -70,6 +70,7 @@ class hb_Fcgi
         method SetSessionCookieValue(par_cName,par_cValue,par_cPath)             // A session cookie, also called a transient cookie, is a cookie that is erased when you end the browser session.
         method DeleteCookie(par_cName,par_cPath)                            // Will delete regular and transient cookies by blanking their values and making cookies transient (will be removed when browser closes).
         method Redirect(par_cURL)                                           // Page Redirect via HTTP
+        method GenerateRandomString(par_nLength,par_cPossibleChars)
         method OnError(par_oError)
         method OnFirstRequest() inline nil
         method OnRequest()      inline nil
@@ -633,6 +634,15 @@ method WriteOutput() class hb_Fcgi
     endif
     ::OutputBuffer = ""
 return NIL
+//-----------------------------------------------------------------------------------------------------------------
+method GenerateRandomString(par_nLength,par_cPossibleChars) class hb_Fcgi
+    local cString := ""
+    local nPossibleCharsLen := len(par_cPossibleChars)
+    local nCounter
+    for nCounter := 1 to par_nLength
+        cString += chr(hb_BPeek(par_cPossibleChars,hb_RandomInt(1,nPossibleCharsLen)))
+    endfor
+return cString
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
     local cTypeOfxValue
