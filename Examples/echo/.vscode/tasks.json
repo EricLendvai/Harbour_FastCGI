@@ -95,7 +95,7 @@
         {
             "label": "DelAllPPO",
             "type": "shell",
-            "command": "del *.ppo",
+            "command": "del ..\\..\\hb_fcgi\\*.ppo|del *.ppo",
             "isBackground": true,
             "options": {
                 "cwd": "${workspaceFolder}",

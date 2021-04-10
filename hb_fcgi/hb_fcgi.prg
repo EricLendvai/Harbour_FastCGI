@@ -69,6 +69,7 @@ class hb_Fcgi
         method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)    // By default par_iExpireDays is 365. par_nExpireDays should be between 1 and 365
         method SetSessionCookieValue(par_cName,par_cValue,par_cPath)             // A session cookie, also called a transient cookie, is a cookie that is erased when you end the browser session.
         method DeleteCookie(par_cName,par_cPath)                            // Will delete regular and transient cookies by blanking their values and making cookies transient (will be removed when browser closes).
+        method Redirect(par_cURL)                                           // Page Redirect via HTTP
         method OnError(par_oError)
         method OnFirstRequest() inline nil
         method OnRequest()      inline nil
@@ -598,21 +599,38 @@ method DeleteCookie(par_cName,par_cPath)
                      iif(empty(cPath),"","; Path="+cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
+method Redirect(par_cURL)
+    ::SetHeaderValue("Status","303 OK")
+    ::SetHeaderValue("Location",par_cURL)
+return NIL
+//-----------------------------------------------------------------------------------------------------------------
 method WriteOutput() class hb_Fcgi
     local cHeader
-    local cHeaderName
+    local cHeaderName,cHeaderValue
     local nPos
+    local nRedirected := 0
     hb_Fcgx_Print("Content-type: "+iif(empty(::ContentType),::DefaultContentType,::ContentType)+CRLF)
     for each cHeader in ::ResponseHeader
-        cHeaderName := cHeader:__enumKey()
+        cHeaderName  := cHeader:__enumKey()
+        cHeaderValue := cHeader:__enumValue()
+        do case
+        case cHeaderName == "Location"
+            nRedirected++
+        case cHeaderName == "Status" .and. left(cHeaderValue,1) == "3"
+            nRedirected++
+        endcase
         nPos := at("~",cHeaderName)  // To handle multiple Set-Cookies header entries
         if nPos > 0
             cHeaderName := left(cHeaderName,nPos-1)
         endif
-        hb_Fcgx_Print(cHeaderName+": "+cHeader:__enumValue()+CRLF)
+        hb_Fcgx_Print(cHeaderName+":"+cHeaderValue+CRLF)
     endfor
     hb_Fcgx_Print(CRLF)
-    hb_Fcgx_Print(::OutputBuffer)
+    if nRedirected < 2
+        hb_Fcgx_Print(::OutputBuffer)
+    // else
+    //     SendToDebugView("WriteOutput - Dropped Output due to redirect")
+    endif
     ::OutputBuffer = ""
 return NIL
 //=================================================================================================================

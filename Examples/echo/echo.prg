@@ -93,6 +93,17 @@ method OnRequest() class MyFcgi
 
     ::Print([</body></html>])
 
+
+    // // ::SetHeaderValue("Location","/fcgi_echo/")
+    // ::SetHeaderValue("Status","303 OK")
+    // // ::SetHeaderValue("Status","202 OK")
+    // ::SetHeaderValue("Location","/fcgi_localsandbox/")
+    // // ::SetHeaderValue("Content-Location","/fcgi_localsandbox/")
+    
+
+    // ::Redirect("/fcgi_localsandbox/home?action=cancel")
+    
+
     // ::SetCookieValue("MyCookie1","123",1,)
     // ::SetCookieValue("MyCookie2","456",2,"/Bogus/")
 
