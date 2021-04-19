@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "FCGITaskManager Down echo",
             "program": "${workspaceFolder}\\mingw64\\debug\\FCGITaskManager.exe",
-            "arguments": ["down","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
+            "arguments": ["down","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
             "stopOnEntry": false,
             "preLaunchTask": "CompileDebug",
             "postDebugTask": "",
@@ -23,7 +23,7 @@
             "request": "launch",
             "name": "FCGITaskManager Activate Echo",
             "program": "${workspaceFolder}\\mingw64\\debug\\FCGITaskManager.exe",
-            "arguments": ["activate","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
+            "arguments": ["activate","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
             "stopOnEntry": false,
             "preLaunchTask": "CompileDebug",
             "postDebugTask": "",
@@ -37,7 +37,7 @@
             "request": "launch",
             "name": "FCGITaskManager Kill Echo",
             "program": "${workspaceFolder}\\mingw64\\debug\\FCGITaskManager.exe",
-            "arguments": ["kill","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
+            "arguments": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
             "stopOnEntry": false,
             "preLaunchTask": "CompileDebug",
             "postDebugTask": "",
@@ -45,15 +45,6 @@
             "sourcePaths": [
                 "${workspaceFolder}\\"
             ]
-        }
-    ],
-    "inputs": [
-        {
-            "id": "CCompiler",
-            "type": "pickString",
-            "description": "Select C Compiler",
-            "options": ["mingw64","msvc64"],
-            "default": "mingw64"
         }
     ]
 }

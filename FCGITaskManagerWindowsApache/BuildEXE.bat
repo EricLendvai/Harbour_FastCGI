@@ -39,9 +39,9 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 )
 
 if %BuildMode% == debug (
-    hbmk2 %EXEName%.hbp -b
+    hbmk2 %EXEName%.hbp -b -p -w3
 ) else (
-    hbmk2 %EXEName%.hbp
+    hbmk2 %EXEName%.hbp -w3
 )
 
 if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (

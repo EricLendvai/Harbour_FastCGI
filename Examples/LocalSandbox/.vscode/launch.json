@@ -9,10 +9,14 @@
             "type": "harbour-dbg",
             "request": "attach",
             "name": "Attach Program LocalSandbox.exe",
-            "program": "C:\\Harbour_websites\\fcgi_LocalSandbox\\backend\\FCGILocalSandbox.exe",
-            "sourcePaths": [
-                "${workspaceFolder}"
-            ]
+            "windows":{
+                "program": "R:\\Harbour_websites\\fcgi_LocalSandbox\\backend\\FCGILocalSandbox.exe",
+                "sourcePaths": [
+                    "${workspaceFolder}"
+                ]
+            },
+            "linux":{
+            }
         }
     ]
 }

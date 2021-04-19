@@ -1,4 +1,4 @@
-//Copyright (c) 2020 Eric Lendvai MIT License
+//Copyright (c) 2021 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
@@ -62,7 +62,9 @@ method OnRequest() class MyFcgi
     cHtml += [</table>]
     ::Print(cHtml)
 
-// altd()
+    // ::Print([<p>]+::GenerateRandomString(16,"01234567890ABCDEF")+[</p>])
+
+altd()
 
     // ::Print("<p>SCRIPT_NAME   = "+::GetEnvironment("SCRIPT_NAME")+"</p>")
     // ::Print("<p>REQUEST_URI   = "+::GetEnvironment("REQUEST_URI")+"</p>")
@@ -92,14 +94,6 @@ method OnRequest() class MyFcgi
     ::Print([<p>Build Info: ]+hb_buildinfo()+[</p>])
 
     ::Print([</body></html>])
-
-
-    // // ::SetHeaderValue("Location","/fcgi_echo/")
-    // ::SetHeaderValue("Status","303 OK")
-    // // ::SetHeaderValue("Status","202 OK")
-    // ::SetHeaderValue("Location","/fcgi_localsandbox/")
-    // // ::SetHeaderValue("Content-Location","/fcgi_localsandbox/")
-    
 
     // ::Redirect("/fcgi_localsandbox/home?action=cancel")
     

@@ -4,22 +4,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "RunDebug",
-            "command": "${command:workbench.action.debug.start}",
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Compile and Debug>","hide" : false}
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": true
-            }
-        },
-        {
             "label": "CompileDebug",
             "type": "shell",
             "command": "${workspaceFolder}\\BuildEXE.bat",
@@ -52,7 +36,7 @@
                     "BuildMode": "release",
                     "hb_compiler": "${input:CCompiler}"
                 },
-                "statusbar": {"label" : "<Compile Release and Run>","hide" : false}
+                "statusbar": {"label" : "<Compile Release>","hide" : false}
             },
             "presentation": {
                 "echo": true,

@@ -13,9 +13,9 @@ if %BuildMode%. == . goto MissingEnvironmentVariables
 if %SiteRootFolder%. ==. goto MissingEnvironmentVariables
 if %HB_COMPILER%. ==. goto MissingEnvironmentVariables
 
-if not exist %EXEName%.hbp (
-	echo Invalid Workspace Folder. Missing file %EXEName%.hbp
-	goto End
+if not exist %EXEName%_windows.hbp (
+    echo Invalid Workspace Folder. Missing file %EXEName%_windows.hbp
+    goto End
 )
 
 if %BuildMode%. == debug.   goto GoodParameters
@@ -52,8 +52,8 @@ echo local l_cBuildInfo := "%HB_COMPILER% %BuildMode% %mydate% %mytime%">BuildIn
 
 del %HB_COMPILER%\%BuildMode%\%EXEName%.exe 2>nul
 if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
-	echo Could not delete previous version of %EXEName%.exe
-	goto End
+    echo Could not delete previous version of %EXEName%.exe
+    goto End
 )
 
 ::	-b        = debug
@@ -63,72 +63,65 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 ::  /p        = Leave generated ppo files
 
 if %BuildMode% == debug (
-	copy %FastCGIRootPath%hb_fcgi\debugger_on.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
-    rem	hbmk2 %EXEName%.hbp -b /p /w3    linux version does not like the  /  use   - instead
-
-    hbmk2 %EXEName%.hbp -b -p -w3
-
-    rem hbmk2 %EXEName%.hbp -b -prgflag=p     does not work
-
-  
-
+    copy %FastCGIRootPath%hb_fcgi\debugger_on.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
+    hbmk2 %EXEName%_windows.hbp -b -p -w3
 ) else (
-	copy %FastCGIRootPath%hb_fcgi\debugger_off.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
-	hbmk2 %EXEName%.hbp /w3
+    copy %FastCGIRootPath%hb_fcgi\debugger_off.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
+    hbmk2 %EXEName%_windows.hbp -w3
 )
 
 echo Current time is %mydate% %mytime%
 
 if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
-	echo Failed To build %EXEName%.exe
+    echo Failed To build %EXEName%.exe
 ) else (
-	if errorlevel 0 (
-		echo.
-		echo No Errors
+    if errorlevel 0 (
+        echo.
+        echo No Errors
 
-		del %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+        del %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
 
-		if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
-			echo Failed to delete previous version of %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
-			goto End
-		)
+        if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
+            echo Failed to delete previous version of %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+            goto End
+        )
 
-		rem Extra files needed if compiled with mingw64
-		if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libstdc++-6.dll"    "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
-		if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libgcc_s_seh-1.dll" "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
+        rem Extra files needed if compiled with mingw64
+        if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libstdc++-6.dll"    "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
+        if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libgcc_s_seh-1.dll" "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
 
-		if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
-		if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
+        if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
+        if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
 
-		copy "%HB_COMPILER%\%BuildMode%\%EXEName%.exe" "%WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe"
+        copy "%HB_COMPILER%\%BuildMode%\%EXEName%.exe" "%WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe"
 
-		if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
-			echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
-		) else (
-			echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
-		)
+        if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
+            echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+        ) else (
+            echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+        )
 
-		copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
+        copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
 
-		echo.
-		echo Ready            BuildMode = %BuildMode%
-		
-	) else (
-		echo Compilation Error
-		if errorlevel  1 echo Unknown platform
-		if errorlevel  2 echo Unknown compiler
-		if errorlevel  3 echo Failed Harbour detection
-		if errorlevel  5 echo Failed stub creation
-		if errorlevel  6 echo Failed in compilation (Harbour, C compiler, Resource compiler)
-		if errorlevel  7 echo Failed in final assembly (linker or library manager)
-		if errorlevel  8 echo Unsupported
-		if errorlevel  9 echo Failed to create working directory
-		if errorlevel 19 echo Help
-		if errorlevel 10 echo Dependency missing or disabled
-		if errorlevel 20 echo Plugin initialization
-		if errorlevel 30 echo Too deep nesting
-		if errorlevel 50 echo Stop requested
-	)
+        echo.
+        echo Ready            BuildMode = %BuildMode%
+        
+    ) else (
+        echo Compilation Error
+        if errorlevel  1 echo Unknown platform
+        if errorlevel  2 echo Unknown compiler
+        if errorlevel  3 echo Failed Harbour detection
+        if errorlevel  5 echo Failed stub creation
+        if errorlevel  6 echo Failed in compilation (Harbour, C compiler, Resource compiler)
+        if errorlevel  7 echo Failed in final assembly (linker or library manager)
+        if errorlevel  8 echo Unsupported
+        if errorlevel  9 echo Failed to create working directory
+        if errorlevel 19 echo Help
+        if errorlevel 10 echo Dependency missing or disabled
+        if errorlevel 20 echo Plugin initialization
+        if errorlevel 30 echo Too deep nesting
+        if errorlevel 50 echo Stop requested
+    )
 )
 
 goto End
