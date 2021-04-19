@@ -1,0 +1,325 @@
+
+https://lubuntu.me/downloads/
+
+
+------------------------  Not For Doc Begin
+VMWare New Machine
+3GB of Ram, 1CPU 256 Gb Drive
+Lubuntu_Harbour_005   FAILED with lubuntu-19.10-desktop-amd64.iso  due to python.
+
+Made bunch of print screens  04/15/2021
+
+User account: harbour   password: rndrnd
+
+------------------------  Not For Doc End
+Make a new VMWare machine
+3GB of Ram, 1CPU 256 Gb Drive
+Made bunch of print screens  04/15/2021
+Lubuntu_Harbour_006   lubuntu-20.04.2-desktop-amd64.iso
+User account: harbour   password: rndrnd
+
+Install VMWare Client:
+	On VMWare, VM menu to start to install the client
+	
+	Extract the vmware tools files for example in a folder on the Desktop than open a Terminal and execute the following:
+
+	ALT+CTRL+T to opens Terminal
+	
+	cd /home/harbour/Desktop/vmre-tools-distrib
+
+	# to make the file executable
+	sudo chmod u+x vmware-install.pl
+
+	#run the file
+	sudo ./vmware-install.pl
+
+	
+Go to "System Tools" "Discover" to check the version of the OS and remove unneeded apps.
+	Blue Devil Send File
+	LibreOffice
+	Lohit Fonts for languages not needed
+	Skanlite
+Disable Screen Saver  (https://manual.lubuntu.me/stable/3/3.2/3.2.20/screensaver.html?highlight=saver)
+
+
+Misc Setup
+	-Setup Firefox 
+		-As default browser
+		-Home page preference and download location and home page
+		-Toolbar schortcuts
+			https://lubuntu.me/
+
+
+If you are also an MS Windows user you could alter the shortcuts for Copy/Paste
+	-Open Terminal    ALT+CTRL+T
+	-In Terminal, go to edit "File Preference", "Settings" "Shortcuts" and change the copy and paste to CTRL+C and CTRL+V, and also Find = CTRL+F
+
+Check for OS Update
+	Open Terminal    ALT+CTRL+T
+	sudo apt update
+	sudo apt upgrade
+
++++========================= Shut Down VM and Make Image "Install with update and upgrade as of 2021_04_15_001"
+
+
+Install Harbour
+===============
+In Terminal
+
+	sudo apt install git
+	sudo mkdir /etc/harbour
+	cd /etc
+	sudo chown -R $USER:$USER harbour
+	chmod -R 775 harbour
+	#cd MyPrograms
+	git clone http://github.com/harbour/core.git harbour
+	cd harbour
+	sudo apt install autoconf automake intltool build-essential
+		Answer Y
+	sudo apt update
+
+
+
+	sudo apt install -y libncurses5-dev
+	sudo apt install -y libslang2-dev
+	sudo apt install -y libx11-dev
+	# Fails   sudo apt install -y libgpml-dev
+	# Fails   sudo apt install -y liballego4.2-dev
+	sudo apt install -y libcairo2-dev
+	sudo apt install -y libcups2-dev
+	sudo apt install -y libcurl4-openssl-dev
+	
+	# sudo apt install -y firebird2.1-dev
+	sudo apt install -y firebird-dev
+	
+	sudo apt install -y libfreeimage-dev
+	# Fails sudo apt install -y libgd2-xpm-dev
+	sudo apt install -y libgs-dev
+	sudo apt install -y libmagic-dev
+	
+	#sudo apt install -y libmysqlclient15-dev
+	sudo apt install -y libmysqlclient-dev
+	
+	sudo apt install -y unixodbc-dev
+	sudo apt install -y libpq-dev
+	# Fails   sudo apt install -y libqt5-dev
+	
+	# Fails   sudo apt install -y libexpatl-dev
+	sudo apt install -y libbz2-dev
+	sudo apt install -y libsqlite-dev
+
+	# the following are the old instructions. Bug fixed it by doing one step at a time.
+	#	sudo apt install autoconf automake intltool build-essential
+	#	sudo apt install libncurses5-dev libslang2-dev libx11-dev libgpml-dev liballego4.2-dev libcairo2-dev libcups2-dev libcurl4-openssl-dev firebird2.1-dev libfreeimage-dev libgd2-xpm-dev libgs-dev libmagic-dev libmysqlclient15-dev unixodbc-dev libpq-dev libqt5-dev libexpatl-dev libbz2-dev libsqlite-dev | tee pre-hb.log
+	#	sudo apt install libcurl4-openssl-dev unixodbc-dev libsqlite-dev | tee pre-hb.log
+
+
+	cd /etc/harbour
+	make
+	
+	sudo make install
+	sudo ldconfig                     <== Will fix the error:  error while loading shared libraries: 
+	
+	The building (make) process should create a file /usr/local/lib/harbour/libharbour.so.3.2.0 and several Symbolic Links.
+
+reboot
+
+	Test if the Harbour compiler was properly installed
+		
+	In Terminal
+		cd /etc/harbour/tests
+		hbmk2 hello
+		./hello
+	(print screen)
+
+
++++========================= Shut Down VM and Make Image "Installed Harbour as of 2021_04_15_001"
+
+Setting up IDE for Harbour, VSCODE
+==================================
+
+Optional to install Fira Mono font:
+
+https://fonts.google.com/?query=fira+mono&selection.family=Fira+Mono
+	Download to Desktop for example, folder "Fira_Mono", unzip, then will use "Font Manager" that we are going to install.
+
+
+Install Font  "Fira Mono"  (My font used in VSCodium/VSCODE)
+	Install Font Manager
+		sudo apt install -y font-manager
+		In the "File Manager" Right click on the .ttf files (one at a time) and "Open With" "Font Viewer". 
+		Once in the Viewer use the "Install Font" button.
+		
+For additional information: https://itsfoss.com/install-fonts-ubuntu/
+
+
+Install https://vscodium.com/
+
+	#Create a folder that will be used the the "Local History" extension
+	sudo mkdir /etc/VSCode_History
+	sudo chmod -R a+rwx /etc/VSCode_History
+
+
+	New method to install VSCODE:
+		sudo snap install --classic code # or code-insiders
+
+
+	Start VSCodium from the "start menu" under the "Programming" menu and install the same extensions and settings as the once set under  Windows.
+
+		Install VSCode Extensions
+			Required:
+				Harbour and xHarbour (Antonino Perricone)
+				Tasks (actboy168)
+			Optional:
+				Kai Light (Alek Angelov)
+				Local History (xyz)
+				Bracket Pair Colorizer 2 (coenraads)
+				Code Spell Checker (streetsidesoftware)
+				Cursor Align (Mike Moore)
+				filesize (Matheus Kautzmann)
+				HTML Preview (Thomas Haakon Townsend)
+				vscode-icons (vscode-icons-team)
+				Bookmarks (Alessandro Fragnani)
+
+
+
+Optional settings:
+==================
+Update the preferences in featherpad, see print screens
+
+Simplify Password Requirement
+	http://ubuntuhandbook.org/index.php/2015/06/minimum-password-length-ubuntu/
+		$ sudo featherpad /etc/pam.d/common-password
+			Change line "password     [success=1 default=ignore]    pam_unix.so obscure sha512"
+			to          "password     [success=1 default=ignore]	pam_unix.so	sha512	minlen=3"               USE TABS as separators
+
+
+Change PCManFM-Qt setting to default view to details, show hidden, show filter, Terminal to "qterminal", see print screens
+	Had to make same changes for "run as root" mode
+
+
+Anytime Check for Updates
+	$ sudo apt update
+	$ sudo apt upgrade
+
+Add command aliases to have Windows Commands (DOS)
+	$ featherpad ~/.bashrc      and past the following lines at the bottom
+		alias dir="ls -ls"
+		alias e="exit"
+		alias md="mkdir"
+		alias del="rm"
+		alias rd="rmdir"
+		alias n="featherpad"
+
+
+To Add icons on the task bar:
+First make a "Shortcuts" folder on the desktop, then by dragging from the menu make some shortcuts and move then in that new folder. 
+Then drap out of the "Shortcuts" folder icons to the task bar, in the area "Quick Launch". 
+DO NOT DELETE OR MOVE the shortcuts in the "Shortcuts folder!"
+To learn more options use right click on the "Start" button on the bottom panel.
+It is also possible to add extra pannels.
+
++++========================= Shut Down VM and Make Image "Installed Harbour and VSCODE as of 2021_04_16_002"
+
+Configure and install apps for web development.
+===============================================
+
+UNDER DEVELOPMENT NOTES.
+
+Edit local dns host file. Add "localsandbox" and "echo" to use 127.0.0.1
+	sudo featherpad /etc/hosts
+		Add the following lines:
+			127.0.0.1  echo
+			127.0.0.1  localsandbox
+
+To test if host file worked, using the ping command. To stop the command use CTRL+SHIFT+C or CTRL+C (depending of settings)
+	ping echo
+
+Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means home folder (specific to logged in user).
+
+	mkdir ~/GitHub
+	cd ~/GitHub
+	git clone https://github.com/EricLendvai/Harbour_FastCGI.git
+	git clone https://github.com/EricLendvai/Harbour_VFP.git
+	git clone https://github.com/EricLendvai/Harbour_ORM.git
+
+	$ sudo mkdir /etc/Harbour_FastCGI
+	$ sudo mkdir /etc/Harbour_websites
+	$ sudo mkdir /etc/Harbour_ORM
+	$ sudo mkdir /etc/Harbour_VFP
+	
+	$ sudo chmod -R a+rwx /etc/Harbour_FastCGI
+	$ sudo chmod -R a+rwx /etc/Harbour_websites
+	$ sudo chmod -R a+rwx /etc/Harbour_ORM
+	$ sudo chmod -R a+rwx /etc/Harbour_VFP
+
+For Debugging Had to install lighttpd, since it can be started as a console app
+
+Installing lighttpd   Reference: https://help.ubuntu.com/community/lighttpd
+	$ sudo apt-get install lighttpd
+	$ sudo service lighttpd stop
+	$ sudo apt-get install gamin             # On Lubuntu this was needed to fix a bug
+
+#Running lighttpd as a Console Application  (LATER)
+	#$ sudo lighttpd -D -f /etc/lighttpd/lighttpd.conf
+	$ sudo lighttpd -D -f ~/lighttpd.conf
+	# use CTRL+SHIFT+C to break	
+
+Since lighttpd is started as root, to be able to debug using VSCODE, it also has to be started as root, since the "attach" debug mode need to find the process running under root level.
+	$sudo code --user-data-dir="~/.vscode-root"
+	All the extensions will need to be installed under the root account.
+
+TODO 
+====
+	-Figure out what to do for the VSCODE files.
+	-FCGI Manager not fully ported to Linux yet (need hbcurl support). The soft kill is not working yet.
+
+Installing Apache
+=================
+	https://tutorials.ubuntu.com/tutorial/install-and-configure-apache
+
+	$ sudo apt update
+	$ sudo apt upgrade
+	$ sudo apt install apache2
+	$ sudo service apache2 stop
+
+	$ sudo chmod -R a+rwx /etc/apache2/sites-available   //-R means "recursive" Add to All Users Read Write eXecute
+
+
+	#add the Apache FastFCGI server side module
+	$ sudo apt install libapache2-mod-fcgid
+
+	#Enabled the rewrite module
+	$ cd /etc/apache2/mods-available
+	$ sudo a2enmod rewrite
+
+	#sudo service apache2 start
+
+	#sudo service apache2 restart
+
+!!!! FOR DEBUGGING, 
+
+Using Lighttpd for debugging, since runing Apache not as root is too complicated.
+sudo service apache2 stop
+
+
+$ sudo service apache2 stop
+$ sudo lighttpd -D -f ~/lighttpd.conf
+$ sudo service apache2 start
+
+systemctl --type=service | grep apache      To see if Apache is runing
+
+Both of the following with lighttpd
+	http://localhost/echo.fcgi
+	http://echo/echo.fcgi
+
+To test web server, non FastCGI     http://echo/hello.html
+
+
+Possible commands:
+sudo chown -R harbour:harbour /etc/Harbour_FastCGI
+sudo chown -R harbour:harbour /etc/Harbour_websites
+chown -R harbour:harbour /etc/Harbour_FastCGI
+chown -R harbour:harbour /etc/Harbour_websites
+chmod -R a+rwx /etc/Harbour_FastCGI
+chmod -R a+rwx /etc/Harbour_websites

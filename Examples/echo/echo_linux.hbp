@@ -1,0 +1,10 @@
+-hbexe
+#-inc
+-workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
+
+-o${HB_COMPILER}\${BuildMode}\${EXEName}
+
+echo.prg
+
+..\..\hb_fcgi\hb_fcgi.hbm
+..\..\hb_fcgi\debugger.hbm
