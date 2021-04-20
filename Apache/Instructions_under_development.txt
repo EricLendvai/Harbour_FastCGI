@@ -9,14 +9,14 @@ Lubuntu_Harbour_005   FAILED with lubuntu-19.10-desktop-amd64.iso  due to python
 
 Made bunch of print screens  04/15/2021
 
-User account: harbour   password: rndrnd
+User account: harbour   password: password
 
 ------------------------  Not For Doc End
 Make a new VMWare machine
 3GB of Ram, 1CPU 256 Gb Drive
 Made bunch of print screens  04/15/2021
 Lubuntu_Harbour_006   lubuntu-20.04.2-desktop-amd64.iso
-User account: harbour   password: rndrnd
+User account: harbour   password: password
 
 Install VMWare Client:
 	On VMWare, VM menu to start to install the client
@@ -69,7 +69,7 @@ In Terminal
 	sudo apt install git
 	sudo mkdir /etc/harbour
 	cd /etc
-	sudo chown -R $USER:$USER harbour
+	sudo chown -R $USEC:$USER harbour
 	chmod -R 775 harbour
 	#cd MyPrograms
 	git clone http://github.com/harbour/core.git harbour
@@ -118,7 +118,7 @@ In Terminal
 	make
 	
 	sudo make install
-	sudo ldconfig                     <== Will fix the error:  error while loading shared libraries: 
+	sudo ldconfig                     <== Will fix the erroc:  error while loading shared libraries: 
 	
 	The building (make) process should create a file /usr/local/lib/harbour/libharbour.so.3.2.0 and several Symbolic Links.
 
@@ -212,7 +212,7 @@ Add command aliases to have Windows Commands (DOS)
 		alias n="featherpad"
 
 
-To Add icons on the task bar:
+To Add icons on the task bac:
 First make a "Shortcuts" folder on the desktop, then by dragging from the menu make some shortcuts and move then in that new folder. 
 Then drap out of the "Shortcuts" folder icons to the task bar, in the area "Quick Launch". 
 DO NOT DELETE OR MOVE the shortcuts in the "Shortcuts folder!"
@@ -317,9 +317,9 @@ To test web server, non FastCGI     http://echo/hello.html
 
 
 Possible commands:
-sudo chown -R harbour:harbour /etc/Harbour_FastCGI
-sudo chown -R harbour:harbour /etc/Harbour_websites
-chown -R harbour:harbour /etc/Harbour_FastCGI
-chown -R harbour:harbour /etc/Harbour_websites
+sudo chown -R harbouc:harbour /etc/Harbour_FastCGI
+sudo chown -R harbouc:harbour /etc/Harbour_websites
+chown -R harbouc:harbour /etc/Harbour_FastCGI
+chown -R harbouc:harbour /etc/Harbour_websites
 chmod -R a+rwx /etc/Harbour_FastCGI
 chmod -R a+rwx /etc/Harbour_websites

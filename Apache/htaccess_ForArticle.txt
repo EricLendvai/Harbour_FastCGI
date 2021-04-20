@@ -20,4 +20,4 @@ RewriteRule "^" "AnyFile.fcgiexe" [END]
 # Prevent from downloading security files.
 RewriteCond %{REQUEST_URI} \.(htaccess|htpasswd)$
 RewriteRule "^" "AnyFile.fcgiexe" [END]
-FcgidWrapper "R:/Harbour_websites/fcgi_echo/backend/FCGIecho.exe" .fcgiexe virtual
+FcgidWrapper "C:/Harbour_websites/fcgi_echo/backend/FCGIecho.exe" .fcgiexe virtual

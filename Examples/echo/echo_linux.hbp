@@ -1,10 +1,10 @@
 -hbexe
 #-inc
--workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
+-workdir=${HB_COMPILER}/${BuildMode}/hbmk2/
 
--o${HB_COMPILER}\${BuildMode}\${EXEName}
+-o${HB_COMPILER}/${BuildMode}/${EXEName}.exe
 
 echo.prg
 
-..\..\hb_fcgi\hb_fcgi.hbm
-..\..\hb_fcgi\debugger.hbm
+/etc/Harbour_FastCGI/hb_fcgi/hb_fcgi.hbm
+/etc/Harbour_FastCGI/hb_fcgi/debugger.hbm
