@@ -1,6 +1,6 @@
 //static const char rcsid[] = "$Id: hb_fcgi.c,v 1.5 2019/11/16 08:08:00 Eric Lendvai Exp $";
 
-//Copyright (c) 2020 Eric Lendvai MIT License
+//Copyright (c) 2021 Eric Lendvai MIT License
 
 #include "fcgi_config.h"
 
@@ -16,7 +16,6 @@
 extern char **environ;
 #endif
 
-
 #ifdef _WIN32
 #define GETPID _getpid
 #else
@@ -25,9 +24,14 @@ extern char **environ;
 
 #include "fcgiapp.h"
 
-#define GETPID _getpid
-
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
+#ifdef unix
+#include <syslog.h>
+#endif
+
 
 #include "hbapi.h"
 #include "hbapiitm.h"
@@ -40,7 +44,9 @@ extern char **environ;
 // static char cAP_FileName[AP_FILENAMEMAXLENGTH] = "Not Set";          // Used hold last value of SET_AP_FILENAME
 static char cAP_FileName[AP_FILENAMEMAXLENGTH] = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";          // Used hold last value of SET_AP_FILENAME
 
+#ifdef _WIN32
 static char cDebugStringBuffer[20000];
+#endif
 
 static FCGX_Stream *g_in, *g_out, *g_err;
 static FCGX_ParamArray g_envp;
@@ -54,11 +60,13 @@ static void PrintEnv(FCGX_Stream *par_out, char *par_label, char **par_envp)
     FCGX_FPrintF(par_out, "</pre><p>\n");
 }
 
+#ifdef _WIN32
 void handle_sigint(int sig) 
 { 
     sprintf(cDebugStringBuffer, "[Harbour] Signal %d\n", sig);
     OutputDebugString(cDebugStringBuffer);
 } 
+#endif
 
 HB_FUNC( HB_FCGX_WAIT )
 {
@@ -114,8 +122,6 @@ HB_FUNC( HB_FCGX_PRINT )   // Used internally by hb_fcgi function
     if ( HB_ISCHAR( 1 ) )
     {
     	FCGX_FPrintF(g_out, hb_parc( 1 ) );
-        //sprintf(cDebugStringBuffer, "[Harbour] HB_FCGX_PRINT \n");
-        //OutputDebugString(cDebugStringBuffer);
         iResult = 1;
     } else {
         iResult = -1;
@@ -134,11 +140,11 @@ HB_FUNC( HB_FCGI_PRINTENVIRONMENT )  //Only usefull to test FastCGI development 
 
 HB_FUNC( HB_FCGX_INIT )
 {
+#ifdef _WIN32
     sprintf(cDebugStringBuffer, "[Harbour] Fcgi Init \n");
     OutputDebugString(cDebugStringBuffer);
-
     // signal(SIGTERM, handle_sigint);    // Signals not working in Apache and IIS
-    
+#endif
 }
 
 HB_FUNC( HB_FCGX_FINISH )
@@ -186,9 +192,27 @@ HB_FUNC( HB_FCGI_GET_REQUEST_VARIABLES )   // Returns a Hash of all the Environm
 
 HB_FUNC( HB_FCGX_OUTPUTDEBUGSTRING )   // For Windows Only
 {
+
 #ifdef _WIN32
 	OutputDebugString( hb_parc(1) );
 #endif
+
+#ifdef unix
+
+// setlogmask (LOG_UPTO (LOG_NOTICE));
+// openlog ("harbour_fastcgi", LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+// //syslog (LOG_NOTICE, "Program started by User %d", getuid ());
+// syslog (LOG_INFO, "A tree falls in a forest");
+// //syslog (LOG_NOTICE, "%s\n",hb_parc(1) );
+// closelog ();
+
+    openlog("Logs", LOG_NDELAY, LOG_DAEMON);
+    // syslog(LOG_DEBUG, "Eric Eric Eric ...");
+    syslog(LOG_DEBUG,"%s\n",hb_parc(1));
+    closelog();
+
+#endif
+
 }
 
 HB_FUNC( SET_AP_FILENAME )  // Used to assist the debugging of mod_harbour.exe
@@ -209,6 +233,4 @@ HB_FUNC( AP_FILENAME )   // Used to assist the debugging of mod_harbour.exe
 {
     hb_retc( cAP_FileName );
 }
-
 //=================================================================================================================
-
