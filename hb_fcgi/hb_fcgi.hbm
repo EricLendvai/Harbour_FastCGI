@@ -5,7 +5,7 @@
 hb_fcgi_c.c
 hb_fcgi.prg
 vfp_strtran.c
-vfp_StrReplace.c
+vfp_strreplace.c
 
 #hb_fcgi_includes.c
 

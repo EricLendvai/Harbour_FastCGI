@@ -163,7 +163,7 @@
             "label": "BrowseLocalSandbox",
             "windows":{
                 "type": "shell",
-                "command": "C:\\Tools\\f.bat http://localhost:8164/fcgi_localsandbox/",
+                "command": "\"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe\" http://localhost:8164/fcgi_localsandbox/",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
