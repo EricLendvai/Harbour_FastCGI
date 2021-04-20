@@ -1,0 +1,31 @@
+
+#When this .hbm file is processed from the .hbp its working folder is the location of the .hbm itself
+
+#had to have a different name for the .c file and .prg, because at some point a .obj is created, and there was a name clash.
+hb_fcgi_c.c
+hb_fcgi.prg
+vfp_strtran.c
+vfp_strreplace.c
+
+#hb_fcgi_includes.c
+
+##Ensure to update the following prg when the harbour VSCODE extension is updated. 
+#vscode_debugger.prg
+
+#Using the following line tells hbmk2 to search the current folder for the hb_fcgi.ch file. 
+#-i.
+-i/etc/Harbour_FastCGI/hb_fcgi
+
+#-i..\fcgi-2.4.1\include
+#-i~/github/fcgi2/include
+-i/etc/Harbour_FastCGI/fcgi-2.4.1/include
+
+#-L..\fcgi-2.4.1\libfcgi\${HB_COMPILER}\release\
+#-llibfcgi
+
+#-L~/github/fcgi2/libfcgi/.libs
+-L/etc/Harbour_FastCGI/hb_fcgi/
+-lfcgi
+
+#gtwvg.hbc
+

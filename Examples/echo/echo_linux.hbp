@@ -6,5 +6,5 @@
 
 echo.prg
 
-/etc/Harbour_FastCGI/hb_fcgi/hb_fcgi.hbm
+/etc/Harbour_FastCGI/hb_fcgi/hb_fcgi_linux.hbm
 /etc/Harbour_FastCGI/hb_fcgi/debugger.hbm

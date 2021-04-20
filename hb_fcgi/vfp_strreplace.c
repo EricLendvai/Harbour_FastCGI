@@ -53,6 +53,9 @@
 #include "hbapiitm.h"
 #include "hbapierr.h"
 
+#include <stdio.h>
+#include <string.h>
+
 /* hb_StrReplace( <cString>, [ <cSource> | <acSource> | <hReplace> ], [ <cDest> | <acDest> ] ,nFlag)
 	*    --> <cResult>
 	*/
@@ -135,7 +138,7 @@ HB_FUNC( VFP_STRREPLACE )
 								ptr = hb_arrayGetCPtr( pSrc, nAt );
 							}
 							if( nSkip > 0 && nSkip <= nText - nPos &&
-									( nFlag ? _memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
+									( nFlag ? memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
 								break;
 							if( !fNext )
 								nAt = nSrc;
@@ -170,7 +173,7 @@ HB_FUNC( VFP_STRREPLACE )
 							ptr = hb_arrayGetCPtr( pSrc, nAt );
 						}
 						if( nSkip > 0 && nSkip <= nText - nPos &&
-								( nFlag ? _memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
+								( nFlag ? memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
 							break;
 					}
 					if( nAt > nSrc )

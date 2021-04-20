@@ -22,5 +22,5 @@ hbmisc.hbc
 LocalSandbox.prg
 LoadAllHarbourAPI_linux.prg
 
-../../hb_fcgi/hb_fcgi.hbm
+../../hb_fcgi/hb_fcgi_linux.hbm
 ../../hb_fcgi/debugger.hbm

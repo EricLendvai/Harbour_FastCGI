@@ -1,4 +1,4 @@
-//Copyright (c) 2020 Eric Lendvai MIT License
+//Copyright (c) 2021 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
@@ -645,6 +645,7 @@ method GenerateRandomString(par_nLength,par_cPossibleChars) class hb_Fcgi
 return cString
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
+#ifdef _WIN32
     local cTypeOfxValue
     local cValue := "Unknown Value"
     
@@ -683,11 +684,15 @@ function SendToDebugView(cStep,xValue)
     else
         hb_Fcgx_OutputDebugString("[Harbour] "+cStep+" - "+cValue)
     endif
-    
+
+#endif    
+
 return .T.
 //=================================================================================================================
 function SendToClipboard(cText)
+#ifdef _WIN32
     wvt_SetClipboard(cText)
+#endif
 return .T.
 //=================================================================================================================
 function FcgiGetErrorInfo( oError,cCode ,nProgramStackStart)  //From mod_harbour <-> apache.prg
