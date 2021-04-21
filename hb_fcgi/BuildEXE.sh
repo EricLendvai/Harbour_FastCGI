@@ -69,13 +69,6 @@ else
                     if [ -f "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe" ] ; then
                         echo "Failed to delete previous version of ${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
                     else
-                        #rem Extra files needed if compiled with mingw64
-                        #if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libstdc++-6.dll"    "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
-                        #if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libgcc_s_seh-1.dll" "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
-                        #
-                        #if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
-                        #if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
-
                         cp "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
 
                         if [ -f "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe" ] ; then
@@ -86,11 +79,13 @@ else
 
                         #cp "../../fcgi-2.4.1/libfcgi/${HB_COMPILER}/release/libfcgi.dll" "${WebsiteDrive}${SiteRootFolder}backend/libfcgi.dll"
 
+                        echo Current time is ${now}
                         echo ""
                         echo "Ready            BuildMode = ${BuildMode}"
                     fi
                     
                 else
+                    echo Current time is ${now}
                     echo "Compilation Error"
 
                     if [ $nHbmk2Status -eq  1 ]; then echo "Unknown platform" ; fi
