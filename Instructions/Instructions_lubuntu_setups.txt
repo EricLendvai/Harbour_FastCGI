@@ -1,22 +1,13 @@
+Instruction that will be incorporate in Harbour.wiki article !!!
 
 https://lubuntu.me/downloads/
 
 
-------------------------  Not For Doc Begin
-VMWare New Machine
-3GB of Ram, 1CPU 256 Gb Drive
-Lubuntu_Harbour_005   FAILED with lubuntu-19.10-desktop-amd64.iso  due to python.
-
-Made bunch of print screens  04/15/2021
-
-User account: harbour   password: password
-
-------------------------  Not For Doc End
-Make a new VMWare machine
+Make a new VMWare machine for example.
 3GB of Ram, 1CPU 256 Gb Drive
 Made bunch of print screens  04/15/2021
 Lubuntu_Harbour_006   lubuntu-20.04.2-desktop-amd64.iso
-User account: harbour   password: password
+User account: harbour   password: rndrnd
 
 Install VMWare Client:
 	On VMWare, VM menu to start to install the client
@@ -69,7 +60,7 @@ In Terminal
 	sudo apt install git
 	sudo mkdir /etc/harbour
 	cd /etc
-	sudo chown -R $USEC:$USER harbour
+	sudo chown -R $USER:$USER harbour
 	chmod -R 775 harbour
 	#cd MyPrograms
 	git clone http://github.com/harbour/core.git harbour
@@ -118,7 +109,7 @@ In Terminal
 	make
 	
 	sudo make install
-	sudo ldconfig                     <== Will fix the erroc:  error while loading shared libraries: 
+	sudo ldconfig                     <== Will fix the error:  error while loading shared libraries: 
 	
 	The building (make) process should create a file /usr/local/lib/harbour/libharbour.so.3.2.0 and several Symbolic Links.
 
@@ -212,7 +203,7 @@ Add command aliases to have Windows Commands (DOS)
 		alias n="featherpad"
 
 
-To Add icons on the task bac:
+To Add icons on the task bar:
 First make a "Shortcuts" folder on the desktop, then by dragging from the menu make some shortcuts and move then in that new folder. 
 Then drap out of the "Shortcuts" folder icons to the task bar, in the area "Quick Launch". 
 DO NOT DELETE OR MOVE the shortcuts in the "Shortcuts folder!"
@@ -221,10 +212,11 @@ It is also possible to add extra pannels.
 
 +++========================= Shut Down VM and Make Image "Installed Harbour and VSCODE as of 2021_04_16_002"
 
+
+
+
 Configure and install apps for web development.
 ===============================================
-
-UNDER DEVELOPMENT NOTES.
 
 Edit local dns host file. Add "localsandbox" and "echo" to use 127.0.0.1
 	sudo featherpad /etc/hosts
@@ -253,73 +245,10 @@ Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means 
 	$ sudo chmod -R a+rwx /etc/Harbour_ORM
 	$ sudo chmod -R a+rwx /etc/Harbour_VFP
 
-For Debugging Had to install lighttpd, since it can be started as a console app
+	Copy files and folder from ~/GitHub/EricLendvai/Harbour_* folders to /etc/Harbour_*  
+	ENSURE YOU CAN COPY HIDDEN FOLDERS, since ".vscode" is hidden.
+	You can remove the mingw64 and msvc folders since system will generate gcc folder.
+	Future version will have "windows" and "linux" sub folder to make it easier to separate compiled files.
 
-Installing lighttpd   Reference: https://help.ubuntu.com/community/lighttpd
-	$ sudo apt-get install lighttpd
-	$ sudo service lighttpd stop
-	$ sudo apt-get install gamin             # On Lubuntu this was needed to fix a bug
+See other instruction for Apache
 
-#Running lighttpd as a Console Application  (LATER)
-	#$ sudo lighttpd -D -f /etc/lighttpd/lighttpd.conf
-	$ sudo lighttpd -D -f ~/lighttpd.conf
-	# use CTRL+SHIFT+C to break	
-
-Since lighttpd is started as root, to be able to debug using VSCODE, it also has to be started as root, since the "attach" debug mode need to find the process running under root level.
-	$sudo code --user-data-dir="~/.vscode-root"
-	All the extensions will need to be installed under the root account.
-
-TODO 
-====
-	-Figure out what to do for the VSCODE files.
-	-FCGI Manager not fully ported to Linux yet (need hbcurl support). The soft kill is not working yet.
-
-Installing Apache
-=================
-	https://tutorials.ubuntu.com/tutorial/install-and-configure-apache
-
-	$ sudo apt update
-	$ sudo apt upgrade
-	$ sudo apt install apache2
-	$ sudo service apache2 stop
-
-	$ sudo chmod -R a+rwx /etc/apache2/sites-available   //-R means "recursive" Add to All Users Read Write eXecute
-
-
-	#add the Apache FastFCGI server side module
-	$ sudo apt install libapache2-mod-fcgid
-
-	#Enabled the rewrite module
-	$ cd /etc/apache2/mods-available
-	$ sudo a2enmod rewrite
-
-	#sudo service apache2 start
-
-	#sudo service apache2 restart
-
-!!!! FOR DEBUGGING, 
-
-Using Lighttpd for debugging, since runing Apache not as root is too complicated.
-sudo service apache2 stop
-
-
-$ sudo service apache2 stop
-$ sudo lighttpd -D -f ~/lighttpd.conf
-$ sudo service apache2 start
-
-systemctl --type=service | grep apache      To see if Apache is runing
-
-Both of the following with lighttpd
-	http://localhost/echo.fcgi
-	http://echo/echo.fcgi
-
-To test web server, non FastCGI     http://echo/hello.html
-
-
-Possible commands:
-sudo chown -R harbouc:harbour /etc/Harbour_FastCGI
-sudo chown -R harbouc:harbour /etc/Harbour_websites
-chown -R harbouc:harbour /etc/Harbour_FastCGI
-chown -R harbouc:harbour /etc/Harbour_websites
-chmod -R a+rwx /etc/Harbour_FastCGI
-chmod -R a+rwx /etc/Harbour_websites

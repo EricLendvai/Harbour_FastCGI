@@ -1,0 +1,56 @@
+Instruction that will be incorporate in Harbour.wiki article !!!
+
+Instructions to install Postgresql and pgAdmin
+
+# As per https://www.postgresql.org/download/linux/ubuntu/
+
+# Create the file repository configuration:
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+
+# Import the repository signing key:
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+# Update the package lists:
+sudo apt-get update
+
+# Install the latest version of PostgreSQL.
+# If you want a specific version, use 'postgresql-12' or similar instead of 'postgresql':
+sudo apt-get -y install postgresql
+
+
+# As per video https://www.youtube.com/watch?v=lX9uMCSqqko
+#  commands at    https://codingpub.dev/ubuntu-install-postgresql-and-pgadmin/
+# need to add a password for the "postgres" user
+
+    $ sudo su - postgres
+    $ psql
+    From withing psql program run the following
+        #ALTER USER postgres PASSWORD 'root';
+        To see the databases: \l
+        To quit psql: \q
+    The terminal will be left in the "postgres" account. No idea what password it has. Just $ exit the terminal.
+
+To install pgAdmin see Step 4 in  https://codingpub.dev/ubuntu-install-postgresql-and-pgadmin/
+    $ sudo apt install curl
+    $ curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add
+    $ sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
+    $ sudo apt install pgadmin4-desktop
+
+Then search in start menu. It will be under the "programing" menu.
+
+
+To install the ODBC Driver
+    As per https://ubuntu.pkgs.org/20.04/ubuntu-universe-amd64/odbc-postgresql_12.01.0000-1_amd64.deb.html
+    $ sudo apt-get update
+    $ sudo apt-get install odbc-postgresql
+
+To list the driver:  see https://stackoverflow.com/questions/53575855/how-to-find-list-of-odbc-drivers-installed-on-linux
+    $ cat /etc/odbcinst.ini
+	"PostgreSQL Unicode"   <= is the driver name to use for the connect object.
+
+
+
+
+
+
+https://codingpub.dev/ubuntu-install-postgresql-and-pgadmin/

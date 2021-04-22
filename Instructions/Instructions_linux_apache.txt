@@ -1,0 +1,103 @@
+Instruction that will be incorporate in Harbour.wiki article !!!
+
+Installing Apache
+=================
+    https://tutorials.ubuntu.com/tutorial/install-and-configure-apache
+
+    $ sudo apt update
+    $ sudo apt upgrade
+    $ sudo apt install apache2
+    $ sudo service apache2 stop
+
+    $ sudo chmod -R a+rwx /etc/apache2/sites-available   //-R means "recursive" Add to All Users Read Write eXecute  Only needed to create new files. 
+
+    #add the Apache FastFCGI server side module
+    $ sudo apt install libapache2-mod-fcgid
+
+    #Enabled the rewrite module
+    # $ cd /etc/apache2/mods-available  NOT NEEDED
+    $ sudo a2enmod rewrite
+
+
+
+
+Under the "/etc/apache2/sites-available" create a text file "echo.conf" 
+The (under development) content is between the "============================..."
+=============================================================================================================
+<VirtualHost *:80>
+	# The ServerName directive sets the request scheme, hostname and port that
+	# the server uses to identify itself. This is used when creating
+	# redirection URLs. In the context of virtual hosts, the ServerName
+	# specifies what hostname must appear in the request's Host: header to
+	# match this virtual host. For the default virtual host (this file) this
+	# value is not decisive as it is used as a last resort host regardless.
+	# However, you must set it for any further virtual host explicitly.
+	#ServerName www.example.com
+
+	ServerName  echo
+
+	ServerAdmin webmaster@echo
+	DocumentRoot /etc/Harbour_websites/fcgi_echo/website
+
+	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+	# error, crit, alert, emerg.
+	# It is also possible to configure the loglevel for particular
+	# modules, e.g.
+	#LogLevel info ssl:warn
+	LogLevel trace8
+
+#	ErrorLog ${APACHE_LOG_DIR}/error.log
+#	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	ErrorLog /etc/Harbour_websites/fcgi_echo/apache-logs/error.log
+	CustomLog /etc/Harbour_websites/fcgi_echo/apache-logs/access.log combined
+
+	# For most configuration files from conf-available/, which are
+	# enabled or disabled at a global level, it is possible to
+	# include a line for only one particular virtual host. For example the
+	# following line enables the CGI configuration for this host only
+	# after it has been globally disabled with "a2disconf".
+	#Include conf-available/serve-cgi-bin.conf
+
+
+	<Directory /etc/Harbour_websites/fcgi_echo/website/>
+	#	Options Indexes FollowSymLinks
+		Options -Indexes -Includes +FollowSymLinks -MultiViews +ExecCGI
+	#	Options +Indexes +Includes +FollowSymLinks +MultiViews +ExecCGI
+
+	#	AllowOverride None
+		AllowOverride Indexes FileInfo
+	#	AllowOverride All
+
+		Require all granted
+	</Directory>
+
+#	Options -Indexes -Includes +FollowSymLinks -MultiViews +ExecCGI
+#	Require all granted
+
+	<FilesMatch "\.fcgiexe">
+		SetHandler fcgid-script
+	</FilesMatch>
+
+	RewriteEngine On
+
+#	AllowOverride Indexes FileInfo
+
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+=============================================================================================================
+
+Use the following command to enable the echo site  (Will create a symlink in "/etc/apache2/sites-enabled")
+    $ sudo a2ensite echo
+
+Use the following command to disable the echo site
+    $ sudo a2dissite echo
+
+
+To start the Apache service:
+    $ sudo service apache2 start
+
+To see if Apache service is running
+    $ systemctl --type=service | grep apache      To see if Apache is runing
+
