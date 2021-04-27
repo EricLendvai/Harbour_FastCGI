@@ -23,6 +23,7 @@ Install VMWare Client:
 
 	#run the file
 	sudo ./vmware-install.pl
+		answer y  when prompted and accept all other defaults.
 
 	
 Go to "System Tools" "Discover" to check the version of the OS and remove unneeded apps.
@@ -252,3 +253,13 @@ Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means 
 
 See other instruction for Apache
 
+
+
+
+    $ sudo chmod -R a+rwx /etc/Harbour_FastCGI
+    Ensure VSCode is closed. Computer will crash is VSCODE is one as current user and root at the same time.
+    $ sudo code --user-data-dir="~/.vscode-root"
+    Open Workspace /etc/Harbour_FastCGI/Examples/echo/fcgi-echo_linux.code-workspace
+    Open file hb_fcgi/BuildEXE.sh and ensure the line termination is LF not CRLF 
+      (Click in lower right, on CRLF, to switch to LF)
+    Use the <CompileRelease> button

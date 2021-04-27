@@ -5,7 +5,7 @@
 #To enabled progressing recompilation uncomment the following line
 #-inc
 
--workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
+-workdir=build\win64\${HB_COMPILER}\${BuildMode}\hbmk2\
 
 #To also create a list of all the object files linked uncomment the following line
 #-map
@@ -17,7 +17,7 @@ hbfoxpro.hbc
 hbct.hbc
 hbmisc.hbc
 
--o${HB_COMPILER}\${BuildMode}\${EXEName}.exe
+-obuild\win64\${HB_COMPILER}\${BuildMode}\${EXEName}.exe
 
 LocalSandbox.prg
 LoadAllHarbourAPI_windows.prg

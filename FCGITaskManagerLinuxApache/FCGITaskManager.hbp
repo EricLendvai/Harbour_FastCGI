@@ -1,7 +1,7 @@
 -hbexe
 -gtcgi
 
--o${HB_COMPILER}\${BuildMode}\${EXEName}.exe
+-obuild\win64\${HB_COMPILER}\${BuildMode}\${EXEName}.exe
 
 #hbwin.hbc
 

@@ -41,17 +41,19 @@ echo HB_PATH     = %HB_PATH%
 echo HB_COMPILER = %HB_COMPILER%
 echo PATH        = %PATH%
 
-md %HB_COMPILER% 2>nul
-md %HB_COMPILER%\%BuildMode% 2>nul
-md %HB_COMPILER%\%BuildMode%\hbmk2 2>nul
+md build 2>nul
+md build\win64 2>nul
+md build\win64\%HB_COMPILER% 2>nul
+md build\win64\%HB_COMPILER%\%BuildMode% 2>nul
+md build\win64\%HB_COMPILER%\%BuildMode%\hbmk2 2>nul
 
 rem the following will output the current datetime
 for /F "tokens=2" %%i in ('date /t') do set mydate=%%i
 set mytime=%time%
 echo local l_cBuildInfo := "%HB_COMPILER% %BuildMode% %mydate% %mytime%">BuildInfo.txt
 
-del %HB_COMPILER%\%BuildMode%\%EXEName%.exe 2>nul
-if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
+del build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe 2>nul
+if exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
     echo Could not delete previous version of %EXEName%.exe
     goto End
 )
@@ -64,15 +66,17 @@ if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 
 if %BuildMode% == debug (
     copy %FastCGIRootPath%hb_fcgi\debugger_on.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
+rem  cannot used -shared due to some libs. Still researching into this matter.
     hbmk2 %EXEName%_windows.hbp -b -p -w3
 ) else (
     copy %FastCGIRootPath%hb_fcgi\debugger_off.hbm %FastCGIRootPath%hb_fcgi\debugger.hbm
-    hbmk2 %EXEName%_windows.hbp -w3
+    rem can not do -fullstatic due to libfcgi
+    hbmk2 %EXEName%_windows.hbp -w3  -static
 )
 
 echo Current time is %mydate% %mytime%
 
-if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
+if not exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
     echo Failed To build %EXEName%.exe
 ) else (
     if errorlevel 0 (
@@ -80,12 +84,10 @@ if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
         echo No Errors
 
         del %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
-
         if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
             echo Failed to delete previous version of %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
             goto End
         )
-
         rem Extra files needed if compiled with mingw64
         if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libstdc++-6.dll"    "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
         if %HB_COMPILER% == mingw64 copy "c:\Program Files\mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0\mingw64\bin\libgcc_s_seh-1.dll" "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
@@ -93,14 +95,14 @@ if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
         if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libstdc++-6.dll"
         if %HB_COMPILER% == msvc64 del "%WebsiteDrive%%SiteRootFolder%backend\libgcc_s_seh-1.dll"
 
-        copy "%HB_COMPILER%\%BuildMode%\%EXEName%.exe" "%WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe"
-
+        copy "build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe" "%WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe"
         if exist %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe (
-            echo Copied file %HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
+            echo Copied file build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe to %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
         ) else (
             echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
         )
 
+        copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "build\win64\%HB_COMPILER%\%BuildMode%\libfcgi.dll"
         copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
 
         echo.

@@ -29,26 +29,28 @@ echo HB_PATH     = %HB_PATH%
 echo HB_COMPILER = %HB_COMPILER%
 echo PATH        = %PATH%
 
-md %HB_COMPILER%
-md %HB_COMPILER%\%BuildMode%
+md build
+md build\win64
+md build\win64\%HB_COMPILER%
+md build\win64\%HB_COMPILER%\%BuildMode%
 
-del %HB_COMPILER%\%BuildMode%\%EXEName%.exe
-if exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
+del build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe
+if exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 	echo Could not delete previous version of %EXEName%.exe
 	goto End
 )
 
 if %BuildMode% == debug (
-    hbmk2 %EXEName%.hbp -b -p -w3
+    hbmk2 %EXEName%.hbp -b -p -w3 -shared
 ) else (
-    hbmk2 %EXEName%.hbp -w3
+    hbmk2 %EXEName%.hbp -w3 -fullstatic
 )
 
-if not exist %HB_COMPILER%\%BuildMode%\%EXEName%.exe (
+if not exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 	echo Failed To build %EXEName%.exe
 ) else (
 	if errorlevel 0 (
-        copy %HB_COMPILER%\%BuildMode%\%EXEName%.exe ..\FCGITaskManagerBin\%EXEName%.exe
+        copy build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe ..\FCGITaskManagerBin\%EXEName%.exe
 		echo.
 		echo No Errors
 

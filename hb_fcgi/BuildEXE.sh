@@ -31,15 +31,17 @@ else
 
         echo "HB_COMPILER = ${HB_COMPILER}"
 
-        mkdir "${HB_COMPILER}" 2>/dev/null
-        mkdir "${HB_COMPILER}/${BuildMode}" 2>/dev/null
-        mkdir "${HB_COMPILER}/${BuildMode}/hbmk2" 2>/dev/null
+        mkdir "build" 2>/dev/null
+        mkdir "build/lin64" 2>/dev/null
+        mkdir "build/lin64/${HB_COMPILER}" 2>/dev/null
+        mkdir "build/lin64/${HB_COMPILER}/${BuildMode}" 2>/dev/null
+        mkdir "build/lin64/${HB_COMPILER}/${BuildMode}/hbmk2" 2>/dev/null
 
         now=$(date +'%m/%d/%Y %H:%M:%S')
         echo local l_cBuildInfo := \"${HB_COMPILER} ${BuildMode} ${now}\">BuildInfo.txt
 
-        rm "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" 2>/dev/null
-        if [ -f "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ] ; then
+        rm "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" 2>/dev/null
+        if [ -f "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ] ; then
             echo "Could not delete previous version of ${EXEName}.exe"
         else
 
@@ -51,13 +53,13 @@ else
 
             if [ "${BuildMode}" == "debug" ] ; then
                 cp ../../hb_fcgi/debugger_on.hbm ../../hb_fcgi/debugger.hbm
-                hbmk2 "${EXEName}_linux.hbp" -b  -p -w3
+                hbmk2 "${EXEName}_linux.hbp" -b  -p -w3 -shared
             else
                 cp ../../hb_fcgi/debugger_off.hbm ../../hb_fcgi/debugger.hbm
-                hbmk2 "${EXEName}_linux.hbp" -w3
+                hbmk2 "${EXEName}_linux.hbp" -w3 -fullstatic
             fi
             nHbmk2Status=$?
-            if [ ! -f  "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ]; then
+            if [ ! -f  "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ]; then
                 echo "Failed To build ${EXEName}.exe"
             else
                 if [ $nHbmk2Status -eq 0 ]; then
@@ -69,10 +71,10 @@ else
                     if [ -f "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe" ] ; then
                         echo "Failed to delete previous version of ${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
                     else
-                        cp "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
+                        cp "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
 
                         if [ -f "${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe" ] ; then
-                            echo "Copied file ${HB_COMPILER}/${BuildMode}/${EXEName}.exe to ${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
+                            echo "Copied file build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe to ${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
                         else
                             echo "Failed to update file ${WebsiteDrive}${SiteRootFolder}backend/FCGI${EXEName}.exe"
                         fi

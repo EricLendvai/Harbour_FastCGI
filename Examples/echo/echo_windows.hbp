@@ -1,8 +1,8 @@
 -hbexe
 #-inc
--workdir=${HB_COMPILER}\${BuildMode}\hbmk2\
+-workdir=build\win64\${HB_COMPILER}\${BuildMode}\hbmk2\
 
--o${HB_COMPILER}\${BuildMode}\${EXEName}
+-obuild\win64\${HB_COMPILER}\${BuildMode}\${EXEName}
 
 echo.prg
 

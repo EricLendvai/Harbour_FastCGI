@@ -17,26 +17,28 @@ elif [ ! -f "${EXEName}.hbp" ]; then
 else
     echo "HB_COMPILER = ${HB_COMPILER}"
    
-    mkdir "${HB_COMPILER}" 2>/dev/null
-    mkdir "${HB_COMPILER}/${BuildMode}" 2>/dev/null
-    mkdir "${HB_COMPILER}/${BuildMode}/hbmk2" 2>/dev/null
+    mkdir "build" 2>/dev/null
+    mkdir "build/lin64" 2>/dev/null
+    mkdir "build/lin64/${HB_COMPILER}" 2>/dev/null
+    mkdir "build/lin64/${HB_COMPILER}/${BuildMode}" 2>/dev/null
+    mkdir "build/lin64/${HB_COMPILER}/${BuildMode}/hbmk2" 2>/dev/null
     
-    rm "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" 2>/dev/null
-    if [ -f "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ] ; then
+    rm "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" 2>/dev/null
+    if [ -f "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ] ; then
         echo "Could not delete previous version of ${EXEName}.exe"
     else
         if [ "${BuildMode}" == "debug" ] ; then
-            hbmk2 "${EXEName}.hbp" -b -p -w3
+            hbmk2 "${EXEName}.hbp" -b -p -w3 -shared
         else
-            hbmk2 "${EXEName}.hbp" -w3
+            hbmk2 "${EXEName}.hbp" -w3 -fullstatic
         fi
         
         nHbmk2Status=$?
-        if [ ! -f  "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ]; then
+        if [ ! -f  "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" ]; then
             echo "Failed To build ${EXEName}.exe"
         else
             if [ $nHbmk2Status -eq 0 ]; then
-                cp "${HB_COMPILER}/${BuildMode}/${EXEName}.exe" "../FCGITaskManagerBin/${EXEName}.exe"
+                cp "build/lin64/${HB_COMPILER}/${BuildMode}/${EXEName}.exe" "../FCGITaskManagerBin/${EXEName}.exe"
                 
                 echo ""
                 echo "No Errors"
