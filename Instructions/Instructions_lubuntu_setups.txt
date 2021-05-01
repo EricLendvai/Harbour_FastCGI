@@ -246,17 +246,75 @@ Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means 
 	$ sudo chmod -R a+rwx /etc/Harbour_ORM
 	$ sudo chmod -R a+rwx /etc/Harbour_VFP
 
-	Copy files and folder from ~/GitHub/EricLendvai/Harbour_* folders to /etc/Harbour_*  
-	ENSURE YOU CAN COPY HIDDEN FOLDERS, since ".vscode" is hidden.
-	You can remove the mingw64 and msvc folders since system will generate gcc folder.
-	Future version will have "windows" and "linux" sub folder to make it easier to separate compiled files.
+	
+	$ sudo cp -r ~/GitHub/Harbour_VFP /etc
+	On purpose did not specify files patterns, so hidden folders are also copied. Then we can remove the .git folder
+	$ sudo rm -rf /etc/Harbour_VFP/.git
+	$ sudo chmod -R a+rwx /etc/Harbour_VFP/
+
+	$ sudo cp -r ~/GitHub/Harbour_ORM /etc
+	$ sudo rm -rf /etc/Harbour_ORM/.git
+	$ sudo chmod -R a+rwx /etc/Harbour_ORM/
+	
+	$ sudo cp -r ~/GitHub/Harbour_FastCGI /etc
+	$ sudo rm -rf /etc/Harbour_FastCGI/.git
+	$ sudo chmod -R a+rwx /etc/Harbour_FastCGI/
+
+	-------------------------------------
+	code /etc/Harbour_VFP/hb_vfp_linux.code-workspace
+	Use the <Compile Debug> and <Compile Release> buttons in the footer of VSCODE.
+
+	Optional
+	code /etc/Harbour_VFP/Examples/hb_vfp_Test_linux.code-workspace
+	Use the <Compile Debug> and <Compile Release> buttons in the footer of VSCODE and even run the example.
+
+	-------------------------------------
+	code /etc/Harbour_ORM/hb_orm_linux.code-workspace
+	Use the <Compile Debug> and <Compile Release> buttons in the footer of VSCODE.
+
+	Optional   Use the <Compile Debug> and <Compile Release> buttons ...
+	code /etc/Harbour_ORM/Examples/Cursors/hb_orm_Examples_Cursors_linux.code-workspace
+	code /etc/Harbour_ORM/Examples/SQL_CRUD/hb_orm_Examples_SQL_CRUD_linux.code-workspace
+
+	-------------------------------------
+	
+	You can open the Harbour_FastCGI workspaces as a user as long as no debugging is needed. ....
+
+	
+
+	sudo mkdir /etc/Harbour_websites/fcgi_echo
+	sudo cp -r ~/GitHub/Harbour_FastCGI/Examples/echo/FilesForPublishedWebsites/backend /etc/Harbour_websites/fcgi_echo
+	sudo cp -r ~/GitHub/Harbour_FastCGI/Examples/echo/FilesForPublishedWebsites/website /etc/Harbour_websites/fcgi_echo
+	sudo cp /home/eric/GitHub/Harbour_FastCGI/Examples/echo/FilesForPublishedWebsites/LinuxApache2/echo.conf /etc/apache2/sites-available/
+	sudo mkdir /etc/Harbour_websites/fcgi_echo/apache-logs
+	sudo a2ensite echo
+	code /etc/Harbour_FastCGI/Examples/echo/fcgi-echo_linux.code-workspace
+	<Compile Release>  From within VSCODE
+
+	Test the following
+	sudo mkdir /etc/Harbour_websites/fcgi_LocalSandbox
+	sudo cp -r ~/GitHub/Harbour_FastCGI/Examples/LocalSandbox/FilesForPublishedWebsites/backend /etc/Harbour_websites/fcgi_LocalSandbox
+	sudo cp -r ~/GitHub/Harbour_FastCGI/Examples/LocalSandbox/FilesForPublishedWebsites/website /etc/Harbour_websites/fcgi_LocalSandbox
+	sudo cp /home/eric/GitHub/Harbour_FastCGI/Examples/LocalSandbox/FilesForPublishedWebsites/LinuxApache2/LocalSandbox.conf /etc/apache2/sites-available/
+	sudo mkdir /etc/Harbour_websites/fcgi_LocalSandbox/apache-logs
+	sudo a2ensite LocalSandbox
+	code /etc/Harbour_FastCGI/Examples/LocalSandbox/fcgi-LocalSandbox_linux.code-workspace
+	<Compile Release>  From within VSCODE
+
+
+	sudo chmod -R a+rwx /etc/Harbour_websites
+	sudo systemctl reload apache2
+
+	<Browse Echo>  From within VSCODE
+
+
 
 See other instruction for Apache
 
 
 
 
-    $ sudo chmod -R a+rwx /etc/Harbour_FastCGI
+    
     Ensure VSCode is closed. Computer will crash is VSCODE is one as current user and root at the same time.
     $ sudo code --user-data-dir="~/.vscode-root"
     Open Workspace /etc/Harbour_FastCGI/Examples/echo/fcgi-echo_linux.code-workspace
