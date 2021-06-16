@@ -34,14 +34,17 @@ class MyFcgi from hb_Fcgi
     method OnFirstRequest()
     method OnRequest()
     method OnShutdown()
-    method OnError(par_oError)
+    // method OnError(par_oError)
 
 endclass
 //-----------------------------------------------------------------------------------------------------------------
 method OnFirstRequest() class MyFcgi
     SendToDebugView("Called from method OnFirstRequest")
     set delete on
-    
+
+    ::SetOnErrorDetailLevel(2)
+    ::SetOnErrorProgramInfo(hb_BuildInfo())
+
     UpdateSchema()
 
     // From Mod_harbour repo function AddPPRules()
@@ -102,13 +105,23 @@ method OnRequest() class MyFcgi
     // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
 
     // Also using jQuery UI to handle resizing of the mono editor
-    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/jQueryUI_1_12_1_NoTooltip/Themes/smoothness/jqueryui.css">]
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
-    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
-    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+
+    //Retired on 2021-06-16
+    // cHtml += [<link rel="stylesheet" type="text/css" href="scripts/jQueryUI_1_12_1_NoTooltip/Themes/smoothness/jqueryui.css">]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery.js"></script>]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_1_11_3/jquery-migrate.js"></script>]
+    // cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_3_1/css/bootstrap.min.css">]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_3_1/js/bootstrap.min.js"></script>]
+    // cHtml += [<script>$.fn.bootstrapBtn = $.fn.button.noConflict();</script>]
+    // cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQueryUI_1_12_1_NoTooltip/jquery-ui.min.js"></script>]
+
+    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/jQueryUI_1_12_1_NoTooltip/Themes/smoothness/jQueryUI.css">]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQuery_3_6_0/jquery.min.js"></script>]
+    cHtml += [<link rel="stylesheet" type="text/css" href="scripts/Bootstrap_4_6_0/css/bootstrap.min.css">]
+    cHtml += [<script language="javascript" type="text/javascript" src="scripts/Bootstrap_4_6_0/js/bootstrap.bundle.min.js"></script>]
     cHtml += [<script>$.fn.bootstrapBtn = $.fn.button.noConflict();</script>]
     cHtml += [<script language="javascript" type="text/javascript" src="scripts/jQueryUI_1_12_1_NoTooltip/jquery-ui.min.js"></script>]
+
 
     cHtml += [</head>]
 
@@ -121,6 +134,8 @@ method OnRequest() class MyFcgi
     endif
 
     cHtml += [<div>]
+
+// cHtml := 1/0
 
     cPageName := ::RequestSettings["Page"]
 
@@ -160,11 +175,20 @@ method OnShutdown() class MyFcgi
     SendToDebugView("Called from method OnShutdown")
 return nil 
 //-----------------------------------------------------------------------------------------------------------------
-method OnError(par_oError)
-     SendToDebugView("Called from MyFcgi OnError")
-     ::Print("<h1>Error Occurred</h1>")
-     ::hb_Fcgi:OnError(par_oError)
-return nil
+// method OnError(par_oError) class MyFcgi
+//     try
+//         SendToDebugView("Called from MyFcgi OnError")
+//         ::ClearOutputBuffer()
+//         ::Print("<h1>Error Occurred</h1>")
+//         ::Print("<h2>"+hb_buildinfo()+" - Current Time: "+hb_DToC(hb_DateTime())+"</h2>")
+//         ::Print("<div>"+FcgiGetErrorInfo(par_oError)+"</div>")
+//         //  ::hb_Fcgi:OnError(par_oError)
+//         ::Finish()
+//     catch
+//     endtry
+    
+//     BREAK
+// return nil
 //=================================================================================================================
 function UpdateSchema()
 
