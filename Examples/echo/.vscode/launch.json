@@ -10,7 +10,7 @@
             "request": "attach",
             "name": "Attach Program echo.exe",
             "windows":{
-                "program": "C:\\Harbour_websites\\fcgi_echo\\backend\\FCGIecho.exe",
+                "program": "R:\\Harbour_websites\\fcgi_echo\\backend\\FCGIecho.exe",
                 "sourcePaths": [
                     "${workspaceFolder}"
                 ]

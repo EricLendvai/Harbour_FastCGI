@@ -7,4 +7,4 @@
 echo.prg
 
 ..\..\hb_fcgi\hb_fcgi_windows.hbm
-..\..\hb_fcgi\debugger.hbm
+..\debugger.hbm

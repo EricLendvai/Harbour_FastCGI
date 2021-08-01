@@ -5,9 +5,8 @@ https://lubuntu.me/downloads/
 
 Make a new VMWare machine for example.
 3GB of Ram, 1CPU 256 Gb Drive
-Made bunch of print screens  04/15/2021
-Lubuntu_Harbour_006   lubuntu-20.04.2-desktop-amd64.iso
-User account: harbour   password: rndrnd
+Use the iso file   lubuntu-21.04-desktop-amd64.iso
+User account: harbour   password: 1234   (use whatever name and password you want)
 
 Install VMWare Client:
 	On VMWare, VM menu to start to install the client
@@ -16,7 +15,7 @@ Install VMWare Client:
 
 	ALT+CTRL+T to opens Terminal
 	
-	cd /home/harbour/Desktop/vmre-tools-distrib
+	cd ~/Desktop/vmre-tools-distrib
 
 	# to make the file executable
 	sudo chmod u+x vmware-install.pl
@@ -25,12 +24,14 @@ Install VMWare Client:
 	sudo ./vmware-install.pl
 		answer y  when prompted and accept all other defaults.
 
+	reboot
 	
-Go to "System Tools" "Discover" to check the version of the OS and remove unneeded apps.
+Go to "System Tools" "Discover" to check the version of the OS and remove unneeded apps by going to "Installed".
 	Blue Devil Send File
 	LibreOffice
 	Lohit Fonts for languages not needed
 	Skanlite
+	
 Disable Screen Saver  (https://manual.lubuntu.me/stable/3/3.2/3.2.20/screensaver.html?highlight=saver)
 
 
@@ -51,6 +52,39 @@ Check for OS Update
 	sudo apt update
 	sudo apt upgrade
 
+Open FireFox and setup any defaults and preferences.
+
+Optional settings:
+==================
+Update the preferences in featherpad, see print screens
+
+Simplify Password Requirement
+	http://ubuntuhandbook.org/index.php/2015/06/minimum-password-length-ubuntu/
+		$ sudo featherpad /etc/pam.d/common-password
+			Change line "password     [success=1 default=ignore]    pam_unix.so obscure sha512"
+			to          "password     [success=1 default=ignore]	pam_unix.so	sha512	minlen=3"               USE TABS as separators
+
+
+Change PCManFM-Qt setting to default view to details, show hidden, show filter, Terminal to "qterminal", see print screens
+	Had to make same changes for "run as root" mode
+
+
+Anytime Check for Updates
+	$ sudo apt update
+	$ sudo apt upgrade
+
+Add command aliases to have Windows Commands (DOS)
+	$ featherpad ~/.bashrc      and past the following lines at the bottom
+		alias dir="ls -ls"
+		alias e="exit"
+		alias md="mkdir"
+		alias del="rm"
+		alias rd="rmdir"
+		alias n="featherpad"
+
+
+
+	
 +++========================= Shut Down VM and Make Image "Install with update and upgrade as of 2021_04_15_001"
 
 
@@ -174,34 +208,6 @@ Install https://vscodium.com/
 				Bookmarks (Alessandro Fragnani)
 
 
-
-Optional settings:
-==================
-Update the preferences in featherpad, see print screens
-
-Simplify Password Requirement
-	http://ubuntuhandbook.org/index.php/2015/06/minimum-password-length-ubuntu/
-		$ sudo featherpad /etc/pam.d/common-password
-			Change line "password     [success=1 default=ignore]    pam_unix.so obscure sha512"
-			to          "password     [success=1 default=ignore]	pam_unix.so	sha512	minlen=3"               USE TABS as separators
-
-
-Change PCManFM-Qt setting to default view to details, show hidden, show filter, Terminal to "qterminal", see print screens
-	Had to make same changes for "run as root" mode
-
-
-Anytime Check for Updates
-	$ sudo apt update
-	$ sudo apt upgrade
-
-Add command aliases to have Windows Commands (DOS)
-	$ featherpad ~/.bashrc      and past the following lines at the bottom
-		alias dir="ls -ls"
-		alias e="exit"
-		alias md="mkdir"
-		alias del="rm"
-		alias rd="rmdir"
-		alias n="featherpad"
 
 
 To Add icons on the task bar:

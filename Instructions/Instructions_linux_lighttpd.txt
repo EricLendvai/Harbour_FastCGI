@@ -103,3 +103,19 @@ fastcgi.server = ( ".fcgi" =>
                    )
                  )
 =============================================================================================
+
+
+It is possible to run lighttpd as the regular user, not sudo.
+This will allow to debug as the non sudo user, which also means you will not need to run VSCODE as sudo.
+To do so you must use a port > 1024. So instead of port 80, you could use 8080. Edit the file ~/lighttpd.conf .
+When you run $ lighttpd -D -f ~/lighttpd.conf   you will see several errors. Those are access rights issues.
+$ sudo chmod -R a+rwx /var/cache/lighttpd
+$ sudo chmod -R a+rwx /var/run/lighttpd.pid
+$ sudo chmod -R a+rwx /var/log/lighttpd/
+$ sudo chmod -R a+rwx /etc/Harbour_FastCGI/
+
+
+
+
+
+

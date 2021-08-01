@@ -23,4 +23,4 @@ LocalSandbox.prg
 LoadAllHarbourAPI_linux.prg
 
 ../../hb_fcgi/hb_fcgi_linux.hbm
-../../hb_fcgi/debugger.hbm
+../debugger.hbm

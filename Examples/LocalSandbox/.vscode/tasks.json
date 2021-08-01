@@ -23,7 +23,7 @@
             "label": "CompileDebug",
             "windows":{
                 "type": "shell",
-                "command": "${workspaceFolder}\\..\\..\\hb_fcgi\\BuildEXE.bat",
+                "command": "${workspaceFolder}\\..\\BuildEXE.bat",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
@@ -53,7 +53,7 @@
             "label": "CompileRelease",
             "windows":{
                 "type": "shell",
-                "command": "${workspaceFolder}\\..\\..\\hb_fcgi\\BuildEXE.bat",
+                "command": "${workspaceFolder}\\..\\BuildEXE.bat",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {

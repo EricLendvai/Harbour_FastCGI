@@ -39,6 +39,9 @@ class hb_Fcgi
         data   OutputBuffer               init ""     //Needed since response header is before the actual response content
         method WriteOutput()                          //Write out the ResponseHeader and OutputBuffer
 
+        data   OnErrorDetailLevel init 0              //See SetOnErrorDetailLevel() method
+        data   OnErrorProgramInfo init ""             //See SetOnErrorProgramInfo() method
+
     exported:
         data   RequestCount               init 0    READONLY
         data   MaxRequestToProcess        init 0    READONLY
@@ -71,10 +74,13 @@ class hb_Fcgi
         method DeleteCookie(par_cName,par_cPath)                            // Will delete regular and transient cookies by blanking their values and making cookies transient (will be removed when browser closes).
         method Redirect(par_cURL)                                           // Page Redirect via HTTP
         method GenerateRandomString(par_nLength,par_cPossibleChars)
+        method SetOnErrorDetailLevel(par_Level)                                      //0 = "Error Occurred", 1 = "Minimum Debug Info", 2 = "Full Debug Info (not done yet)"
+        method SetOnErrorProgramInfo(par_cInfo)                             // Used to include program name and build info for example
         method OnError(par_oError)
         method OnFirstRequest() inline nil
         method OnRequest()      inline nil
         method OnShutdown()     inline nil
+        method ClearOutputBuffer() 
 
         data   OSPathSeparator            init hb_ps() READONLY
         data   PathBackend                init ""      READONLY   //Folder of FastCGI exe and any other run support files
@@ -85,12 +91,29 @@ class hb_Fcgi
 endclass
 
 //-----------------------------------------------------------------------------------------------------------------
-
+method SetOnErrorDetailLevel(par_Level) class hb_Fcgi
+    ::OnErrorDetailLevel := min(2,max(0,par_Level))
+return ::OnErrorDetailLevel
+//-----------------------------------------------------------------------------------------------------------------
+method SetOnErrorProgramInfo(par_cInfo) class hb_fcgi
+    ::OnErrorProgramInfo := par_cInfo
+return nil
+//-----------------------------------------------------------------------------------------------------------------
 method OnError(par_oError) class hb_Fcgi
     SendToDebugView("In hb_Fcgi:OnError")
     try
-        oFcgi:Print(FcgiGetErrorInfo(par_oError))
-        oFcgi:Finish()
+        ::OutputBuffer := ""  // To wipe out any built page content
+        ::Print("<h1>Error Occurred</h1>")
+        if ::OnErrorDetailLevel > 0
+            if !empty(::OnErrorProgramInfo)
+                ::Print("<h2>"+::OnErrorProgramInfo+"</h2>")
+            endif
+            ::Print("<h3>Error Date and Time: "+hb_TToC(hb_DateTime())+"</h3>")
+            if ::OnErrorDetailLevel > 1
+                ::Print("<div>"+FcgiGetErrorInfo(par_oError)+"</div>")
+            endif
+        endif
+        ::Finish()
     catch
     endtry
     
@@ -643,6 +666,10 @@ method GenerateRandomString(par_nLength,par_cPossibleChars) class hb_Fcgi
         cString += chr(hb_BPeek(par_cPossibleChars,hb_RandomInt(1,nPossibleCharsLen)))
     endfor
 return cString
+//-----------------------------------------------------------------------------------------------------------------
+method ClearOutputBuffer() class hb_Fcgi
+    ::OutputBuffer := ""
+return nil
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
 #ifdef _WIN32

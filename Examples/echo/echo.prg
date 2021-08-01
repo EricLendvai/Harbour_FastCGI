@@ -59,12 +59,15 @@ method OnRequest() class MyFcgi
     cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
     cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
     cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+    cHtml += [<tr><td>Build Info</td>]   +[<td>]+hb_buildinfo()+[</td></tr>]
     cHtml += [</table>]
     ::Print(cHtml)
 
     // ::Print([<p>]+::GenerateRandomString(16,"01234567890ABCDEF")+[</p>])
 
-altd()
+// altd()
+
+// cCrash += 0
 
     // ::Print("<p>SCRIPT_NAME   = "+::GetEnvironment("SCRIPT_NAME")+"</p>")
     // ::Print("<p>REQUEST_URI   = "+::GetEnvironment("REQUEST_URI")+"</p>")
@@ -90,8 +93,6 @@ altd()
 
     ::Print("<p>Request Environment:</p>")
     ::Print(::ListEnvironment())
-
-    ::Print([<p>Build Info: ]+hb_buildinfo()+[</p>])
 
     ::Print([</body></html>])
 
