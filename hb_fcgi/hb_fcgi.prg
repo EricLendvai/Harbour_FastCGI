@@ -170,6 +170,9 @@ method Wait() class hb_Fcgi
     local cPath
     local cPage
     local nPos
+
+    static tRequestStartTime := NIL
+    local tRequestEndTime
     
     if ::ProcessingRequest
         ::Finish()
@@ -184,7 +187,13 @@ method Wait() class hb_Fcgi
             hb_gcAll()         //Since web apps have no inkey() or user input idle time, trigger the garbage collector.
         endif
 
+        if !hb_IsNil(tRequestStartTime)
+            tRequestEndTime := hb_DateTime()
+            SendToDebugView("Response Build Time: "+trans((tRequestEndTime-tRequestStartTime)*(24*3600*1000))+" (ms)")
+        endif
+
         if (iWaitResult := hb_Fcgx_Wait()) >= 0
+            tRequestStartTime := hb_DateTime()
             ::ContentType              := ""
             ::LoadedRequestEnvironment := .f.
             ::LoadedQueryString        := .f.
@@ -226,7 +235,7 @@ method Wait() class hb_Fcgi
                 ::RequestCount++
                 lProcessRequest := .t.
             endif
-    
+
         else
             // Add code to log why the wait failed. Use the variable iWaitResult
             if iWaitResult == 0 //To full the compiler. It will be used later.
@@ -260,7 +269,7 @@ method Wait() class hb_Fcgi
     ::RequestSettings["Page"]        := cPage
     ::RequestSettings["QueryString"] := ::GetEnvironment("REDIRECT_QUERY_STRING")
     ::RequestSettings["WebServerIP"] := ::GetEnvironment("SERVER_ADDR")
-    ::RequestSettings["ClienIP"]     := ::GetEnvironment("REMOTE_ADDR")
+    ::RequestSettings["ClientIP"]    := ::GetEnvironment("REMOTE_ADDR")
 
     if ::ProcessingRequest
         if ::RequestCount == 1
@@ -359,7 +368,9 @@ method LoadInput() class hb_Fcgi
     if !::LoadedInput
         ::LoadedInput := .t.
         ::InputRaw := hb_Fcgx_GetInput(::GetInputLength())  //Will return a buffer that could have chr(0) in it
-        // SendToClipboard(::InputRaw)  // Used during testing
+        
+        // Used during development and debugging
+        // SendToClipboard(::InputRaw)
         // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
 
         cContentType := ::GetContentType()
@@ -381,7 +392,7 @@ method LoadInput() class hb_Fcgi
             cInputBuffer          := substr(cInputBuffer,nPos+2)
 
             do while ((nPos := at(cMultiFormBoundary,cInputBuffer)) > 0)
-                cInput         := left(cInputBuffer,nPos-1)
+                cInput         := left(cInputBuffer,nPos-1)   //Will hold the entire content of the element
                 cInputBuffer   := substr(cInputBuffer,nPos+nMultiFormBoundaryLen)
                 cLine1         := ""
                 cLine2         := ""
@@ -431,13 +442,19 @@ method LoadInput() class hb_Fcgi
                         if lFoundFormData .and. empty(cFileName)
                             //Regular Input Field
                             if !empty(cInputName)
-                                ::Input[cInputName] := {1,cLine3}   // Have to remove the trailing CRTL. {Type = 1, cInputValue}
+                                if len(cInput) > 2  //TEXTAREA (multi line entry). cInput would have whatever is after line3
+                                    ::Input[cInputName] := {1,cLine3+CRLF+left(cInput,len(cInput)-2)}   // use cLine3 and Re-add the CRLF and add whatever is next. {Type = 1, cInputValue}
+                                else
+                                    ::Input[cInputName] := {1,cLine3}   // Removed the trailing CRLF. {Type = 1, cInputValue}
+                                endif
                             endif
                         else
                             //Uploaded File
+                            //Line 3 is empty. The file content start after line 3
                             if (left(cLine2,14) == "Content-Type: ")
                                 cContentType := substr(cLine2,15)
                                 //{nType = 2,"",cFileName,cContentType,Content}
+                                //Had to remove the last to characters, since extra CRLF
                                 ::Input[iif(!empty(cInputName),cInputName,cFileName)] := {2,"",cFileName,cContentType,left(cInput,len(cInput)-2)}
                             else
                                 SendToDebugView("Bad Request multipart format - error 3")
@@ -466,7 +483,7 @@ method LoadInput() class hb_Fcgi
         otherwise
             
         endcase
-
+// altd()
     endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
@@ -633,6 +650,7 @@ method WriteOutput() class hb_Fcgi
     local cHeaderName,cHeaderValue
     local nPos
     local nRedirected := 0
+
     hb_Fcgx_Print("Content-type: "+iif(empty(::ContentType),::DefaultContentType,::ContentType)+CRLF)
     for each cHeader in ::ResponseHeader
         cHeaderName  := cHeader:__enumKey()
@@ -649,7 +667,7 @@ method WriteOutput() class hb_Fcgi
         endif
         hb_Fcgx_Print(cHeaderName+":"+cHeaderValue+CRLF)
     endfor
-    hb_Fcgx_Print(CRLF)
+    hb_Fcgx_Print(CRLF)   //Extra CRLF to notify end of header
     if nRedirected < 2
         hb_Fcgx_Print(::OutputBuffer)
     // else
@@ -672,10 +690,14 @@ method ClearOutputBuffer() class hb_Fcgi
 return nil
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
-#ifdef _WIN32
+
+#ifdef DEBUGVIEW
+
     local cTypeOfxValue
     local cValue := "Unknown Value"
-    
+
+// altd()
+
     cTypeOfxValue = ValType(xValue)
     
     do case
@@ -712,14 +734,17 @@ function SendToDebugView(cStep,xValue)
         hb_Fcgx_OutputDebugString("[Harbour] "+cStep+" - "+cValue)
     endif
 
-#endif    
+#endif
 
 return .T.
 //=================================================================================================================
 function SendToClipboard(cText)
-#ifdef _WIN32
+//#if defined(_WIN32) || defined(_WIN64)   // Will not work since this is a PRG So will use the DEBUGVIEW setting.
+
+#ifdef DEBUGVIEW
     wvt_SetClipboard(cText)
 #endif
+
 return .T.
 //=================================================================================================================
 function FcgiGetErrorInfo( oError,cCode ,nProgramStackStart)  //From mod_harbour <-> apache.prg
