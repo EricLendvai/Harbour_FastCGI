@@ -42,6 +42,7 @@ class hb_Fcgi
         data   OnErrorDetailLevel init 0              //See SetOnErrorDetailLevel() method
         data   OnErrorProgramInfo init ""             //See SetOnErrorProgramInfo() method
 
+        data   aTrace                     init {}     //Used by methods TraceAdd and TraceList to assist development by displaying routines used to build response 
     exported:
         data   RequestCount               init 0    READONLY
         data   MaxRequestToProcess        init 0    READONLY
@@ -81,6 +82,8 @@ class hb_Fcgi
         method OnRequest()      inline nil
         method OnShutdown()     inline nil
         method ClearOutputBuffer() 
+        method TraceAdd(par_cInfo)                //Add to the current request any text that can be listed later. Can be user to help developer find out where code should be updated.
+        method TraceList(par_nListMethod)             //List the info added during multiple calls of TraceAdd. par_nListMethod: 1 = comma delimited, 2 = CR, 3 = <br>, 4 = ordered list
 
         data   OSPathSeparator            init hb_ps() READONLY
         data   PathBackend                init ""      READONLY   //Folder of FastCGI exe and any other run support files
@@ -205,6 +208,7 @@ method Wait() class hb_Fcgi
             hb_HClear(::RequestCookies)
             hb_HClear(::Input)
             hb_HClear(::ResponseHeader)
+            ::aTrace := {}
 
             ::OutputBuffer             := ""
 
@@ -687,6 +691,47 @@ return cString
 //-----------------------------------------------------------------------------------------------------------------
 method ClearOutputBuffer() class hb_Fcgi
     ::OutputBuffer := ""
+return nil
+//-----------------------------------------------------------------------------------------------------------------
+method TraceAdd(par_cInfo) class hb_Fcgi
+    Aadd(::aTrace,par_cInfo)
+return nil
+//-----------------------------------------------------------------------------------------------------------------
+method TraceList(par_nListMethod) class hb_Fcgi
+    local nLoop
+    local cResult := []
+    if len(::aTrace) > 0
+        do case
+        case par_nListMethod == 1   // Comma Delimited
+            for nLoop := 1 to Len(::aTrace)
+                if !empty(cResult)
+                    cResult += ","
+                endif
+                cResult += ::aTrace[nLoop]
+            endfor
+        case par_nListMethod == 2   // CRLF
+            for nLoop := 1 to Len(::aTrace)
+                if !empty(cResult)
+                    cResult += CRLF
+                endif
+                cResult += ::aTrace[nLoop]
+            endfor
+        case par_nListMethod == 3   // <br>
+            for nLoop := 1 to Len(::aTrace)
+                if !empty(cResult)
+                    cResult += [<br>]
+                endif
+                cResult += ::aTrace[nLoop]
+            endfor
+        case par_nListMethod == 4   // <ol>
+            cResult += [<ol>]
+            for nLoop := 1 to Len(::aTrace)
+                cResult += [<li>]+::aTrace[nLoop]+[</li>]
+            endfor
+            cResult += [</ol>]
+        endcase
+    endif
+    return cResult
 return nil
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
