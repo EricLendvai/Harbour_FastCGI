@@ -218,6 +218,7 @@ method Wait() class hb_Fcgi
             ::RequestMethod            := ""
     
             if ::ReloadConfigAtEveryRequest
+                hb_HClear(::AppConfig)
                 ::LoadAppConfig()
             endif
     
