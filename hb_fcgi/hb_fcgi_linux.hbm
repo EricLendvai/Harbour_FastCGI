@@ -14,17 +14,17 @@ vfp_strreplace.c
 
 #Using the following line tells hbmk2 to search the current folder for the hb_fcgi.ch file. 
 #-i.
--i/etc/Harbour_FastCGI/hb_fcgi
+-i../hb_fcgi
 
 #-i..\fcgi-2.4.1\include
 #-i~/github/fcgi2/include
--i/etc/Harbour_FastCGI/fcgi-2.4.1/include
+-i../fcgi-2.4.1/include
 
 #-L..\fcgi-2.4.1\libfcgi\${HB_COMPILER}\release\
 #-llibfcgi
 
 #-L~/github/fcgi2/libfcgi/.libs
--L/etc/Harbour_FastCGI/hb_fcgi/
+-L../hb_fcgi/
 -lfcgi
 
 #gtwvg.hbc
