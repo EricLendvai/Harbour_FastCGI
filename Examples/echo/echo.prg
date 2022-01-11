@@ -58,7 +58,7 @@ method OnRequest() class MyFcgi
     cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
     cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
     cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
-    cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+    cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
     cHtml += [<tr><td>Build Info</td>]   +[<td>]+hb_buildinfo()+[</td></tr>]
     cHtml += [</table>]
     ::Print(cHtml)
