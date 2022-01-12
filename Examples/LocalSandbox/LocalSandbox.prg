@@ -157,7 +157,7 @@ method OnRequest() class MyFcgi
             cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
             cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
             cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
-            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
             cHtml += [</table>]
 
             cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
