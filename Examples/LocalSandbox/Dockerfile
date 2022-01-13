@@ -9,7 +9,7 @@ WORKDIR /src/Examples/LocalSandbox
 RUN mkdir -p build/lin64/clang/release/hbmk2
 RUN BuildMode=release EXEName=FCGILocalSandbox hbmk2 LocalSandbox_linux.hbp -w3 -static
 
-FROM ubuntu 
+FROM elmarit/harbour:3.2 
 ## for apt to be noninteractive
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN true
@@ -28,7 +28,9 @@ RUN echo "tzdata tzdata/Areas select Europe" > /tmp/preseed.txt; \
     apt-get update && \
     apt-get install -y tzdata
 
-RUN apt-get -y install libapache2-mod-fcgid
+RUN apt-get -y install libapache2-mod-fcgid \
+    libfcgi-dev \
+    libgpm2
 RUN apt-get clean 
 
 RUN a2enmod rewrite
