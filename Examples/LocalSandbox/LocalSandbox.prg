@@ -157,7 +157,7 @@ method OnRequest() class MyFcgi
             cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
             cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
             cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
-            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClienIP"]+[</td></tr>]
+            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
             cHtml += [</table>]
 
             cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
@@ -338,7 +338,7 @@ local cCurrentDir
 local cRunResult
 local cSourceCodePPO
 local oHrb, uRet
-local cHBheaders1 := "~/harbour/include"
+local cHBheaders1 := "/harbour/include/"
 local cHBheaders2 := "c:\harbour\include"
 local pHbPCode
 local cPRGFLAGS := ""
@@ -517,7 +517,7 @@ if OpenTable("sandprog",.t.,.f.)
                             cSourceCodePPO = __pp_process( v_hPP, cSourceCode )
                             hb_MemoWrit(cHRBName+".ppo",cSourceCodePPO)  // Using while testing this routine
                         catch oError
-                            hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Preprocessor Error")
+                            hb_MemoWrit(oFcgi:PathBackend+"CompileAndRun"+oFcgi:OSPathSeparator+"result.txt","Preprocessor Error:"+ErrMsg( oError ))
                             cSourceCodePPO := ""
                             oHrb := ""
                         endtry
@@ -814,3 +814,17 @@ function hb_buildinfo()
 #include "BuildInfo.txt"
 return l_cBuildInfo
 //=================================================================================================================
+
+
+static function ErrMsg( oErr )
+return "Error " + ;
+   iif( HB_ISSTRING( oErr:subsystem ), ;
+        oErr:subsystem, "???" ) + ;
+   iif( HB_ISNUMERIC( oErr:subCode ), ;
+        "/" + hb_ntos( oErr:subCode ), "/???" ) + ;
+   iif( HB_ISSTRING( oErr:description ), ;
+        " " + oErr:description, "" ) + ;
+   iif( ! oErr:filename == "", ;
+        " " + oErr:filename, ;
+        iif( ! Empty( oErr:operation ), ;
+             " " + oErr:operation, "" ) )
