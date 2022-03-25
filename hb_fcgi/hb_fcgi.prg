@@ -1071,7 +1071,9 @@ function FcgiLogger(par_nAction,par_cString,...)
 static cBuffer := ""
 local nPCount
 local cCallBuffer
-local nPos,nByte
+local nPos
+// local nByte
+local nChar
 
 switch par_nAction
 case 1  // Reset
@@ -1087,12 +1089,20 @@ case 3  // Append to Line, same as ?? <expr>
             cBuffer += " "
         endif
         cCallBuffer := hb_ValToStr(hb_PValue(nPCount))
-        for nPos := 1 to len(cCallBuffer)
-            nByte := hb_BPeek(cCallBuffer,nPos)
-            if nByte < 32 .or. nByte > 126
-                hb_BPoke(@cCallBuffer,nPos,63)   // to replace invalid html char with "?"
+        // for nPos := 1 to len(cCallBuffer)
+        //     nByte := hb_BPeek(cCallBuffer,nPos)
+        //     if nByte < 32 //.or. nByte > 126
+        //         hb_BPoke(@cCallBuffer,nPos,63)   // to replace invalid html char with "?"
+        //     endif
+        // endfor
+
+        for nPos := 1 to hb_utf8Len(cCallBuffer)
+            nChar := hb_utf8Peek(cCallBuffer,nPos)
+            if nChar < 32
+                hb_utf8Poke(@cCallBuffer,nPos,hb_utf8Asc("?"))   // to replace invalid html char with "?"
             endif
         endfor
+
         cBuffer += cCallBuffer
     endfor
     exit

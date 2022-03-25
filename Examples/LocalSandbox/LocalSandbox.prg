@@ -157,7 +157,7 @@ method OnRequest() class MyFcgi
             cHtml += [<tr><td>Page</td>]         +[<td>]+::RequestSettings["Page"]+[</td></tr>]
             cHtml += [<tr><td>Query String</td>] +[<td>]+::RequestSettings["QueryString"]+[</td></tr>]
             cHtml += [<tr><td>Web Server IP</td>]+[<td>]+::RequestSettings["WebServerIP"]+[</td></tr>]
-            cHtml += [<tr><td>Clien IP</td>]     +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
+            cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
             cHtml += [</table>]
 
             cHtml += [<p><a href="home">Manage Code Snippets </a></p>]
@@ -618,7 +618,7 @@ cHtml += [<div class="m-2">]
             cHtml += [</div>]
         else
             cHtml += [<table border="1" cellpadding="3" cellspacing="0">]
-            cHtml += [<tr">]
+            cHtml += [<tr>]
             cHtml += [<th class="GridHeaderTopLeftCell text-center">]+cHtmlNewButton+[</th>]
             cHtml += [<th class="GridHeaderRowCells"><span>Name</span></th>]
             cHtml += [<th class="GridHeaderRowCells"><span>Last Updated On</span></th>]
@@ -814,8 +814,6 @@ function hb_buildinfo()
 #include "BuildInfo.txt"
 return l_cBuildInfo
 //=================================================================================================================
-
-
 static function ErrMsg( oErr )
 return "Error " + ;
    iif( HB_ISSTRING( oErr:subsystem ), ;
@@ -828,3 +826,4 @@ return "Error " + ;
         " " + oErr:filename, ;
         iif( ! Empty( oErr:operation ), ;
              " " + oErr:operation, "" ) )
+//=================================================================================================================
