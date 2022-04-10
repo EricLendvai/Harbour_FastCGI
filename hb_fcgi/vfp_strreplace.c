@@ -1,3 +1,5 @@
+#ifndef USING_HB_VFP
+
 //vfp_StrReplace is case insensitive ready version of hb_StrReplace
 
 /*
@@ -53,7 +55,7 @@
 #include "hbapiitm.h"
 #include "hbapierr.h"
 
-#ifdef __linux__
+#ifndef _WIN32
 #include <stdio.h>
 #include <string.h>
 #endif
@@ -140,10 +142,10 @@ HB_FUNC( VFP_STRREPLACE )
 								ptr = hb_arrayGetCPtr( pSrc, nAt );
 							}
 							if( nSkip > 0 && nSkip <= nText - nPos &&
-#ifdef __linux__ 
-								( nFlag ? strncasecmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
-#elif _WIN32
+#ifdef _WIN32
 								( nFlag ? _memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
+#else
+								( nFlag ? strncasecmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
 #endif
 								break;
 							if( !fNext )
@@ -179,10 +181,10 @@ HB_FUNC( VFP_STRREPLACE )
 							ptr = hb_arrayGetCPtr( pSrc, nAt );
 						}
 						if( nSkip > 0 && nSkip <= nText - nPos &&
-#ifdef __linux__ 
-							( nFlag ? strncasecmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
-#elif _WIN32
+#ifdef _WIN32
 							( nFlag ? _memicmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
+#else
+							( nFlag ? strncasecmp( pszText + nPos, ptr, nSkip ) : memcmp( pszText + nPos, ptr, nSkip ) ) == 0 )
 #endif
 
 							break;
@@ -258,3 +260,6 @@ HB_FUNC( VFP_STRREPLACE )
 	else
 		hb_errRT_BASE_SubstR( EG_ARG, 3012, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
 }
+
+#endif //USING_HB_VFP
+ 

@@ -926,6 +926,9 @@ return vfp_StrReplace(par_FieldValue,{;
                                         chr(9) => [&#9;]      ;
                                      },,1)
 //=================================================================================================================
+//If the web application is also using the Harbour_VFP contrib define the compiler variable USING_HB_VFP to avoid object redefinition.
+#ifndef USING_HB_VFP
+
 //The VFP_ScanStack is to be used in conjuntion with the "#command SCAN" and "#command ENDSCAN"
 function VFP_ScanStack(par_action)    //action = "push" "pop" "scan" , "clear" (empty the entire stack)
 local xResult := nil
@@ -989,6 +992,8 @@ if nFileHandle >= 0
 endif
 
 return nBytesWritten
+
+#endif //USING_HB_VFP
 //=================================================================================================================
 //The following a modified version of the "uhttpd_URLDecode" function from extras\httpsrv\_cgifunc.prg   Copyright 2009 Francesco Saverio Giudice <info / at / fsgiudice.com>
 //under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2, or (at your option) * any later version.

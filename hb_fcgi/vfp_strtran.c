@@ -1,3 +1,5 @@
+#ifndef USING_HB_VFP
+
 /*
 	* StrTran() function
 	*
@@ -203,3 +205,5 @@ HB_FUNC( VFP_STRTRAN )
 #endif
 	}
 }
+
+#endif //USING_HB_VFP
