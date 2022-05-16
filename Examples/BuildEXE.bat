@@ -1,13 +1,13 @@
 @echo off
 
 ::echo on
-::echo FastCGIRootPath = %FastCGIRootPath%
+::echo HB_FASTCGI_ROOT = %HB_FASTCGI_ROOT%
 ::echo EXEName = %EXEName%
 ::echo BuildMode = %BuildMode%
 ::echo SiteRootFolder = %SiteRootFolder%
 ::echo HB_COMPILER = %HB_COMPILER%
 
-if %FastCGIRootPath%. == . goto MissingEnvironmentVariables
+if %HB_FASTCGI_ROOT%. == . goto MissingEnvironmentVariables
 if %EXEName%. == . goto MissingEnvironmentVariables
 if %BuildMode%. == . goto MissingEnvironmentVariables
 if %SiteRootFolder%. ==. goto MissingEnvironmentVariables
@@ -67,11 +67,11 @@ if exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 if %BuildMode% == debug (
     copy ..\debugger_on.hbm ..\debugger.hbm
 rem  cannot used -shared due to some libs. Still researching into this matter.
-    hbmk2 %EXEName%_windows.hbp -b -p -w3
+    hbmk2 %EXEName%_windows.hbp -b -p -w3 -dDEBUGVIEW
 ) else (
     copy ..\debugger_off.hbm ..\debugger.hbm
     rem can not do -fullstatic due to libfcgi
-    hbmk2 %EXEName%_windows.hbp -w3  -static
+    hbmk2 %EXEName%_windows.hbp -w3  -static -dDEBUGVIEW
 )
 
 echo Current time is %mydate% %mytime%
@@ -102,8 +102,8 @@ if not exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
             echo Failed to update file %WebsiteDrive%%SiteRootFolder%backend\FCGI%EXEName%.exe
         )
 
-        copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "build\win64\%HB_COMPILER%\%BuildMode%\libfcgi.dll"
-        copy %FastCGIRootPath%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
+        copy %HB_FASTCGI_ROOT%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "build\win64\%HB_COMPILER%\%BuildMode%\libfcgi.dll"
+        copy %HB_FASTCGI_ROOT%fcgi-2.4.1\libfcgi\%HB_COMPILER%\release\libfcgi.dll "%WebsiteDrive%%SiteRootFolder%backend\libfcgi.dll"
 
         echo.
         echo Ready            BuildMode = %BuildMode%

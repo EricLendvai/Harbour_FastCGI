@@ -27,7 +27,7 @@
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
-                        "FastCGIRootPath":"..\\..\\",
+                        "HB_FASTCGI_ROOT":"..\\..\\",
                         "EXEName":"LocalSandbox",
                         "BuildMode":"debug",
                         "HB_COMPILER":"${input:CCompiler}",
@@ -57,7 +57,7 @@
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
-                        "FastCGIRootPath":"..\\..\\",
+                        "HB_FASTCGI_ROOT":"..\\..\\",
                         "EXEName":"LocalSandbox",
                         "BuildMode":"release",
                         "HB_COMPILER":"${input:CCompiler}",

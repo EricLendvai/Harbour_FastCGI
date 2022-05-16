@@ -680,6 +680,7 @@ for iLineCounter := 1 to iNumberOfLines
     cLine := strtran(cLine,"\"   ,"\\")
     cLine := strtran(cLine,chr(9),"\t")
     cLine := strtran(cLine,"'"   ,"\'")
+    cLine := strtran(cLine,"%"  ,"%%")
 
     cMonacoValue += space(8)+"'"+cLine+iif(iLineCounter < iNumberOfLines,"',"+ CRLF,"'")
 

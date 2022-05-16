@@ -27,7 +27,7 @@
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
-                        "FastCGIRootPath":"..\\..\\",
+                        "HB_FASTCGI_ROOT":"..\\..\\",
                         "EXEName":"echo",
                         "BuildMode":"debug",
                         "HB_COMPILER":"${input:CCompiler}",
@@ -81,7 +81,7 @@
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
-                        "FastCGIRootPath":"..\\..\\",
+                        "HB_FASTCGI_ROOT":"..\\..\\",
                         "EXEName":"echo",
                         "BuildMode":"release",
                         "HB_COMPILER":"${input:CCompiler}",
