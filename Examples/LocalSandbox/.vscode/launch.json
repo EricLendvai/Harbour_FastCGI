@@ -10,7 +10,7 @@
             "request": "attach",
             "name": "Attach Program LocalSandbox.exe",
             "windows":{
-                "program": "R:\\Harbour_websites\\fcgi_LocalSandbox\\backend\\FCGILocalSandbox.exe",
+                "program": "C:\\Harbour_websites\\fcgi_LocalSandbox\\backend\\FCGILocalSandbox.exe",
                 "sourcePaths": [
                     "${workspaceFolder}"
                 ]

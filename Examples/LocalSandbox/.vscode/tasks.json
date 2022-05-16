@@ -31,7 +31,7 @@
                         "EXEName":"LocalSandbox",
                         "BuildMode":"debug",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"R:",
+                        "WebsiteDrive":"C:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_LocalSandbox\\"
                     },
                     "statusbar": {"label" : "<Compile Debug>","hide" : false}
@@ -61,7 +61,7 @@
                         "EXEName":"LocalSandbox",
                         "BuildMode":"release",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"R:",
+                        "WebsiteDrive":"C:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_LocalSandbox\\"
                     },
                     "statusbar": {"label" : "<Compile Release>","hide" : false}
@@ -96,7 +96,7 @@
             "windows":{
                 "type": "shell",
                 "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
-                "args": ["kill","http","localhost","8164","/fcgi_LocalSandbox/","R:/Harbour_websites/fcgi_LocalSandbox/","LocalSandbox",""],
+                "args": ["kill","http","localhost","8164","/fcgi_LocalSandbox/","C:/Harbour_websites/fcgi_LocalSandbox/","LocalSandbox",""],
                 "options": {
                     "statusbar": {"label" : "<Soft Kill Fcgi Exe>","hide" : true}
                 }
@@ -121,7 +121,7 @@
             "label": "Down",
             "windows":{
                 "type": "shell",
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
@@ -135,7 +135,7 @@
             "label": "ActivateLocalSandbox",
             "windows":{
                 "type": "shell",
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
@@ -149,7 +149,7 @@
             "label": "KillLocalSandbox",
             "windows":{
                 "type": "shell",
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ R:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_LocalSandbox/ C:/Harbour_websites/fcgi_LocalSandbox/ LocalSandbox",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
