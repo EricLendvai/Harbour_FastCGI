@@ -1,6 +1,9 @@
 //static const char rcsid[] = "$Id: hb_fcgi.c,v 1.5 2019/11/16 08:08:00 Eric Lendvai Exp $";
 
-//Copyright (c) 2021 Eric Lendvai MIT License
+//Copyright (c) 2022 Eric Lendvai MIT License
+
+// Following define needed as of MSVC 2022
+// #define _CRT_SECURE_NO_DEPRECATE
 
 #include "fcgi_config.h"
 
@@ -60,13 +63,14 @@ static void PrintEnv(FCGX_Stream *par_out, char *par_label, char **par_envp)
     FCGX_FPrintF(par_out, "</pre><p>\n");
 }
 
-#ifdef _WIN32
-void handle_sigint(int sig) 
-{ 
-    sprintf(cDebugStringBuffer, "[Harbour] Signal %d\n", sig);
-    OutputDebugString(cDebugStringBuffer);
-} 
-#endif
+// The following code was never used.
+// #ifdef _WIN32
+// void handle_sigint(int sig) 
+// { 
+//     sprintf_s(cDebugStringBuffer, "[Harbour] Signal %d\n",(int)sig);
+//     OutputDebugString(cDebugStringBuffer);
+// } 
+// #endif
 
 HB_FUNC( HB_FCGX_WAIT )
 {
@@ -141,7 +145,8 @@ HB_FUNC( HB_FCGI_PRINTENVIRONMENT )  //Only usefull to test FastCGI development 
 HB_FUNC( HB_FCGX_INIT )
 {
 #ifdef _WIN32
-    sprintf(cDebugStringBuffer, "[Harbour] Fcgi Init \n");
+    // sprintf_s(cDebugStringBuffer, "[Harbour] Fcgi Init \n");
+    strcpy_s(cDebugStringBuffer,sizeof cDebugStringBuffer , "[Harbour] Fcgi Init \n");  // https://en.cppreference.com/w/c/string/byte/strcpy  had to add the middle parameter
     OutputDebugString(cDebugStringBuffer);
     // signal(SIGTERM, handle_sigint);    // Signals not working in Apache and IIS
 #endif
@@ -175,7 +180,7 @@ HB_FUNC( HB_FCGI_GET_REQUEST_VARIABLES )   // Returns a Hash of all the Environm
         HB_SIZE nLen = strlen( *RequestEnvironmentPointer );
         HB_SIZE nPos = hb_strAt( "=", 1,*RequestEnvironmentPointer, nLen );
         if (nPos > 0) {
-            // sprintf(cDebugStringBuffer, "[Harbour] %lld %lld %s\n", nLen, nPos, *RequestEnvironmentPointer);
+            // sprintf_s(cDebugStringBuffer, "[Harbour] %lld %lld %s\n", nLen, nPos, *RequestEnvironmentPointer);
             // OutputDebugString(cDebugStringBuffer);
 
             PointerToSubstring = *RequestEnvironmentPointer;

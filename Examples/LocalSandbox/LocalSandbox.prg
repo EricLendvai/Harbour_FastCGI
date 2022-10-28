@@ -1,4 +1,4 @@
-//Copyright (c) 2020 Eric Lendvai MIT License
+//Copyright (c) 2022 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 #include "fileio.ch"
@@ -6,19 +6,21 @@
 
 request DBFCDX
 request DBFFPT
-request HB_CODEPAGE_EN
-//request HB_CODEPAGE_UTF8
-memvar v_hPP
+
+request HB_CODEPAGE_UTF8EX
+
 //=================================================================================================================
 Function Main()
 
-public v_hPP
-v_hPP := nil
+private v_hPP := nil
+
+private oFcgi
 
 SendToDebugView("Starting LocalSandbox")
 
+//hb_cdpSelect("EN")
 //hb_cdpSelect("UTF8")
-hb_cdpSelect("EN")
+hb_cdpSelect("UTF8EX")
 
 // oFcgi := hb_Fcgi():New()
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi

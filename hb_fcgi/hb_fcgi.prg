@@ -732,8 +732,7 @@ method TraceList(par_nListMethod) class hb_Fcgi
             cResult += [</ol>]
         endcase
     endif
-    return cResult
-return nil
+return cResult
 //=================================================================================================================
 function SendToDebugView(cStep,xValue)
 
@@ -787,7 +786,7 @@ return .T.
 function SendToClipboard(cText)
 //#if defined(_WIN32) || defined(_WIN64)   // Will not work since this is a PRG So will use the DEBUGVIEW setting.
 
-#ifdef DEBUGVIEW
+#ifdef CLIPBOARDSUPPORT
     wvt_SetClipboard(cText)
 #endif
 
