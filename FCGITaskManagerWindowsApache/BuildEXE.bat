@@ -41,9 +41,9 @@ if exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (
 )
 
 if %BuildMode% == debug (
-    hbmk2 %EXEName%.hbp -b -p -w3 -shared
+    hbmk2 %EXEName%.hbp -b -p -w3 -shared -dDEBUGVIEW
 ) else (
-    hbmk2 %EXEName%.hbp -w3 -fullstatic
+    hbmk2 %EXEName%.hbp -w3 -fullstatic -dDEBUGVIEW
 )
 
 if not exist build\win64\%HB_COMPILER%\%BuildMode%\%EXEName%.exe (

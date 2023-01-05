@@ -1,4 +1,4 @@
-//Copyright (c) 2021 Eric Lendvai MIT License
+//Copyright (c) 2022 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
@@ -10,6 +10,7 @@ local cHtml
 
 SendToDebugView("Starting echo")
 
+private oFcgi
 // oFcgi := hb_Fcgi():New()
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 
@@ -47,7 +48,10 @@ method OnRequest() class MyFcgi
     //cCrash++    // To test the error handler
 
     ::Print("<h1>FastCGI echo</h1>")
-    
+
+altd()
+// GetSymbols()
+
     ::Print("<p>FastCGI EXE = "+::FastCGIExeFullPath+"</p>")
     cHtml := [<table border="1" cellpadding="3" cellspacing="0">]
     cHtml += [<tr><td>Protocol</td>]     +[<td>]+::RequestSettings["Protocol"]+[</td></tr>]
@@ -115,3 +119,26 @@ function hb_buildinfo()
 #include "BuildInfo.txt"
 return l_cBuildInfo
 //=================================================================================================================
+//---------------------------------------------------------------------------
+function GetSymbols()
+local xValue := ""
+local nSymbolCount := __dynscount()
+local i, cName, cVarNames := ''
+static xMyStatic
+public xMyPublic
+private xMyVar1, xMyVar2, xMyVar3
+
+for i := 1 to nSymbolCount
+    cName := __dynsgetname( i )
+    if ! __dynsisfun(cName)
+        if __mvExist(cName)
+            xValue := __mvGet(cName)
+            oFcgi:Print("Variable - "+cName+" - "+ValType(xValue)+"<br>")
+        endif
+    else
+        //?"function ",cName
+    endif
+endfor
+return nil
+//---------------------------------------------------------------------------
+

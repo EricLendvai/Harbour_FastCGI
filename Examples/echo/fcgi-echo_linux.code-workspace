@@ -2,25 +2,21 @@
     "folders": [
         {
             "path": "."
-        },
-        {
-            "path": "/etc/Harbour_FastCGI/hb_fcgi"
-        },
-        {
-            "path": "/etc/Harbour_websites/fcgi_echo/backend"
         }
+        // ,{
+        //     "path": "/opt/Harbour_FastCGI/hb_fcgi"
+        // }
+        // ,{
+        //     "path": "/var/www/Harbour_websites/fcgi_echo/backend"
+        // }
     ],
     "settings": {
         "files.autoSave": "onFocusChange",
-        "harbour.compilerExecutable": "/etc/harbour/bin/linux/gcc/harbour",
-        "harbour.extraOptions": "-i/etc/harbour/include/",
-        "harbour.extraIncludePaths":["/etc/harbour/include/",
-                                     "/etc/Harbour_FastCGI/hb_fcgi/"],
+        "harbour.compilerExecutable": "/src/harbour/bin/linux/gcc/harbour",
+        "harbour.extraOptions": "-i/src/harbour/include/",
+        "harbour.extraIncludePaths":["/src/harbour/include/",
+                                     "/src/Harbour_FastCGI/hb_fcgi/"],
         "harbour.warningLevel":1,
         "harbour.decorator":true,
-        "local-history.path": "/etc/VSCode_History/Harbour_FastCGI",
-        "local-history.treeLocation": "localHistory",
-        "local-history.daysLimit": 0,
-        "local-history.maxDisplay": 5,
     }
 }

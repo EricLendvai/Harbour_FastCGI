@@ -4,6 +4,30 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "SwitchOS",
+            "windows": {
+                "command": "${command:remote-containers.reopenInContainer}",
+                "options": {
+                    "statusbar": {"label" : "<Open Container - Go to Ubuntu>","hide" : false}
+                }
+            },
+            "linux": {
+                "command": "${command:remote-containers.reopenLocally}",
+                "options": {
+                    "statusbar": {"label" : "<Close Container - Go to Windows>","hide" : false}
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+
+        },
+        {
             "label": "RunDebug",
             "command": "${command:workbench.action.debug.start}",
             "options": {
@@ -21,9 +45,9 @@
         },
         {
             "label": "CompileDebug",
+            "type": "shell",
             "windows": {
-                "type": "shell",
-                "command": "${workspaceFolder}\\..\\BuildEXE.bat",
+                "command": "${workspaceFolder}\\BuildEXE.bat",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
@@ -31,25 +55,16 @@
                         "EXEName":"echo",
                         "BuildMode":"debug",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"C:",
+                        "WebsiteDrive":"R:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                     },
                     "statusbar": {"label" : "<Compile Debug>","hide" : false}
                 },
                 "dependsOrder": "sequence",
-                "dependsOn":["SoftKillFcgiExe"],
-                "presentation": {
-                    "echo": true,
-                    "reveal": "always",
-                    "focus": true,
-                    "panel": "shared",
-                    "showReuseMessage": false,
-                    "clear": true
-                }
+                "dependsOn":["SoftKillFcgiExe"]
             },
             "linux": {
-                "type": "shell",
-                "command": "${workspaceFolder}/../BuildEXE.sh",
+                "command": "${workspaceFolder}/BuildEXE.sh",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
@@ -57,27 +72,27 @@
                         "BuildMode":"debug",
                         "HB_COMPILER":"gcc",
                         "WebsiteDrive":"",
-                        "SiteRootFolder":"/etc/Harbour_websites/fcgi_echo/"
+                        "SiteRootFolder":"/var/www/Harbour_websites/fcgi_echo/"
                     },
                     "statusbar": {"label" : "<Compile Debug>","hide" : false}
-                },
+                }
                 //"dependsOrder": "sequence",
                 //"dependsOn":["SoftKillFcgiExe"],
-                "presentation": {
-                    "echo": true,
-                    "reveal": "always",
-                    "focus": true,
-                    "panel": "shared",
-                    "showReuseMessage": false,
-                    "clear": true
-                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
             }
         },
         {
             "label": "CompileRelease",
+            "type": "shell",
             "windows": {
-                "type": "shell",
-                "command": "${workspaceFolder}\\..\\BuildEXE.bat",
+                "command": "${workspaceFolder}\\BuildEXE.bat",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
@@ -85,52 +100,44 @@
                         "EXEName":"echo",
                         "BuildMode":"release",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"C:",
+                        "WebsiteDrive":"R:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                     },
                     "statusbar": {"label" : "<Compile Release>","hide" : false}
                 },
                 "dependsOrder": "sequence",
-                "dependsOn":["SoftKillFcgiExe"],
-                "presentation": {
-                    "echo": true,
-                    "reveal": "always",
-                    "focus": true,
-                    "panel": "shared",
-                    "showReuseMessage": false,
-                    "clear": true
-                }
+                "dependsOn":["SoftKillFcgiExe"]
             },
             "linux":{
-                "type": "shell",
-                "command": "${workspaceFolder}/../BuildEXE.sh",
+                "command": "${workspaceFolder}/BuildEXE.sh",
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "env": {
+                        "HB_FASTCGI_ROOT":"..\\..\\",
                         "EXEName":"echo",
                         "BuildMode":"release",
                         "HB_COMPILER":"gcc",
                         "WebsiteDrive":"",
-                        "SiteRootFolder":"/etc/Harbour_websites/fcgi_echo/"
+                        "SiteRootFolder":"/var/www/Harbour_websites/fcgi_echo/"
                     },
                     "statusbar": {"label" : "<Compile Release>","hide" : false}
-                },
+                }
                 //"dependsOrder": "sequence",
                 //"dependsOn":["SoftKillFcgiExe"],
-                "presentation": {
-                    "echo": true,
-                    "reveal": "always",
-                    "focus": true,
-                    "panel": "shared",
-                    "showReuseMessage": false,
-                    "clear": true
-                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
             }
         },
         {
             "label":"KillFcgiExe",
+            "type": "shell",
             "windows":{
-                "type": "shell",
                 "command":"taskkill",
                 "args": ["/IM","FCGIecho.exe","/f","/t"],
                 "options": {
@@ -138,7 +145,6 @@
                 }
             },
             "linux": {
-                "type": "shell",
                 "command":"taskkill",
                 "args": ["/IM","FCGIecho.exe","/f","/t"],
                 "options": {"statusbar": {"hide" : true}}
@@ -146,135 +152,108 @@
         },
         {
             "label":"SoftKillFcgiExe",
+            "type": "shell",
             "windows":{
-                "type": "shell",
                 "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
-                "args": ["kill","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
+                "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
                 "options": {
                     "statusbar": {"label" : "<Soft Kill Fcgi Exe>","hide" : true}
                 }
             },
             "linux": {
-                "type": "shell",
+//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
                 "command":"${workspaceFolder}/../../FCGITaskManager/gcc/release/FCGITaskManager.exe",
-                "args": ["kill","http","localhost","8164","/","/etc/Harbour_websites/fcgi_echo/","echo",""],
+                "args": ["kill","http","localhost","8164","/","/var/www/Harbour_websites/fcgi_echo/","echo",""],
                 "options": {"statusbar": {"hide" : true}}
             }
         },
         {
             "label": "DelAllPPO",
+            "type": "shell",
             "windows":{
-                "type": "shell",
                 "command": "del ..\\..\\hb_fcgi\\*.ppo|del *.ppo",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "statusbar": {"label" : "<Del All PPO>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
+                }
             },
             "linux": {
-                "type": "shell",
                 "command": "rm *.ppo",
                 "isBackground": true,
                 "options": {
                     "cwd": "${workspaceFolder}",
                     "statusbar": {"label" : "<Del All PPO>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
-            }
+                }
+            },
+            "presentation": {"reveal": "never"}
         },
         {
             "label": "Down",
+            "type": "shell",
             "windows":{
-                "type": "shell",
-                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Down>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
+                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
             },
             "linux": {
-                "type": "shell",
-                "command": "/etc/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe down http localhost 8164 / /etc/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Down>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
-            }
+                //The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
+                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe down http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo"
+            },
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Down>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         },
         {
             "label": "ActivateEcho",
+            "type": "shell",
             "windows":{
-                "type": "shell",
-                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Activate Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
+                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo",
             },
             "linux": {
-                "type": "shell",
-                "command": "/etc/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe activate http localhost 8164 / /etc/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Activate Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
-            }
+//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
+                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe activate http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo",
+            },
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Activate Echo>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         },
         {
             "label": "KillEcho",
+            "type": "shell",
             "windows":{
-                "type": "shell",
-                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Kill Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
+                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
             },
             "linux": {
-                "type": "shell",
-                "command": "/etc/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe kill http localhost 8164 / /etc/Harbour_websites/fcgi_echo/ echo",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Kill Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
-            }
+//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
+                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe kill http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo"
+            },
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Kill Echo>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         },
         {
             "label": "BrowseEcho",
+            "type":"shell",
             "windows":{
-                "type": "shell",
-                "command": "\"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe\" http://localhost:8164/fcgi_echo/",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Browse Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
+                "command": "firefox.exe http://localhost:8164/fcgi_echo/"
             },
             "linux": {
-                "type": "shell",
-                "command": "firefox http://echo/",
-                "isBackground": true,
-                "options": {
-                    "cwd": "${workspaceFolder}",
-                    "statusbar": {"label" : "<Browse Echo>","hide" : false}
-                },
-                "presentation": {"reveal": "never"}
-            }
+                "command": "firefox http://echo/"
+            },
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {"label" : "<Browse Echo>","hide" : false}
+            },
+            "presentation": {"reveal": "never"}
         }
     ],
     "inputs": [

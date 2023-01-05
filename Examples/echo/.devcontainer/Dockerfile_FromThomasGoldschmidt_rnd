@@ -9,7 +9,8 @@ WORKDIR /src/Examples/echo
 RUN mkdir -p build/lin64/clang/release/hbmk2
 RUN BuildMode=release EXEName=FCGIecho hbmk2 echo_linux.hbp -w3 -static
 
-FROM ubuntu
+FROM ubuntu 
+
 
 ## for apt to be noninteractive
 ENV DEBIAN_FRONTEND noninteractive
@@ -50,6 +51,5 @@ COPY ./Examples/echo/FilesForPublishedWebsites/website /var/www/Harbour_websites
 
 RUN chown -R www-data:www-data /var/www/Harbour_websites
 
-EXPOSE 80
- 
+EXPOSE 80 
 CMD apache2ctl -D FOREGROUND
