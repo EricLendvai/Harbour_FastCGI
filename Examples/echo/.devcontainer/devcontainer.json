@@ -17,7 +17,7 @@
         "harbour.decorator":true
     },
 
-    "mounts": ["source=R:\\Harbour_FastCGI,target=/src/Harbour_FastCGI,type=bind,consistency=default"],
+    "mounts": ["source=C:\\Harbour_FastCGI,target=/src/Harbour_FastCGI,type=bind,consistency=default"],
 
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [

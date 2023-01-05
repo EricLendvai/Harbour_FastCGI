@@ -55,7 +55,7 @@
                         "EXEName":"echo",
                         "BuildMode":"debug",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"R:",
+                        "WebsiteDrive":"C:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                     },
                     "statusbar": {"label" : "<Compile Debug>","hide" : false}
@@ -100,7 +100,7 @@
                         "EXEName":"echo",
                         "BuildMode":"release",
                         "HB_COMPILER":"${input:CCompiler}",
-                        "WebsiteDrive":"R:",
+                        "WebsiteDrive":"C:",
                         "SiteRootFolder":"\\Harbour_websites\\fcgi_echo\\"
                     },
                     "statusbar": {"label" : "<Compile Release>","hide" : false}
@@ -155,7 +155,7 @@
             "type": "shell",
             "windows":{
                 "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
-                "args": ["kill","http","localhost","8164","/fcgi_echo/","R:/Harbour_websites/fcgi_echo/","echo",""],
+                "args": ["kill","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
                 "options": {
                     "statusbar": {"label" : "<Soft Kill Fcgi Exe>","hide" : true}
                 }
@@ -192,7 +192,7 @@
             "label": "Down",
             "type": "shell",
             "windows":{
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo"
             },
             "linux": {
                 //The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
@@ -209,7 +209,7 @@
             "label": "ActivateEcho",
             "type": "shell",
             "windows":{
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
             },
             "linux": {
 //The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
@@ -226,7 +226,7 @@
             "label": "KillEcho",
             "type": "shell",
             "windows":{
-                "command": "R:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ R:/Harbour_websites/fcgi_echo/ echo"
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo"
             },
             "linux": {
 //The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
