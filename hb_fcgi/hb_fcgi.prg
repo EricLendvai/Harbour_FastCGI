@@ -565,6 +565,9 @@ method LoadAppConfig() class hb_Fcgi
             else
                 cValue := allt(left(cLine,nPos-1))
             endif
+            if left(cValue,2) == "${" .and. right(cValue,1) == "}" // The value is making a reference to an environment variable
+                cValue := hb_GetEnv(substr(cValue,3,len(cValue)-3),"")
+            endif
             ::AppConfig[cName] := cValue
             iNumberOfConfigs++
         endif
@@ -773,6 +776,10 @@ function SendToDebugView(cStep,xValue)
         cValue := "Null"
     endcase
     
+    cValue := strtran(cValue,chr(13)+chr(10),[<br>])
+    cValue := strtran(cValue,chr(10),[<br>])
+    cValue := strtran(cValue,chr(13),[<br>])
+
     if empty(cValue)
         hb_Fcgx_OutputDebugString("[Harbour] "+cStep)
     else
