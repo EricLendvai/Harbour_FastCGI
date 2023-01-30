@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 01/29/2023
+* Enhanced FastCGI interface to handle streaming row file content (including chr(0)).
+
 ## 01/23/2023
 * GetAppConfig method will not support getting values from environment variables. If the value in config.txt is formatted as ${ENVIRONMENT_VARIABLE_NAME}, when the values are loaded, the named environment variable will be used.
 

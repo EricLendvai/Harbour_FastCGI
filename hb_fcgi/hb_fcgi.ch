@@ -1,5 +1,5 @@
-#ifndef HB_FCGI_CH_
-#define HB_FCGI_CH_
+#ifndef HB_FCGI_BUILDVERSION
+#define HB_FCGI_BUILDVERSION "1.1"
 
 #include "hbclass.ch"
 
@@ -39,6 +39,6 @@
 #xcommand TEXT TO VAR <var> => #pragma __stream|<var>:=%s
 #xcommand ENDTEXT => #pragma __endtext
 
-#endif /* HB_FCGI_CH_ */
+#endif /* HB_FCGI_BUILDVERSION */
 
 memvar oFcgi

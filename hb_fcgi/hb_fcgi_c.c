@@ -134,6 +134,21 @@ HB_FUNC( HB_FCGX_PRINT )   // Used internally by hb_fcgi function
     hb_retni( iResult );
 }
 
+HB_FUNC( HB_FCGX_BPRINT )   // Used internally by hb_fcgi function   Binary Print
+{
+    int iResult ;
+
+    if ( HB_ISCHAR( 1 ) )
+    {
+    	FCGX_PutStr(hb_parc( 1 ),hb_parclen( 1 ),g_out );
+        iResult = 1;
+    } else {
+        iResult = -1;
+    }
+	
+    hb_retni( iResult );
+}
+
 HB_FUNC( HB_FCGI_PRINTENVIRONMENT )  //Only usefull to test FastCGI development - Will be removed
 {
     PrintEnv(g_out, "Request environment", g_envp);

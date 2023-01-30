@@ -44,9 +44,10 @@ class hb_Fcgi
 
         data   aTrace                     init {}     //Used by methods TraceAdd and TraceList to assist development by displaying routines used to build response 
     exported:
-        data   RequestCount               init 0    READONLY
-        data   MaxRequestToProcess        init 0    READONLY
-        data   FastCGIExeFullPath         init ""   READONLY
+        data   p_hb_fcgi_version          init HB_FCGI_BUILDVERSION READONLY
+        data   RequestCount               init 0                    READONLY
+        data   MaxRequestToProcess        init 0                    READONLY
+        data   FastCGIExeFullPath         init ""                   READONLY
         method New() constructor
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
@@ -677,7 +678,8 @@ method WriteOutput() class hb_Fcgi
     endfor
     hb_Fcgx_Print(CRLF)   //Extra CRLF to notify end of header
     if nRedirected < 2
-        hb_Fcgx_Print(::OutputBuffer)
+        // hb_Fcgx_Print(::OutputBuffer)
+        hb_Fcgx_BPrint(::OutputBuffer)
     // else
     //     SendToDebugView("WriteOutput - Dropped Output due to redirect")
     endif
