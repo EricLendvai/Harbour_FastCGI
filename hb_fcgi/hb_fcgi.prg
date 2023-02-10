@@ -1,4 +1,4 @@
-//Copyright (c) 2021 Eric Lendvai MIT License
+//Copyright (c) 2023 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
@@ -560,7 +560,7 @@ method LoadAppConfig() class hb_Fcgi
         if nPos > 1  //Name may not be empty
             cName := left(cLine,nPos-1)
             cLine := substr(cLine,nPos+1)
-            nPos := rat("//",cLine)
+            nPos := rat(" //",cLine)    // To ensure the "//" comment marker is not part of a config value, it must be preceded with at least one blank.
             if empty(nPos)
                 cValue := allt(cLine)
             else

@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 02/08/2023 v 1.2
+* Method to avoid conflicts between config values and commends; to ensure the "//" comment marker is not part of a config value, it must be preceded with at least one blank.
+
 ## 01/29/2023
 * Enhanced FastCGI interface to handle streaming row file content (including chr(0)).
 
