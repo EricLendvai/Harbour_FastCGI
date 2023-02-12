@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 02/11/2023 v 1.3
+* When loading web site configuration, will prioritize the use of file "config_deployment.txt" instead of "config.txt". This allows for not placing in git repo the file "config_deployment.txt".
+
 ## 02/08/2023 v 1.2
 * Method to avoid conflicts between config values and commends; to ensure the "//" comment marker is not part of a config value, it must be preceded with at least one blank.
 

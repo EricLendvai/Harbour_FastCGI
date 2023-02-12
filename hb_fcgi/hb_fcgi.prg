@@ -553,7 +553,11 @@ method LoadAppConfig() class hb_Fcgi
     local cValue
     local iNumberOfConfigs := 0
     //The configuration file is purposely not with a .txt extension to block users from accessing it.
-    cConfigText := hb_MemoRead(::PathBackend+"config.txt")
+    if file(::PathBackend+"config_deployment.txt")
+        cConfigText := hb_MemoRead(::PathBackend+"config_deployment.txt")
+    else
+        cConfigText := hb_MemoRead(::PathBackend+"config.txt")
+    endif
     cConfigText := StrTran(StrTran(cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
     for each cLine in hb_ATokens(cConfigText,chr(10),.f.,.f.)
         nPos := at("=",cLine)
