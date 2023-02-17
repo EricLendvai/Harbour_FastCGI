@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 02/17/2023 v 1.4
+* Fix on "scan" command. Mismatch in definition with hb_vfp.ch was detected.
+
 ## 02/11/2023 v 1.3
 * When loading web site configuration, will prioritize the use of file "config_deployment.txt" instead of "config.txt". This allows for not placing in git repo the file "config_deployment.txt".
 
