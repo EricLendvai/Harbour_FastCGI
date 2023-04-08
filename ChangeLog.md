@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 04/08/2023 v 1.4
+* Changed Dockerfile of devcontainer to work around git install failure introduced around April 2023.
+
 ## 02/17/2023 v 1.4
 * Fix on "scan" command. Mismatch in definition with hb_vfp.ch was detected.
 

@@ -9,6 +9,9 @@ ENV InDocker=True
 
 RUN apt-get update && apt-get install -y apt-utils
 
+# Run update again to work around git install failure introduced around April 2023
+RUN apt-get update
+
 RUN apt-get install -y \
         git \
         build-essential \
