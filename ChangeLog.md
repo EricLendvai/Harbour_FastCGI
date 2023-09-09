@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 09/09/2023 v 1.5
+* Minor tweak in redirect method.
+
 ## 04/08/2023 v 1.4
 * Changed Dockerfile of devcontainer to work around git install failure introduced around April 2023.
 

@@ -654,7 +654,9 @@ method DeleteCookie(par_cName,par_cPath)
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Redirect(par_cURL)
-    ::SetHeaderValue("Status","303 OK")
+    ::SetContentType("text/html")
+    // ::SetHeaderValue("Status","303 OK")
+    ::SetHeaderValue("Status","303 See Other")
     ::SetHeaderValue("Location",par_cURL)
 return NIL
 //-----------------------------------------------------------------------------------------------------------------

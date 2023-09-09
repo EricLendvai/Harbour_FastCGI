@@ -1,5 +1,5 @@
 #ifndef HB_FCGI_BUILDVERSION
-#define HB_FCGI_BUILDVERSION "1.4"
+#define HB_FCGI_BUILDVERSION "1.5"
 
 #include "hbclass.ch"
 
