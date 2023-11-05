@@ -26,6 +26,7 @@ class hb_Fcgi
         data   Input                      init {=>}   //TODO  Hash with FieldName as Key, and an array as value. Array as follows: {nType(1=Field,2=File),cInputValue,cFileName,cContentType,Content}
         data   InputLength                init -1     // -1 Means not loaded
         data   InputRaw                   init ""
+        data   hJsonInput                 init {=>}   //The Json input for APIs when "Content-Type" is set to "application/json"
         method LoadInput()
 
         data   ReloadConfigAtEveryRequest init .f.
@@ -48,6 +49,7 @@ class hb_Fcgi
         data   RequestCount               init 0                    READONLY
         data   MaxRequestToProcess        init 0                    READONLY
         data   FastCGIExeFullPath         init ""                   READONLY
+
         method New() constructor
         method Wait()
         method Finish()                                // To mark page build. Happens automatically on next Wait() or OnError
@@ -60,7 +62,8 @@ class hb_Fcgi
         method GetAppConfig(par_cName)
         method GetQueryString(par_cName)
         method GetInputLength()
-        method GetRawInput()                           // To be only available during development
+        method GetRawInput()                           // To be only available during development or for creating logs
+        method GetJsonInput()
         method GetInputValue(par_cName)
         method GetInputFileName(par_cName)
         method GetInputFileContentType(par_cName)
@@ -96,205 +99,207 @@ endclass
 
 //-----------------------------------------------------------------------------------------------------------------
 method SetOnErrorDetailLevel(par_Level) class hb_Fcgi
-    ::OnErrorDetailLevel := min(2,max(0,par_Level))
+::OnErrorDetailLevel := min(2,max(0,par_Level))
 return ::OnErrorDetailLevel
 //-----------------------------------------------------------------------------------------------------------------
 method SetOnErrorProgramInfo(par_cInfo) class hb_fcgi
-    ::OnErrorProgramInfo := par_cInfo
+::OnErrorProgramInfo := par_cInfo
 return nil
 //-----------------------------------------------------------------------------------------------------------------
 method OnError(par_oError) class hb_Fcgi
-    SendToDebugView("In hb_Fcgi:OnError")
-    try
-        ::OutputBuffer := ""  // To wipe out any built page content
-        ::Print("<h1>Error Occurred</h1>")
-        if ::OnErrorDetailLevel > 0
-            if !empty(::OnErrorProgramInfo)
-                ::Print("<h2>"+::OnErrorProgramInfo+"</h2>")
-            endif
-            ::Print("<h3>Error Date and Time: "+hb_TToC(hb_DateTime())+"</h3>")
-            if ::OnErrorDetailLevel > 1
-                ::Print("<div>"+FcgiGetErrorInfo(par_oError)+"</div>")
-            endif
+SendToDebugView("In hb_Fcgi:OnError")
+try
+    ::OutputBuffer := ""  // To wipe out any built page content
+    ::Print("<h1>Error Occurred</h1>")
+    if ::OnErrorDetailLevel > 0
+        if !empty(::OnErrorProgramInfo)
+            ::Print("<h2>"+::OnErrorProgramInfo+"</h2>")
         endif
-        ::Finish()
-    catch
-    endtry
-    
-    BREAK
+        ::Print("<h3>Error Date and Time: "+hb_TToC(hb_DateTime())+"</h3>")
+        if ::OnErrorDetailLevel > 1
+            ::Print("<div>"+FcgiGetErrorInfo(par_oError)+"</div>")
+        endif
+    endif
+    ::Finish()
+catch
+endtry
+
+BREAK
 return nil
 //-----------------------------------------------------------------------------------------------------------------
 method New() class hb_Fcgi
-    local cRootPath
-    local cAppValue
+local l_cRootPath
+local l_cAppValue
 
-    ErrorBlock({|o|oFcgi:OnError(o)})
+ErrorBlock({|o|oFcgi:OnError(o)})
 
-    hb_HCaseMatch(::QueryString,.f.)
-    hb_HCaseMatch(::RequestCookies,.f.)
-    hb_HCaseMatch(::AppConfig,.f.)
+hb_HCaseMatch(::QueryString,.f.)
+hb_HCaseMatch(::RequestCookies,.f.)
+hb_HCaseMatch(::AppConfig,.f.)
 
-    // hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
-    ::FastCGIExeFullPath := hb_argV(0)
-    cRootPath := left(::FastCGIExeFullPath,rat(::OSPathSeparator,::FastCGIExeFullPath)-1)
-    cRootPath := left(cRootPath,rat(::OSPathSeparator,cRootPath))
+// hb_hSetOrder(::RequestEnvironment,.f.)  Does not seem to work
+::FastCGIExeFullPath := hb_argV(0)
+l_cRootPath := left(::FastCGIExeFullPath,rat(::OSPathSeparator,::FastCGIExeFullPath)-1)
+l_cRootPath := left(l_cRootPath,rat(::OSPathSeparator,l_cRootPath))
 
-    ::PathBackend := cRootPath+"backend"+::OSPathSeparator
-    ::PathWebsite := cRootPath+"website"+::OSPathSeparator
-    
-    ::LoadAppConfig()
+::PathBackend := l_cRootPath+"backend"+::OSPathSeparator
+::PathWebsite := l_cRootPath+"website"+::OSPathSeparator
 
-    cAppValue := ::GetAppConfig("PathData")
-    if empty(cAppValue)
-        ::PathData    := cRootPath+"data"+::OSPathSeparator     //Default Location
-    else
-        ::PathData    := hb_DirSepAdd(cAppValue)
-    endif
+::LoadAppConfig()
 
-    cAppValue := ::GetAppConfig("PathSession")
-    if empty(cAppValue)
-        ::PathSession := cRootPath+"session"+::OSPathSeparator  //Default Location
-    else
-        ::PathSession := hb_DirSepAdd(cAppValue)
-    endif
+l_cAppValue := ::GetAppConfig("PathData")
+if empty(l_cAppValue)
+    ::PathData    := l_cRootPath+"data"+::OSPathSeparator     //Default Location
+else
+    ::PathData    := hb_DirSepAdd(l_cAppValue)
+endif
 
-    hb_Fcgx_Init()
+l_cAppValue := ::GetAppConfig("PathSession")
+if empty(l_cAppValue)
+    ::PathSession := l_cRootPath+"session"+::OSPathSeparator  //Default Location
+else
+    ::PathSession := hb_DirSepAdd(l_cAppValue)
+endif
 
-    set exact on
-    
+hb_Fcgx_Init()
+
+set exact on
+
 return Self
 //-----------------------------------------------------------------------------------------------------------------
 method Wait() class hb_Fcgi
-    //Used to wait for the next page request 
-    local lProcessRequest      //If web page should be built
-    // local cREQUEST_URI
-    local iWaitResult
-    local cDownFileName
-    local cSitePath
-    local cPath
-    local cPage
-    local nPos
+//Used to wait for the next page request 
+local l_lProcessRequest      //If web page should be built
+// local cREQUEST_URI
+local l_iWaitResult
+local l_cDownFileName
+local l_cSitePath
+local l_cPath
+local l_cPage
+local l_nPos
 
-    static tRequestStartTime := NIL
-    local tRequestEndTime
-    
-    if ::ProcessingRequest
-        ::Finish()
+static tRequestStartTime := NIL
+local tRequestEndTime
+
+if ::ProcessingRequest
+    ::Finish()
+endif
+
+if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
+    //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
+    l_lProcessRequest := .f.
+else
+    if ::RequestCount > 0
+        FcgiLogger(1)
+        hb_gcAll()         //Since web apps have no inkey() or user input idle time, trigger the garbage collector.
     endif
 
-    if ::MaxRequestToProcess > 0 .and. ::RequestCount >= ::MaxRequestToProcess
-        //Reached Max Number of Requests to Process. This will happen after a page finished to build, and we are back in waiting request mode.
-        lProcessRequest := .f.
-    else
-        if ::RequestCount > 0
-            FcgiLogger(1)
-            hb_gcAll()         //Since web apps have no inkey() or user input idle time, trigger the garbage collector.
+    if !hb_IsNil(tRequestStartTime)
+        tRequestEndTime := hb_DateTime()
+        SendToDebugView("Response Build Time: "+trans((tRequestEndTime-tRequestStartTime)*(24*3600*1000))+" (ms)")
+    endif
+
+    if (l_iWaitResult := hb_Fcgx_Wait()) >= 0
+        tRequestStartTime := hb_DateTime()
+        ::ContentType              := ""
+        ::LoadedRequestEnvironment := .f.
+        ::LoadedQueryString        := .f.
+        ::LoadedRequestCookies     := .f.
+        ::LoadedInput              := .f.
+
+        hb_HClear(::RequestEnvironment)
+        hb_HClear(::QueryString)
+        hb_HClear(::RequestCookies)
+        hb_HClear(::Input)
+        hb_HClear(::ResponseHeader)
+        hb_HClear(::hJsonInput)
+
+        ::aTrace := {}
+
+        ::OutputBuffer             := ""
+
+        ::InputLength              := -1
+        ::InputRaw                 := ""
+
+        ::RequestMethod            := ""
+
+        if ::ReloadConfigAtEveryRequest
+            hb_HClear(::AppConfig)
+            ::LoadAppConfig()
         endif
 
-        if !hb_IsNil(tRequestStartTime)
-            tRequestEndTime := hb_DateTime()
-            SendToDebugView("Response Build Time: "+trans((tRequestEndTime-tRequestStartTime)*(24*3600*1000))+" (ms)")
-        endif
+        // cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
+        // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
 
-        if (iWaitResult := hb_Fcgx_Wait()) >= 0
-            tRequestStartTime := hb_DateTime()
-            ::ContentType              := ""
-            ::LoadedRequestEnvironment := .f.
-            ::LoadedQueryString        := .f.
-            ::LoadedRequestCookies     := .f.
-            ::LoadedInput              := .f.
-    
-            hb_HClear(::RequestEnvironment)
-            hb_HClear(::QueryString)
-            hb_HClear(::RequestCookies)
-            hb_HClear(::Input)
-            hb_HClear(::ResponseHeader)
-            ::aTrace := {}
-
-            ::OutputBuffer             := ""
-
-            ::InputLength              := -1
-            ::InputRaw                 := ""
-    
-            ::RequestMethod            := ""
-    
-            if ::ReloadConfigAtEveryRequest
-                hb_HClear(::AppConfig)
-                ::LoadAppConfig()
-            endif
-    
-            // cREQUEST_URI := ::GetEnvironment("REQUEST_URI")
-            // SendToDebugView("cREQUEST_URI",cREQUEST_URI)
-
-            if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
-                // altd()
-                cDownFileName = ::PathWebsite+"down.html"
-                if file(cDownFileName)
-                    ::Print(hb_MemoRead(cDownFileName))
-                else
-                    ::Print([Site is down. Add a "down.html" file.])
-                endif
-                lProcessRequest := .f.
-                ::ProcessingRequest := .t. //Since issued ::Print()
-                ::Finish()
+        if file(left(::FastCGIExeFullPath,len(::FastCGIExeFullPath)-3)+"kill")
+            // altd()
+            l_cDownFileName = ::PathWebsite+"down.html"
+            if file(l_cDownFileName)
+                ::Print(hb_MemoRead(l_cDownFileName))
             else
-                ::RequestCount++
-                lProcessRequest := .t.
+                ::Print([Site is down. Add a "down.html" file.])
             endif
-
+            l_lProcessRequest := .f.
+            ::ProcessingRequest := .t. //Since issued ::Print()
+            ::Finish()
         else
-            // Add code to log why the wait failed. Use the variable iWaitResult
-            if iWaitResult == 0 //To full the compiler. It will be used later.
-            endif
-
-            lProcessRequest := .f.
+            ::RequestCount++
+            l_lProcessRequest := .t.
         endif
-    endif
 
-    ::ProcessingRequest = lProcessRequest
-
-    // Initialize ::URIInfo To provide easy access to 
-    cSitePath := ::GetEnvironment("CONTEXT_PREFIX")
-    if len(cSitePath) == 0
-        cSitePath := "/"
-    endif
-
-    cPath := substr(::GetEnvironment("REDIRECT_URL"),len(cSitePath)+1)
-    nPos  := hb_RAt("/",cPath)
-    cPage := substr(cPath,nPos+1)
-    if cPage == "default.html"
-        cPage := ""  //Work Around the behaviour of Apache's work around to deal with root file access
-    endif
-    cPath := left(cPath,nPos)
-
-    ::RequestSettings["Protocol"]    := ::GetEnvironment("REQUEST_SCHEME")
-    ::RequestSettings["Port"]        := val(::GetEnvironment("SERVER_PORT"))
-    ::RequestSettings["Host"]        := ::GetEnvironment("SERVER_NAME")
-    ::RequestSettings["SitePath"]    := cSitePath
-    ::RequestSettings["Path"]        := cPath
-    ::RequestSettings["Page"]        := cPage
-    ::RequestSettings["QueryString"] := ::GetEnvironment("REDIRECT_QUERY_STRING")
-    ::RequestSettings["WebServerIP"] := ::GetEnvironment("SERVER_ADDR")
-    ::RequestSettings["ClientIP"]    := ::GetEnvironment("REMOTE_ADDR")
-
-    if ::ProcessingRequest
-        if ::RequestCount == 1
-            ::OnFirstRequest()
-        endif
     else
-        if ::RequestCount > 0
-            ::OnShutdown()
+        // Add code to log why the wait failed. Use the variable l_iWaitResult
+        if l_iWaitResult == 0 //To full the compiler. It will be used later.
         endif
-    endif
 
-return lProcessRequest
+        l_lProcessRequest := .f.
+    endif
+endif
+
+::ProcessingRequest = l_lProcessRequest
+
+// Initialize ::URIInfo To provide easy access to 
+l_cSitePath := ::GetEnvironment("CONTEXT_PREFIX")
+if len(l_cSitePath) == 0
+    l_cSitePath := "/"
+endif
+
+l_cPath := substr(::GetEnvironment("REDIRECT_URL"),len(l_cSitePath)+1)
+l_nPos  := hb_RAt("/",l_cPath)
+l_cPage := substr(l_cPath,l_nPos+1)
+if l_cPage == "default.html"
+    l_cPage := ""  //Work Around the behaviour of Apache's work around to deal with root file access
+endif
+l_cPath := left(l_cPath,l_nPos)
+
+::RequestSettings["Protocol"]    := ::GetEnvironment("REQUEST_SCHEME")
+::RequestSettings["Port"]        := val(::GetEnvironment("SERVER_PORT"))
+::RequestSettings["Host"]        := ::GetEnvironment("SERVER_NAME")
+::RequestSettings["SitePath"]    := l_cSitePath
+::RequestSettings["Path"]        := l_cPath
+::RequestSettings["Page"]        := l_cPage
+::RequestSettings["QueryString"] := ::GetEnvironment("REDIRECT_QUERY_STRING")
+::RequestSettings["WebServerIP"] := ::GetEnvironment("SERVER_ADDR")
+::RequestSettings["ClientIP"]    := ::GetEnvironment("REMOTE_ADDR")
+
+if ::ProcessingRequest
+    if ::RequestCount == 1
+        ::OnFirstRequest()
+    endif
+else
+    if ::RequestCount > 0
+        ::OnShutdown()
+    endif
+endif
+
+return l_lProcessRequest
 //-----------------------------------------------------------------------------------------------------------------
 method Finish() class hb_Fcgi
-    if ::ProcessingRequest
-        ::WriteOutput()
-        ::ProcessingRequest := .f.
-        hb_Fcgx_Finish()
-    endif
+if ::ProcessingRequest
+    ::WriteOutput()
+    ::ProcessingRequest := .f.
+    hb_Fcgx_Finish()
+endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method ShutDownFastCGIEXEAfterResponse() class hb_Fcgi
@@ -303,631 +308,651 @@ method ShutDownFastCGIEXEAfterResponse() class hb_Fcgi
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Print(...) class hb_Fcgi
-    local nPCount
-    for nPCount := 1 to pcount()
-        if nPCount > 1
-            ::OutputBuffer += " "
-        endif
-        ::OutputBuffer += hb_ValToStr(hb_PValue(nPCount)) //par_html
-    endfor
+local l_nPCount
+for l_nPCount := 1 to pcount()
+    if l_nPCount > 1
+        ::OutputBuffer += " "
+    endif
+    ::OutputBuffer += hb_ValToStr(hb_PValue(l_nPCount)) //par_html
+endfor
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetContentType() class hb_Fcgi
 return ::GetEnvironment("CONTENT_TYPE")
 //-----------------------------------------------------------------------------------------------------------------
 method SetContentType(par_type) class hb_Fcgi
-    ::ContentType = par_type
+::ContentType = par_type
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetEnvironment(par_cName) class hb_Fcgi
-    if !::LoadedRequestEnvironment
-        ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
-    endif
+if !::LoadedRequestEnvironment
+    ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
+endif
 return hb_HGetDef(::RequestEnvironment, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method ListEnvironment() class hb_Fcgi
-    local cEnvironment
-    local cHtml := ""
-    local cValue
-    
-    if !::LoadedRequestEnvironment
-        ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
-    endif
-    for each cEnvironment in ::RequestEnvironment
-        cValue := strtran(cEnvironment:__enumValue(),"%","&#37;")   // Not Certain why had to convert the % character
-        cHtml += "<div>"+cEnvironment:__enumKey()+" - "+cValue+"</div>"
-    endfor
-return cHtml
+local l_cEnvironment
+local l_cHtml := ""
+local l_cValue
+
+if !::LoadedRequestEnvironment
+    ::RequestEnvironment := hb_Fcgi_Get_Request_Variables()
+endif
+for each l_cEnvironment in ::RequestEnvironment
+    l_cValue := strtran(l_cEnvironment:__enumValue(),"%","&#37;")   // Not Certain why had to convert the % character
+    l_cHtml += "<div>"+l_cEnvironment:__enumKey()+" - "+l_cValue+"</div>"
+endfor
+return l_cHtml
 //-----------------------------------------------------------------------------------------------------------------
 method GetAppConfig(par_cName) class hb_Fcgi
 return hb_HGetDef(::AppConfig, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method GetQueryString(par_cName) class hb_Fcgi
-    local cParameter
-    local nPos
-    if !::LoadedQueryString
-        ::LoadedQueryString := .t.
-        // Important: It seems that under IIS if have parameters like   "name1=val1&name2=val2"  it get converted name not repeating "name" and just having the number. More research needed here.
-        for each cParameter in hb_ATokens(::GetEnvironment("QUERY_STRING"),"&",.f.,.f.)
-            nPos := at("=",cParameter)
-            if nPos > 1  // Name may not be empty
-                ::QueryString[left(cParameter,nPos-1)] := substr(cParameter,nPos+1)
-            endif
-        endfor
-    endif
+local l_cParameter
+local l_nPos
+if !::LoadedQueryString
+    ::LoadedQueryString := .t.
+    // Important: It seems that under IIS if have parameters like   "name1=val1&name2=val2"  it get converted name not repeating "name" and just having the number. More research needed here.
+    for each l_cParameter in hb_ATokens(::GetEnvironment("QUERY_STRING"),"&",.f.,.f.)
+        l_nPos := at("=",l_cParameter)
+        if l_nPos > 1  // Name may not be empty
+            ::QueryString[left(l_cParameter,l_nPos-1)] := substr(l_cParameter,l_nPos+1)
+        endif
+    endfor
+endif
 return hb_HGetDef(::QueryString, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method LoadInput() class hb_Fcgi
-    local cInput
-    local nPos
-    local cContentType
-    local cMultiFormBoundary
-    local nMultiFormBoundaryLen
-    local cInputBuffer
-    local cLine1,cLine2,cLine3
-    local lFoundAllLines
-    local cInputName
-    local cFileName
-    local cToken
-    local lFoundFormData
+local l_cInput
+local l_nPos
+local l_cContentType
+local l_cMultiFormBoundary
+local l_nMultiFormBoundaryLen
+local l_cInputBuffer
+local l_cLine1
+local l_cLine2
+local l_cLine3
+local l_lFoundAllLines
+local l_cInputName
+local l_cFileName
+local l_cToken
+local l_lFoundFormData
+local l_hJsonInput
 
-    if !::LoadedInput
-        ::LoadedInput := .t.
-        ::InputRaw := hb_Fcgx_GetInput(::GetInputLength())  //Will return a buffer that could have chr(0) in it
-        
-        // Used during development and debugging
-        // SendToClipboard(::InputRaw)
-        // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
+if !::LoadedInput
+    ::LoadedInput := .t.
+    ::InputRaw := hb_Fcgx_GetInput(::GetInputLength())  //Will return a buffer that could have chr(0) in it
+    
+    // Used during development and debugging
+    // SendToClipboard(::InputRaw)
+    // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
 
-        cContentType := ::GetContentType()
+    l_cContentType := ::GetContentType()
+//  SendToDebugView("Content Type: "+l_cContentType)
+//[30432] [Harbour] Other Content Type: application/json
 
-        do case
-        case cContentType == "application/x-www-form-urlencoded"
-            for each cInput in hb_ATokens(::InputRaw,"&",.f.,.f.)
-                nPos := at("=",cInput)
-                if nPos > 1  // Name may not be empty
-                    ::Input[left(cInput,nPos-1)] := {1,substr(cInput,nPos+1)}
-                endif
-            endfor
-        
-        case left(cContentType,19) == "multipart/form-data"
-            cInputBuffer          := ::InputRaw
-            nPos                  := at(CRLF,cInputBuffer)
-            cMultiFormBoundary    := left(cInputBuffer,nPos-1)
-            nMultiFormBoundaryLen := len(cMultiFormBoundary)
-            cInputBuffer          := substr(cInputBuffer,nPos+2)
+    do case
+    case l_cContentType == "application/x-www-form-urlencoded"
+        for each l_cInput in hb_ATokens(::InputRaw,"&",.f.,.f.)
+            l_nPos := at("=",l_cInput)
+            if l_nPos > 1  // Name may not be empty
+                ::Input[left(l_cInput,l_nPos-1)] := {1,substr(l_cInput,l_nPos+1)}
+            endif
+        endfor
+    
+    case left(l_cContentType,19) == "multipart/form-data"
+        l_cInputBuffer          := ::InputRaw
+        l_nPos                  := at(CRLF,l_cInputBuffer)
+        l_cMultiFormBoundary    := left(l_cInputBuffer,l_nPos-1)
+        l_nMultiFormBoundaryLen := len(l_cMultiFormBoundary)
+        l_cInputBuffer          := substr(l_cInputBuffer,l_nPos+2)
 
-            do while ((nPos := at(cMultiFormBoundary,cInputBuffer)) > 0)
-                cInput         := left(cInputBuffer,nPos-1)   //Will hold the entire content of the element
-                cInputBuffer   := substr(cInputBuffer,nPos+nMultiFormBoundaryLen)
-                cLine1         := ""
-                cLine2         := ""
-                cLine3         := ""
-                
-                lFoundAllLines := .f.
-                if !empty(cInput)
-                    // Pop First 3 Lines   Should always have 3 lines
-                    nPos := at(CRLF,cInput)
-                    if nPos > 0
-                        cLine1 := left(cInput,nPos-1)
-                        cInput := substr(cInput,nPos+2)
-                        nPos := at(CRLF,cInput)
-                        if nPos > 0
-                            cLine2 := left(cInput,nPos-1)
-                            cInput := substr(cInput,nPos+2)
-                            nPos := at(CRLF,cInput)
-                            if nPos > 0
-                                cLine3 := left(cInput,nPos-1)
-                                cInput := substr(cInput,nPos+2)
-                                lFoundAllLines := .t.
-                            endif
-                        endif
-                    endif
-                    if lFoundAllLines
-                        lFoundFormData := .f.
-                        cInputName     := ""
-                        cFileName      := ""
-                        // cContentType   := ""
-
-                        //Process Line 1
-                        for each cToken in hb_ATokens(cLine1,";",.f.,.f.)
-                            if cToken == "Content-Disposition: form-data"
-                                lFoundFormData := .t.
-                                loop
-                            else
-                                if (nPos := at("=",cToken)) > 0
-                                    if left(cToken,nPos-1) == " name"
-                                        cInputName = strtran(substr(cToken,nPos+1),["],[])
-                                    elseif left(cToken,nPos-1) == " filename"
-                                        cFileName = strtran(substr(cToken,nPos+1),["],[])
-                                    endif
-                                endif
-                            endif
-                        endfor
-
-                        if lFoundFormData .and. empty(cFileName)
-                            //Regular Input Field
-                            if !empty(cInputName)
-                                if len(cInput) > 2  //TEXTAREA (multi line entry). cInput would have whatever is after line3
-                                    ::Input[cInputName] := {1,cLine3+CRLF+left(cInput,len(cInput)-2)}   // use cLine3 and Re-add the CRLF and add whatever is next. {Type = 1, cInputValue}
-                                else
-                                    ::Input[cInputName] := {1,cLine3}   // Removed the trailing CRLF. {Type = 1, cInputValue}
-                                endif
-                            endif
-                        else
-                            //Uploaded File
-                            //Line 3 is empty. The file content start after line 3
-                            if (left(cLine2,14) == "Content-Type: ")
-                                cContentType := substr(cLine2,15)
-                                //{nType = 2,"",cFileName,cContentType,Content}
-                                //Had to remove the last to characters, since extra CRLF
-                                ::Input[iif(!empty(cInputName),cInputName,cFileName)] := {2,"",cFileName,cContentType,left(cInput,len(cInput)-2)}
-                            else
-                                SendToDebugView("Bad Request multipart format - error 3")
-                                loop
-                            endif
-                        endif
-
-                    else
-                        SendToDebugView("Bad Request multipart format - error 2")
-                        loop
-                    endif
-
-                endif
-
-                if left(cInputBuffer,2) == "--"
-                    exit
-                elseif left(cInputBuffer,2) == CRLF
-                    cInputBuffer = substr(cInputBuffer,3)
-                else
-                    //This should not Happen!!!
-                    SendToDebugView("Bad Request multipart format - error 1")
-                    exit
-                endif
-            enddo
-
-        otherwise
+        do while ((l_nPos := at(l_cMultiFormBoundary,l_cInputBuffer)) > 0)
+            l_cInput         := left(l_cInputBuffer,l_nPos-1)   //Will hold the entire content of the element
+            l_cInputBuffer   := substr(l_cInputBuffer,l_nPos+l_nMultiFormBoundaryLen)
+            l_cLine1         := ""
+            l_cLine2         := ""
+            l_cLine3         := ""
             
-        endcase
-// altd()
-    endif
+            l_lFoundAllLines := .f.
+            if !empty(l_cInput)
+                // Pop First 3 Lines   Should always have 3 lines
+                l_nPos := at(CRLF,l_cInput)
+                if l_nPos > 0
+                    l_cLine1 := left(l_cInput,l_nPos-1)
+                    l_cInput := substr(l_cInput,l_nPos+2)
+                    l_nPos := at(CRLF,l_cInput)
+                    if l_nPos > 0
+                        l_cLine2 := left(l_cInput,l_nPos-1)
+                        l_cInput := substr(l_cInput,l_nPos+2)
+                        l_nPos := at(CRLF,l_cInput)
+                        if l_nPos > 0
+                            l_cLine3 := left(l_cInput,l_nPos-1)
+                            l_cInput := substr(l_cInput,l_nPos+2)
+                            l_lFoundAllLines := .t.
+                        endif
+                    endif
+                endif
+                if l_lFoundAllLines
+                    l_lFoundFormData := .f.
+                    l_cInputName     := ""
+                    l_cFileName      := ""
+                    // l_cContentType   := ""
+
+                    //Process Line 1
+                    for each l_cToken in hb_ATokens(l_cLine1,";",.f.,.f.)
+                        if l_cToken == "Content-Disposition: form-data"
+                            l_lFoundFormData := .t.
+                            loop
+                        else
+                            if (l_nPos := at("=",l_cToken)) > 0
+                                if left(l_cToken,l_nPos-1) == " name"
+                                    l_cInputName = strtran(substr(l_cToken,l_nPos+1),["],[])
+                                elseif left(l_cToken,l_nPos-1) == " filename"
+                                    l_cFileName = strtran(substr(l_cToken,l_nPos+1),["],[])
+                                endif
+                            endif
+                        endif
+                    endfor
+
+                    if l_lFoundFormData .and. empty(l_cFileName)
+                        //Regular Input Field
+                        if !empty(l_cInputName)
+                            if len(l_cInput) > 2  //TEXTAREA (multi line entry). l_cInput would have whatever is after line3
+                                ::Input[l_cInputName] := {1,l_cLine3+CRLF+left(l_cInput,len(l_cInput)-2)}   // use l_cLine3 and Re-add the CRLF and add whatever is next. {Type = 1, l_cInputValue}
+                            else
+                                ::Input[l_cInputName] := {1,l_cLine3}   // Removed the trailing CRLF. {Type = 1, l_cInputValue}
+                            endif
+                        endif
+                    else
+                        //Uploaded File
+                        //Line 3 is empty. The file content start after line 3
+                        if (left(l_cLine2,14) == "Content-Type: ")
+                            l_cContentType := substr(l_cLine2,15)
+                            //{nType = 2,"",l_cFileName,l_cContentType,Content}
+                            //Had to remove the last to characters, since extra CRLF
+                            ::Input[iif(!empty(l_cInputName),l_cInputName,l_cFileName)] := {2,"",l_cFileName,l_cContentType,left(l_cInput,len(l_cInput)-2)}
+                        else
+                            SendToDebugView("Bad Request multipart format - error 3")
+                            loop
+                        endif
+                    endif
+
+                else
+                    SendToDebugView("Bad Request multipart format - error 2")
+                    loop
+                endif
+
+            endif
+
+            if left(l_cInputBuffer,2) == "--"
+                exit
+            elseif left(l_cInputBuffer,2) == CRLF
+                l_cInputBuffer = substr(l_cInputBuffer,3)
+            else
+                //This should not Happen!!!
+                SendToDebugView("Bad Request multipart format - error 1")
+                exit
+            endif
+        enddo
+
+    case l_cContentType == "application/json"
+        l_cInputBuffer := ::InputRaw
+        l_hJsonInput := {=>}
+
+        if !empty(l_cInputBuffer)
+            // hb_jsonDecode(l_cInputBuffer,<@xValue>,[<cdpID>]) ➔ <nLengthDecoded>
+            hb_jsonDecode(l_cInputBuffer,@l_hJsonInput)
+            ::hJsonInput := hb_HClone(l_hJsonInput) 
+        endif
+
+    otherwise
+        SendToDebugView("Other Content Type: "+l_cContentType)
+        
+    endcase
+
+endif
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetRawInput() class hb_Fcgi
-    if !::LoadedInput
-        ::LoadInput()
-    endif
+if !::LoadedInput
+    ::LoadInput()
+endif
 return ::InputRaw
 //-----------------------------------------------------------------------------------------------------------------
+method GetJsonInput() class hb_Fcgi
+if !::LoadedInput
+    ::LoadInput()
+endif
+return ::hJsonInput
+//-----------------------------------------------------------------------------------------------------------------
 method GetInputValue(par_cName) class hb_Fcgi
-    local aResult
-    if !::LoadedInput
-        ::LoadInput()
-    endif
-    aResult := hb_HGetDef(::Input, par_cName, {1,""})
-return aResult[2]
+local l_aResult
+if !::LoadedInput
+    ::LoadInput()
+endif
+l_aResult := hb_HGetDef(::Input, par_cName, {1,""})
+return l_aResult[2]
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputFileName(par_cName) class hb_Fcgi
-    local aResult
-    if !::LoadedInput
-        ::LoadInput()
-    endif
-    aResult := hb_HGetDef(::Input, par_cName, {1,""})
-return iif(aResult[1]=2,aResult[3],"") //Verify it input was a file
+local l_aResult
+if !::LoadedInput
+    ::LoadInput()
+endif
+l_aResult := hb_HGetDef(::Input, par_cName, {1,""})
+return iif(l_aResult[1]=2,l_aResult[3],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputFileContentType(par_cName) class hb_Fcgi
-    local aResult
-    if !::LoadedInput
-        ::LoadInput()
-    endif
-    aResult := hb_HGetDef(::Input, par_cName, {1,""})
-return iif(aResult[1]=2,aResult[4],"") //Verify it input was a file
+local l_aResult
+if !::LoadedInput
+    ::LoadInput()
+endif
+l_aResult := hb_HGetDef(::Input, par_cName, {1,""})
+return iif(l_aResult[1]=2,l_aResult[4],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputFileContent(par_cName) class hb_Fcgi
-    local aResult
-    if !::LoadedInput
-        ::LoadInput()
-    endif
-    aResult := hb_HGetDef(::Input, par_cName, {1,""})
-return iif(aResult[1]=2,aResult[5],"") //Verify it input was a file
+local l_aResult
+if !::LoadedInput
+    ::LoadInput()
+endif
+l_aResult := hb_HGetDef(::Input, par_cName, {1,""})
+return iif(l_aResult[1]=2,l_aResult[5],"") //Verify it input was a file
 //-----------------------------------------------------------------------------------------------------------------
 method SaveInputFileContent(par_cName,par_cFileFullPath) class hb_Fcgi
-    local aResult
-    local lResult := .f.
-    if !::LoadedInput
-        ::LoadInput()
-    endif
-    aResult := hb_HGetDef(::Input, par_cName, {1,""})
-    try 
-        hb_MemoWrit(par_cFileFullPath,iif(aResult[1]=2,aResult[5],""))
-        lResult := .t.
-    catch
-    endtry
+local l_aResult
+local lResult := .f.
+if !::LoadedInput
+    ::LoadInput()
+endif
+l_aResult := hb_HGetDef(::Input, par_cName, {1,""})
+try 
+    hb_MemoWrit(par_cFileFullPath,iif(l_aResult[1]=2,l_aResult[5],""))
+    lResult := .t.
+catch
+endtry
 return lResult  // .t. if content was saved to file
 //-----------------------------------------------------------------------------------------------------------------
 method LoadAppConfig() class hb_Fcgi
-    local cConfigText
-    local cLine
-    local nPos
-    local cName
-    local cValue
-    local iNumberOfConfigs := 0
-    //The configuration file is purposely not with a .txt extension to block users from accessing it.
-    if file(::PathBackend+"config_deployment.txt")
-        cConfigText := hb_MemoRead(::PathBackend+"config_deployment.txt")
-    else
-        cConfigText := hb_MemoRead(::PathBackend+"config.txt")
-    endif
-    cConfigText := StrTran(StrTran(cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
-    for each cLine in hb_ATokens(cConfigText,chr(10),.f.,.f.)
-        nPos := at("=",cLine)
-        if nPos > 1  //Name may not be empty
-            cName := left(cLine,nPos-1)
-            cLine := substr(cLine,nPos+1)
-            nPos := rat(" //",cLine)    // To ensure the "//" comment marker is not part of a config value, it must be preceded with at least one blank.
-            if empty(nPos)
-                cValue := allt(cLine)
-            else
-                cValue := allt(left(cLine,nPos-1))
-            endif
-            if left(cValue,2) == "${" .and. right(cValue,1) == "}" // The value is making a reference to an environment variable
-                cValue := hb_GetEnv(substr(cValue,3,len(cValue)-3),"")
-            endif
-            ::AppConfig[cName] := cValue
-            iNumberOfConfigs++
+local l_cConfigText
+local l_cLine
+local l_nPos
+local l_cName
+local l_cValue
+local l_iNumberOfConfigs := 0
+//The configuration file is purposely not with a .txt extension to block users from accessing it.
+if file(::PathBackend+"config_deployment.txt")
+    l_cConfigText := hb_MemoRead(::PathBackend+"config_deployment.txt")
+else
+    l_cConfigText := hb_MemoRead(::PathBackend+"config.txt")
+endif
+l_cConfigText := StrTran(StrTran(l_cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
+for each l_cLine in hb_ATokens(l_cConfigText,chr(10),.f.,.f.)
+    l_nPos := at("=",l_cLine)
+    if l_nPos > 1  //Name may not be empty
+        l_cName := left(l_cLine,l_nPos-1)
+        l_cLine := substr(l_cLine,l_nPos+1)
+        l_nPos := rat(" //",l_cLine)    // To ensure the "//" comment marker is not part of a config value, it must be preceded with at least one blank.
+        if empty(l_nPos)
+            l_cValue := allt(l_cLine)
+        else
+            l_cValue := allt(left(l_cLine,l_nPos-1))
         endif
-    endfor
-    ::MaxRequestToProcess        := val(hb_HGetDef(::AppConfig,"MaxRequestPerFCGIProcess","0"))
-    ::ReloadConfigAtEveryRequest := (hb_HGetDef(::AppConfig,"ReloadConfigAtEveryRequest","false") == "true")
-return iNumberOfConfigs
+        if left(l_cValue,2) == "${" .and. right(l_cValue,1) == "}" // The value is making a reference to an environment variable
+            l_cValue := hb_GetEnv(substr(l_cValue,3,len(l_cValue)-3),"")
+        endif
+        ::AppConfig[l_cName] := l_cValue
+        l_iNumberOfConfigs++
+    endif
+endfor
+::MaxRequestToProcess        := val(hb_HGetDef(::AppConfig,"MaxRequestPerFCGIProcess","0"))
+::ReloadConfigAtEveryRequest := (hb_HGetDef(::AppConfig,"ReloadConfigAtEveryRequest","false") == "true")
+return l_iNumberOfConfigs
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputLength() class hb_Fcgi
-    if ::InputLength < 0
-        ::InputLength := val(::GetEnvironment("CONTENT_LENGTH"))
-    endif
+if ::InputLength < 0
+    ::InputLength := val(::GetEnvironment("CONTENT_LENGTH"))
+endif
 return ::InputLength
 //-----------------------------------------------------------------------------------------------------------------
 method IsGet() class hb_Fcgi
-    if empty(::RequestMethod)
-        ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
-    endif
+if empty(::RequestMethod)
+    ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
+endif
 return (::RequestMethod == "GET")
 //-----------------------------------------------------------------------------------------------------------------
 method IsPost() class hb_Fcgi
-    if empty(::RequestMethod)
-        ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
-    endif
+if empty(::RequestMethod)
+    ::RequestMethod := ::GetEnvironment("REQUEST_METHOD")
+endif
 return (::RequestMethod == "POST")
 //-----------------------------------------------------------------------------------------------------------------
 method GetHeaderValue(par_cName) class hb_Fcgi
 return allt(::GetEnvironment("HTTP_"+upper(par_cName)))
 //-----------------------------------------------------------------------------------------------------------------
 method SetHeaderValue(par_cName,par_cValue) class hb_Fcgi
-    ::ResponseHeader[par_cName] := par_cValue
+::ResponseHeader[par_cName] := par_cValue
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GetCookieValue(par_cName)
-    local cCookie
-    local nPos
-    if !::LoadedRequestCookies
-        ::LoadedRequestCookies := .t.
-        for each cCookie in hb_ATokens(::GetEnvironment("HTTP_COOKIE"),";",.f.,.f.)
-            nPos := at("=",cCookie)
-            if nPos > 1  // Name may not be empty
-                ::RequestCookies[allt(left(cCookie,nPos-1))] := allt(substr(cCookie,nPos+1))
-            endif
-        endfor
-    endif
+local l_cCookie
+local l_nPos
+if !::LoadedRequestCookies
+    ::LoadedRequestCookies := .t.
+    for each l_cCookie in hb_ATokens(::GetEnvironment("HTTP_COOKIE"),";",.f.,.f.)
+        l_nPos := at("=",l_cCookie)
+        if l_nPos > 1  // Name may not be empty
+            ::RequestCookies[allt(left(l_cCookie,l_nPos-1))] := allt(substr(l_cCookie,l_nPos+1))
+        endif
+    endfor
+endif
 return hb_HGetDef(::RequestCookies, par_cName, "")
 //-----------------------------------------------------------------------------------------------------------------
 method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)
-    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    //Will mark the cookie to expire 364 days from now and site root path
-    local nExpireDays := hb_defaultValue(par_nExpireDays,365)
-    local cPath       := hb_defaultValue(@par_cPath,"/")
-    
-    //Added the cookie name to the Header Name since using a Hash array
-    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
-                     iif(empty(nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+nExpireDays))+;
-                     iif(empty(cPath),"","; Path="+cPath) )
+//See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+//Will mark the cookie to expire 364 days from now and site root path
+local l_nExpireDays := hb_defaultValue(par_nExpireDays,365)
+local l_cPath       := hb_defaultValue(@par_cPath,"/")
+
+//Added the cookie name to the Header Name since using a Hash array
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+                    iif(empty(l_nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+l_nExpireDays))+;
+                    iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method SetSessionCookieValue(par_cName,par_cValue,par_cPath)
-    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    //Will mark the cookie to expire 364 days from now and site root path
-    local cPath       := hb_defaultValue(@par_cPath,"/")
-    
-    //Added the cookie name to the Header Name since using a Hash array
-    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
-                     iif(empty(cPath),"","; Path="+cPath) )
+//See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+//Will mark the cookie to expire 364 days from now and site root path
+local l_cPath       := hb_defaultValue(@par_cPath,"/")
+
+//Added the cookie name to the Header Name since using a Hash array
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+                    iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method DeleteCookie(par_cName,par_cPath)
-    //See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
-    //Will mark the cookie to expire 364 days from now and site root path
-    local cPath       := hb_defaultValue(@par_cPath,"/")
-    
-    //Added the cookie name to the Header Name since using a Hash array
-    ::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+;
-                     "; Expires=0"+;
-                     iif(empty(cPath),"","; Path="+cPath) )
+//See  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+//Will mark the cookie to expire 364 days from now and site root path
+local l_cPath       := hb_defaultValue(@par_cPath,"/")
+
+//Added the cookie name to the Header Name since using a Hash array
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+;
+                    "; Expires=0"+;
+                    iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method Redirect(par_cURL)
-    ::SetContentType("text/html")
-    // ::SetHeaderValue("Status","303 OK")
-    ::SetHeaderValue("Status","303 See Other")
-    ::SetHeaderValue("Location",par_cURL)
+::SetContentType("text/html")
+// ::SetHeaderValue("Status","303 OK")
+::SetHeaderValue("Status","303 See Other")
+::SetHeaderValue("Location",par_cURL)
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method WriteOutput() class hb_Fcgi
-    local cHeader
-    local cHeaderName,cHeaderValue
-    local nPos
-    local nRedirected := 0
+local l_cHeader
+local l_cHeaderName
+local l_cHeaderValue
+local l_nPos
+local l_nRedirected := 0
 
-    hb_Fcgx_Print("Content-type: "+iif(empty(::ContentType),::DefaultContentType,::ContentType)+CRLF)
-    for each cHeader in ::ResponseHeader
-        cHeaderName  := cHeader:__enumKey()
-        cHeaderValue := cHeader:__enumValue()
-        do case
-        case cHeaderName == "Location"
-            nRedirected++
-        case cHeaderName == "Status" .and. left(cHeaderValue,1) == "3"
-            nRedirected++
-        endcase
-        nPos := at("~",cHeaderName)  // To handle multiple Set-Cookies header entries
-        if nPos > 0
-            cHeaderName := left(cHeaderName,nPos-1)
-        endif
-        hb_Fcgx_Print(cHeaderName+":"+cHeaderValue+CRLF)
-    endfor
-    hb_Fcgx_Print(CRLF)   //Extra CRLF to notify end of header
-    if nRedirected < 2
-        // hb_Fcgx_Print(::OutputBuffer)
-        hb_Fcgx_BPrint(::OutputBuffer)
-    // else
-    //     SendToDebugView("WriteOutput - Dropped Output due to redirect")
+hb_Fcgx_Print("Content-type: "+iif(empty(::ContentType),::DefaultContentType,::ContentType)+CRLF)
+for each l_cHeader in ::ResponseHeader
+    l_cHeaderName  := l_cHeader:__enumKey()
+    l_cHeaderValue := l_cHeader:__enumValue()
+    do case
+    case l_cHeaderName == "Location"
+        l_nRedirected++
+    case l_cHeaderName == "Status" .and. left(l_cHeaderValue,1) == "3"
+        l_nRedirected++
+    endcase
+    l_nPos := at("~",l_cHeaderName)  // To handle multiple Set-Cookies header entries
+    if l_nPos > 0
+        l_cHeaderName := left(l_cHeaderName,l_nPos-1)
     endif
-    ::OutputBuffer = ""
+    hb_Fcgx_Print(l_cHeaderName+":"+l_cHeaderValue+CRLF)
+endfor
+hb_Fcgx_Print(CRLF)   //Extra CRLF to notify end of header
+if l_nRedirected < 2
+    // hb_Fcgx_Print(::OutputBuffer)
+    hb_Fcgx_BPrint(::OutputBuffer)
+// else
+//     SendToDebugView("WriteOutput - Dropped Output due to redirect")
+endif
+::OutputBuffer = ""
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
 method GenerateRandomString(par_nLength,par_cPossibleChars) class hb_Fcgi
-    local cString := ""
-    local nPossibleCharsLen := len(par_cPossibleChars)
-    local nCounter
-    for nCounter := 1 to par_nLength
-        cString += chr(hb_BPeek(par_cPossibleChars,hb_RandomInt(1,nPossibleCharsLen)))
-    endfor
-return cString
+local l_cString := ""
+local l_nPossibleCharsLen := len(par_cPossibleChars)
+local l_nCounter
+for l_nCounter := 1 to par_nLength
+    l_cString += chr(hb_BPeek(par_cPossibleChars,hb_RandomInt(1,l_nPossibleCharsLen)))
+endfor
+return l_cString
 //-----------------------------------------------------------------------------------------------------------------
 method ClearOutputBuffer() class hb_Fcgi
-    ::OutputBuffer := ""
+::OutputBuffer := ""
 return nil
 //-----------------------------------------------------------------------------------------------------------------
 method TraceAdd(par_cInfo) class hb_Fcgi
-    Aadd(::aTrace,par_cInfo)
+Aadd(::aTrace,par_cInfo)
 return nil
 //-----------------------------------------------------------------------------------------------------------------
 method TraceList(par_nListMethod) class hb_Fcgi
-    local nLoop
-    local cResult := []
-    if len(::aTrace) > 0
-        do case
-        case par_nListMethod == 1   // Comma Delimited
-            for nLoop := 1 to Len(::aTrace)
-                if !empty(cResult)
-                    cResult += ","
-                endif
-                cResult += ::aTrace[nLoop]
-            endfor
-        case par_nListMethod == 2   // CRLF
-            for nLoop := 1 to Len(::aTrace)
-                if !empty(cResult)
-                    cResult += CRLF
-                endif
-                cResult += ::aTrace[nLoop]
-            endfor
-        case par_nListMethod == 3   // <br>
-            for nLoop := 1 to Len(::aTrace)
-                if !empty(cResult)
-                    cResult += [<br>]
-                endif
-                cResult += ::aTrace[nLoop]
-            endfor
-        case par_nListMethod == 4   // <ol>
-            cResult += [<ol>]
-            for nLoop := 1 to Len(::aTrace)
-                cResult += [<li>]+::aTrace[nLoop]+[</li>]
-            endfor
-            cResult += [</ol>]
-        endcase
-    endif
-return cResult
+local l_nLoop
+local l_cResult := []
+if len(::aTrace) > 0
+    do case
+    case par_nListMethod == 1   // Comma Delimited
+        for l_nLoop := 1 to Len(::aTrace)
+            if !empty(l_cResult)
+                l_cResult += ","
+            endif
+            l_cResult += ::aTrace[l_nLoop]
+        endfor
+    case par_nListMethod == 2   // CRLF
+        for l_nLoop := 1 to Len(::aTrace)
+            if !empty(l_cResult)
+                l_cResult += CRLF
+            endif
+            l_cResult += ::aTrace[l_nLoop]
+        endfor
+    case par_nListMethod == 3   // <br>
+        for l_nLoop := 1 to Len(::aTrace)
+            if !empty(l_cResult)
+                l_cResult += [<br>]
+            endif
+            l_cResult += ::aTrace[l_nLoop]
+        endfor
+    case par_nListMethod == 4   // <ol>
+        l_cResult += [<ol>]
+        for l_nLoop := 1 to Len(::aTrace)
+            l_cResult += [<li>]+::aTrace[l_nLoop]+[</li>]
+        endfor
+        l_cResult += [</ol>]
+    endcase
+endif
+return l_cResult
 //=================================================================================================================
-function SendToDebugView(cStep,xValue)
+function SendToDebugView(par_cStep,par_xValue)
 
 #ifdef DEBUGVIEW
 
-    local cTypeOfxValue
-    local cValue := "Unknown Value"
+    local l_cTypeOfxValue
+    local l_cValue := "Unknown Value"
 
-// altd()
-
-    cTypeOfxValue = ValType(xValue)
+    l_cTypeOfxValue = ValType(par_xValue)
     
     do case
     case pcount() < 2
-        cValue := ""
-    case cTypeOfxValue $ "AH" // Array or Hash
-        cValue := hb_ValToExp(xValue)
-    case cTypeOfxValue == "B" // Block
+        l_cValue := ""
+    case l_cTypeOfxValue $ "AH" // Array or Hash
+        l_cValue := hb_ValToExp(par_xValue)
+    case l_cTypeOfxValue == "B" // Block
         //Not coded yet
-    case cTypeOfxValue == "C" // Character (string)
-        cValue := xValue
+    case l_cTypeOfxValue == "C" // Character (string)
+        l_cValue := par_xValue
         //Not coded yet
-    case cTypeOfxValue == "D" // Date
-        cValue := DTOC(xValue)
-    case cTypeOfxValue == "L" // Logical
-        cValue := IIF(xValue,"True","False")
-    case cTypeOfxValue == "M" // Memo
+    case l_cTypeOfxValue == "D" // Date
+        l_cValue := DTOC(par_xValue)
+    case l_cTypeOfxValue == "L" // Logical
+        l_cValue := IIF(par_xValue,"True","False")
+    case l_cTypeOfxValue == "M" // Memo
         //Not coded yet
-    case cTypeOfxValue == "N" // Numeric
-        cValue := alltrim(str(xValue))
-    case cTypeOfxValue == "O" // Object
+    case l_cTypeOfxValue == "N" // Numeric
+        l_cValue := alltrim(str(par_xValue))
+    case l_cTypeOfxValue == "O" // Object
         //Not coded yet
-    case cTypeOfxValue == "P" // Pointer
+    case l_cTypeOfxValue == "P" // Pointer
         //Not coded yet
-    case cTypeOfxValue == "S" // Symbol
+    case l_cTypeOfxValue == "S" // Symbol
         //Not coded yet
-    case cTypeOfxValue == "U" // NIL
-        cValue := "Null"
+    case l_cTypeOfxValue == "U" // NIL
+        l_cValue := "Null"
     endcase
     
-    cValue := strtran(cValue,chr(13)+chr(10),[<br>])
-    cValue := strtran(cValue,chr(10),[<br>])
-    cValue := strtran(cValue,chr(13),[<br>])
+    l_cValue := strtran(l_cValue,chr(13)+chr(10),[<br>])
+    l_cValue := strtran(l_cValue,chr(10),[<br>])
+    l_cValue := strtran(l_cValue,chr(13),[<br>])
 
-    if empty(cValue)
-        hb_Fcgx_OutputDebugString("[Harbour] "+cStep)
+    if empty(l_cValue)
+        hb_Fcgx_OutputDebugString("[Harbour] "+par_cStep)
     else
-        hb_Fcgx_OutputDebugString("[Harbour] "+cStep+" - "+cValue)
+        hb_Fcgx_OutputDebugString("[Harbour] "+par_cStep+" - "+l_cValue)
     endif
 
 #endif
 
 return .T.
 //=================================================================================================================
-function SendToClipboard(cText)
+function SendToClipboard(par_cText)
 //#if defined(_WIN32) || defined(_WIN64)   // Will not work since this is a PRG So will use the DEBUGVIEW setting.
 
 #ifdef CLIPBOARDSUPPORT
-    wvt_SetClipboard(cText)
+    wvt_SetClipboard(par_cText)
 #endif
 
 return .T.
 //=================================================================================================================
-function FcgiGetErrorInfo( oError,cCode ,nProgramStackStart)  //From mod_harbour <-> apache.prg
+function FcgiGetErrorInfo( par_oError,par_cCode ,par_nProgramStackStart)  //From mod_harbour <-> apache.prg
+local l_n
+local l_cInfo := "Error: " + par_oError:description + "<br>"
+local l_cProcname
+local l_aLines
+local l_nLine
+local l_lPrintedSourceHeader := .f.
 
-    local n
-    local cInfo := "Error: " + oError:description + "<br>"
-    local cProcname
-    local aLines
-    local nLine
-    local lPrintedSourceHeader := .f.
+hb_default(@par_nProgramStackStart ,1)
 
-    hb_default(@nProgramStackStart ,1)
+if ! Empty( par_oError:operation )
+    l_cInfo += "operation: " + par_oError:operation + "<br>"
+endif   
+
+if ! Empty( par_oError:filename )
+    l_cInfo += "filename: " + par_oError:filename + "<br>"
+endif   
+
+if ValType( par_oError:Args ) == "A"
+    for l_n = 1 to Len( par_oError:Args )
+        l_cInfo += "[" + Str( l_n, 4 ) + "] = " + ValType( par_oError:Args[ l_n ] ) + ;
+                "   " + FcgiValToChar( par_oError:Args[ l_n ] ) + "<br>"
+    next
+endif	
     
-    if ! Empty( oError:operation )
-        cInfo += "operation: " + oError:operation + "<br>"
-    endif   
+l_n = par_nProgramStackStart
+while .t.
+    l_cProcname := upper(ProcName( l_n ))
+    do case
+    case empty(l_cProcname) .or. l_cProcname == "HB_HRBDO" 
+        exit
+    case right(l_cProcname,8) == ":ONERROR"
+    case l_cProcname == "ERRORBLOCKCODE"  
+    case right(l_cProcname,10) == "__DBGENTRY"
+    case right(l_cProcname,11) == "HB_FCGI_NEW"
+    otherwise
+        l_cInfo += "Called From: " + If( ! Empty( ProcFile( l_n ) ), ProcFile( l_n ) + ", ", "" ) + l_cProcname + ", line: " + AllTrim( Str( ProcLine( l_n ) ) ) + "<br>"
+    endcase
+    l_n++
+end
 
-    if ! Empty( oError:filename )
-        cInfo += "filename: " + oError:filename + "<br>"
-    endif   
-
-    if ValType( oError:Args ) == "A"
-        for n = 1 to Len( oError:Args )
-            cInfo += "[" + Str( n, 4 ) + "] = " + ValType( oError:Args[ n ] ) + ;
-                    "   " + FcgiValToChar( oError:Args[ n ] ) + "<br>"
+if ! Empty( par_cCode )
+    l_aLines = hb_ATokens( par_cCode, Chr( 10 ) )
+    l_n = 1
+    l_nLine := 0
+    while( l_nLine := ProcLine( ++l_n ) ) == 0   //The the line number in the last on the stack of programs
+    end   
+    if l_nLine > 0
+        for l_n = Max( l_nLine - 2, 1 ) to Min( l_nLine + 2, Len( l_aLines ) )
+            if !l_lPrintedSourceHeader
+                l_cInfo += "<br><b>Source:</b><br>"
+                l_lPrintedSourceHeader := .t.
+            endif
+            l_cInfo += "<nobr>"+StrZero( l_n, 5 ) + If( l_n == l_nLine, " =>", ": " ) + FcgiGetErrorInfo_HtmlEncode( l_aLines[ l_n ] ) + "</nobr><br>" //+ CRLF
         next
-    endif	
+    endif
+endif
+
+return l_cInfo
+//=================================================================================================================
+function FcgiGetErrorInfo_HtmlEncode( par_cString )
+local l_cChar
+local l_cResult := "" 
+
+for each l_cChar in par_cString
+    do case
+    case l_cChar == "<"
+        l_cChar = "&lt;"
+
+    case l_cChar == '>'
+        l_cChar = "&gt;"     
         
-    n = nProgramStackStart
-    while .t.
-        cProcname := upper(ProcName( n ))
-        do case
-        case empty(cProcname) .or. cProcname == "HB_HRBDO" 
-            exit
-        case right(cProcname,8) == ":ONERROR"
-        case cProcname == "ERRORBLOCKCODE"  
-        case right(cProcname,10) == "__DBGENTRY"
-        case right(cProcname,11) == "HB_FCGI_NEW"
-        otherwise
-            cInfo += "Called From: " + If( ! Empty( ProcFile( n ) ), ProcFile( n ) + ", ", "" ) + cProcname + ", line: " + AllTrim( Str( ProcLine( n ) ) ) + "<br>"
-        endcase
-        n++
-    end
+    case l_cChar == "&"
+        l_cChar = "&amp;"     
 
-    if ! Empty( cCode )
-        aLines = hb_ATokens( cCode, Chr( 10 ) )
-        n = 1
-        nLine := 0
-        while( nLine := ProcLine( ++n ) ) == 0   //The the line number in the last on the stack of programs
-        end   
-        if nLine > 0
-            for n = Max( nLine - 2, 1 ) to Min( nLine + 2, Len( aLines ) )
-                if !lPrintedSourceHeader
-                    cInfo += "<br><b>Source:</b><br>"
-                    lPrintedSourceHeader := .t.
-                endif
-                cInfo += "<nobr>"+StrZero( n, 5 ) + If( n == nLine, " =>", ": " ) + FcgiGetErrorInfo_HtmlEncode( aLines[ n ] ) + "</nobr><br>" //+ CRLF
-            next
-        endif
-    endif      
+    case l_cChar == '"'
+        l_cChar = "&quot;"    
+        
+    case l_cChar == " "
+        l_cChar = "&nbsp;"               
+    endcase
+    l_cResult += l_cChar 
+endfor
 
- return cInfo
-
-function FcgiGetErrorInfo_HtmlEncode( cString )
-   
-   local cChar, cResult := "" 
-
-   for each cChar in cString
-      do case
-      case cChar == "<"
-            cChar = "&lt;"
-
-      case cChar == '>'
-            cChar = "&gt;"     
-            
-      case cChar == "&"
-            cChar = "&amp;"     
-
-      case cChar == '"'
-            cChar = "&quot;"    
-            
-      case cChar == " "
-            cChar = "&nbsp;"               
-      endcase
-      cResult += cChar 
-   next
-    
-return cResult   
+return l_cResult   
 
 //=================================================================================================================
-function FcgiValToChar( u )  //Adapted From mod_harbour <-> apache.prg
-    local cResult
+function FcgiValToChar( par_u )  //Adapted From mod_harbour <-> apache.prg
+local l_cResult
+
+switch ValType( par_u )
+case "C"
+    l_cResult = par_u
+    exit
+case "D"
+    l_cResult = DToC( par_u )
+    exit
+case "L"
+    l_cResult = If( par_u, ".T.", ".F." )
+    exit
+case "N"
+    l_cResult = AllTrim( Str( par_u ) )
+    exit
+case "A"
+    l_cResult = hb_ValToExp( par_u )
+    exit
+case "P"
+    l_cResult = "(P)" 
+    exit
+case "H"
+    l_cResult = hb_ValToExp( par_u )
+    exit
+case "U"
+    l_cResult = "nil"
+    exit
+otherwise
+    l_cResult = "type not supported yet in function ValToChar()"
+endswitch
  
-    switch ValType( u )
-        case "C"
-            cResult = u
-            exit
-        case "D"
-            cResult = DToC( u )
-            exit
-        case "L"
-            cResult = If( u, ".T.", ".F." )
-            exit
-        case "N"
-            cResult = AllTrim( Str( u ) )
-            exit
-        case "A"
-            cResult = hb_ValToExp( u )
-            exit
-        case "P"
-            cResult = "(P)" 
-            exit
-        case "H"
-            cResult = hb_ValToExp( u )
-            exit
-        case "U"
-            cResult = "nil"
-            exit
-        otherwise
-            cResult = "type not supported yet in function ValToChar()"
-    endswitch
- 
- return cResult   
+ return l_cResult   
 //=================================================================================================================
 function FcgiPrepFieldForValue( par_FieldValue ) 
 // for now calling vfp_StrReplace, which is case insensitive ready version of hb_StrReplace
@@ -945,67 +970,66 @@ return vfp_StrReplace(par_FieldValue,{;
 
 //The VFP_ScanStack is to be used in conjuntion with the "#command SCAN" and "#command ENDSCAN"
 function VFP_ScanStack(par_action)    //action = "push" "pop" "scan" , "clear" (empty the entire stack)
-local xResult := nil
-static iTop   := 0
-static aStack := {}
+local l_xResult := nil
+static s_iTop   := 0
+static s_aStack := {}
 
 hb_default( @par_action, "scan" )
 
 switch par_action
-    case "push"
-        iTop++
-        if len(aStack) < iTop
-            ASize( aStack, iTop )
-        endif
-        aStack[iTop] := {select(),.t.} // Record the current work area and flag to know during "scan" calls if they are going to be the initial "locate" or should be "continue"
-        xResult := nil
-        exit
-    case "pop"
-        iTop--
-        //No need to reduce the size of aStack since will most likely be increased again
-        exit
-    case "clear"
-        iTop   := 0
-        ASize( aStack, 0 )
-        exit
-    otherwise
-        select (aStack[iTop,1])
-        xResult := aStack[iTop,2]
-        aStack[iTop,2] := .f.
-        exit
+case "push"
+    s_iTop++
+    if len(s_aStack) < s_iTop
+        ASize( s_aStack, s_iTop )
+    endif
+    s_aStack[s_iTop] := {select(),.t.} // Record the current work area and flag to know during "scan" calls if they are going to be the initial "locate" or should be "continue"
+    l_xResult := nil
+    exit
+case "pop"
+    s_iTop--
+    //No need to reduce the size of s_aStack since will most likely be increased again
+    exit
+case "clear"
+    s_iTop   := 0
+    ASize( s_aStack, 0 )
+    exit
+otherwise
+    select (s_aStack[s_iTop,1])
+    l_xResult := s_aStack[s_iTop,2]
+    s_aStack[s_iTop,2] := .f.
+    exit
 endswitch
 
-return xResult
+return l_xResult
 //=================================================================================================================
 function VFP_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
+local l_lAdditive
+local l_nBytesWritten := 0
+local l_nFileHandle
 
-local lAdditive
-local nBytesWritten := 0
-local nFileHandle
-
-lAdditive := hb_defaultValue(par_lAdditive,.f.)
+l_lAdditive := hb_defaultValue(par_lAdditive,.f.)
 
 if hb_FileExists(par_cFileName)
-    if lAdditive
-        nFileHandle := FOpen(par_cFileName,FO_WRITE)
-        FSeek(nFileHandle,0,FS_END)  // go to the end of file
+    if l_lAdditive
+        l_nFileHandle := FOpen(par_cFileName,FO_WRITE)
+        FSeek(l_nFileHandle,0,FS_END)  // go to the end of file
     else
         if ferase(par_cFileName) == 0
-            nFileHandle := FCreate(par_cFileName)
+            l_nFileHandle := FCreate(par_cFileName)
         else
-            nFileHandle := -1
+            l_nFileHandle := -1
         endif
     endif
 else
-    nFileHandle := FCreate(par_cFileName)
+    l_nFileHandle := FCreate(par_cFileName)
 endif
 
-if nFileHandle >= 0
-    nBytesWritten := fwrite(nFileHandle,par_cExpression)
-    fclose(nFileHandle)
+if l_nFileHandle >= 0
+    l_nBytesWritten := fwrite(l_nFileHandle,par_cExpression)
+    fclose(l_nFileHandle)
 endif
 
-return nBytesWritten
+return l_nBytesWritten
 
 #endif //USING_HB_VFP
 //=================================================================================================================
@@ -1019,21 +1043,21 @@ function DecodeURIComponent(par_cString)
 #else
     local cRet := ""
     local i
-    local cChar
+    local l_cChar
 
 	FOR i := 1 TO Len( par_cString )
-		cChar := SubStr( par_cString, i, 1 )
+		l_cChar := SubStr( par_cString, i, 1 )
 		DO CASE
-		CASE cChar == "+"
+		CASE l_cChar == "+"
 			cRet += " "
 
-		CASE cChar == "%"
+		CASE l_cChar == "%"
 			i++
 			cRet += Chr( hb_HexToNum( SubStr( par_cString, i, 2 ) ) )
 			i++
 
 		OTHERWISE
-			cRet += cChar
+			cRet += l_cChar
 
 		ENDCASE
 
@@ -1054,28 +1078,28 @@ function EncodeURIComponent(par_cString,par_lComplete)
 
 	RETURN TIPENCODERURL_ENCODE( cpar_cStringString, par_lComplete )
 #else
-	local cRet := "", i, nVal, cChar
+	local cRet := "", i, nVal, l_cChar
 
 	__defaultNIL( @par_lComplete, .T. )
 
 	for i := 1 to Len( par_cString )
-		cChar := SubStr( par_cString, i, 1 )
+		l_cChar := SubStr( par_cString, i, 1 )
 		DO CASE
-		CASE cChar == " "
+		CASE l_cChar == " "
 			cRet += "+"
 
-		CASE ( cChar >= "A" .AND. cChar <= "Z" ) .OR. ;
-				( cChar >= "a" .AND. cChar <= "z" ) .OR. ;
-				( cChar >= "0" .AND. cChar <= "9" ) .OR. ;
-				cChar == "." .OR. cChar == "," .OR. cChar == "&" .OR. ;
-				cChar == "/" .OR. cChar == ";" .OR. cChar == "_"
-			cRet += cChar
+		CASE ( l_cChar >= "A" .AND. l_cChar <= "Z" ) .OR. ;
+				( l_cChar >= "a" .AND. l_cChar <= "z" ) .OR. ;
+				( l_cChar >= "0" .AND. l_cChar <= "9" ) .OR. ;
+				l_cChar == "." .OR. l_cChar == "," .OR. l_cChar == "&" .OR. ;
+				l_cChar == "/" .OR. l_cChar == ";" .OR. l_cChar == "_"
+			cRet += l_cChar
 
-		CASE iif( ! par_lComplete, cChar == ":" .OR. cChar == "?" .OR. cChar == "=", .F. )
-			cRet += cChar
+		CASE iif( ! par_lComplete, l_cChar == ":" .OR. l_cChar == "?" .OR. l_cChar == "=", .F. )
+			cRet += l_cChar
 
 		OTHERWISE
-			nVal := Asc( cChar )
+			nVal := Asc( l_cChar )
 			cRet += "%" + hb_NumToHex( nVal )
             
 		ENDCASE
@@ -1087,68 +1111,68 @@ function FcgiLogger(par_nAction,par_cString,...)
 //par_nAction, 1=Reset,2=Add Line,3=Append To Line,4=Save to File,5=Save to File and Reset
 //par_cString, if par_nAction = 2 or 3 the text to send out, if par_nAction = 4 the full file name to write out.
 
-static cBuffer := ""
-local nPCount
-local cCallBuffer
-local nPos
+static s_cBuffer := ""
+local l_nPCount
+local l_cCallBuffer
+local l_nPos
 // local nByte
-local nChar
+local l_nChar
 
 switch par_nAction
 case 1  // Reset
-    cBuffer := ""
+    s_cBuffer := ""
     exit
 case 2  // Add Line, same as ? <expr>
-    if len(cBuffer) > 0
-        cBuffer += chr(13)+chr(10)
+    if len(s_cBuffer) > 0
+        s_cBuffer += chr(13)+chr(10)
     endif
 case 3  // Append to Line, same as ?? <expr>
-    for nPCount := 2 to pcount()
-        if nPCount > 2
-            cBuffer += " "
+    for l_nPCount := 2 to pcount()
+        if l_nPCount > 2
+            s_cBuffer += " "
         endif
-        cCallBuffer := hb_ValToStr(hb_PValue(nPCount))
-        // for nPos := 1 to len(cCallBuffer)
-        //     nByte := hb_BPeek(cCallBuffer,nPos)
+        l_cCallBuffer := hb_ValToStr(hb_PValue(l_nPCount))
+        // for l_nPos := 1 to len(l_cCallBuffer)
+        //     nByte := hb_BPeek(l_cCallBuffer,l_nPos)
         //     if nByte < 32 //.or. nByte > 126
-        //         hb_BPoke(@cCallBuffer,nPos,63)   // to replace invalid html char with "?"
+        //         hb_BPoke(@l_cCallBuffer,l_nPos,63)   // to replace invalid html char with "?"
         //     endif
         // endfor
 
-        for nPos := 1 to hb_utf8Len(cCallBuffer)
-            nChar := hb_utf8Peek(cCallBuffer,nPos)
-            if nChar < 32
-                hb_utf8Poke(@cCallBuffer,nPos,hb_utf8Asc("?"))   // to replace invalid html char with "?"
+        for l_nPos := 1 to hb_utf8Len(l_cCallBuffer)
+            l_nChar := hb_utf8Peek(l_cCallBuffer,l_nPos)
+            if l_nChar < 32
+                hb_utf8Poke(@l_cCallBuffer,l_nPos,hb_utf8Asc("?"))   // to replace invalid html char with "?"
             endif
         endfor
 
-        cBuffer += cCallBuffer
+        s_cBuffer += l_cCallBuffer
     endfor
     exit
 case 4
 case 5
-    vfp_StrToFile(cBuffer,par_cString)
+    vfp_StrToFile(s_cBuffer,par_cString)
     if par_nAction == 5
-        cBuffer := ""
+        s_cBuffer := ""
     endif
 endswitch
 
 return nil
 //=================================================================================================================
-function FcgiCookieTimeToExpires(tDateTime)
-local cUTCGMT
-local cDow
-local dDate
-local cMonth
-local cTime := ""
+function FcgiCookieTimeToExpires(par_tDateTime)
+local l_cUTCGMT
+local l_cDow
+local l_dDate
+local l_cMonth
+local l_cTime := ""
 // See https://stackoverflow.com/questions/11136372/which-date-formats-can-i-use-when-specifying-the-expiry-date-when-setting-a-cook
-dDate = hb_TtoD(hb_TSToUTC(tDateTime),@cTime,"hh:mm:ss")
-cDow   := {"Sun","Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}[dow(dDate)]
-cMonth := {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}[Month(dDate)]
+l_dDate = hb_TtoD(hb_TSToUTC(par_tDateTime),@l_cTime,"hh:mm:ss")
+l_cDow   := {"Sun","Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}[dow(l_dDate)]
+l_cMonth := {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}[Month(l_dDate)]
 
-cUTCGMT := cDow + ", " + Trans(Day(dDate)) + " " + cMonth + " " + Trans(Year(dDate)) + " " + cTime + " GMT"
+l_cUTCGMT := l_cDow + ", " + Trans(Day(l_dDate)) + " " + l_cMonth + " " + Trans(Year(l_dDate)) + " " + l_cTime + " GMT"
 
 //  UTC/GMT format is required by cookies e.g. Sun, 15 Jul 2012 00:00:01 GMT
 
-return cUTCGMT
+return l_cUTCGMT
 //=================================================================================================================

@@ -1,5 +1,9 @@
 # Harbour FastCGI - Change Log
 
+## 11/05/2023 v 1.6
+* Support to "Content Type" of "application/json".
+* Code refactoring to align coding standards to other Repos in Eric Lendvai Git account.
+
 ## 09/09/2023 v 1.5
 * Minor tweak in redirect method.
 
