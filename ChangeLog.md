@@ -1,5 +1,17 @@
 # Harbour FastCGI - Change Log
 
+## 01/07/2024 v 1.7
+* Due to a bug in Apache (non MS Windows), which would call the FastCGI exe for missing resource files, like favicon.ico, or any files with an extension, the new engine will skip any pages with an extension. DO NOT use extensions in page names, those are reserved for resource files, like .ico, .css, .js, .txt, .html, ...
+* Please update any main loop by testing the new property SkipRequest as follow:
+```
+do while oFcgi:Wait()
+    if !oFcgi:SkipRequest
+        oFcgi:OnRequest()
+    endif
+enddo
+```
+Please not the RequestCount property will not be incremented for missing resource files requests.
+
 ## 11/05/2023 v 1.6
 * Support to "Content Type" of "application/json".
 * Code refactoring to align coding standards to other Repos in Eric Lendvai Git account.

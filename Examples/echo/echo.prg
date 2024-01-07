@@ -15,7 +15,9 @@ private oFcgi
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
 
 do while oFcgi:Wait()
-    oFcgi:OnRequest()
+    if !oFcgi:SkipRequest
+        oFcgi:OnRequest()
+    endif
 enddo
 
 SendToDebugView("Done")
@@ -65,6 +67,7 @@ altd()
     cHtml += [<tr><td>Client IP</td>]    +[<td>]+::RequestSettings["ClientIP"]+[</td></tr>]
     cHtml += [<tr><td>Build Info</td>]   +[<td>]+hb_buildinfo()+[</td></tr>]
     cHtml += [</table>]
+
     ::Print(cHtml)
 
     // ::Print([<p>]+::GenerateRandomString(16,"01234567890ABCDEF")+[</p>])

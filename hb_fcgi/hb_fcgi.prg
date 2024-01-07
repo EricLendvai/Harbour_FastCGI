@@ -95,6 +95,7 @@ class hb_Fcgi
         data   PathWebsite                init ""      READONLY   //website Folder
         data   PathSession                init ""      READONLY   //Folder of Session files
         data   RequestSettings            init {=>}    READONLY   //Used to assist parsing the Request URL aka Full URI (not the way apache defines URI, see https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
+        data   SkipRequest                init .f.     READONLY   //Set in the wait() method to skip resource files
 endclass
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -181,7 +182,9 @@ local l_nPos
 static tRequestStartTime := NIL
 local tRequestEndTime
 
-if ::ProcessingRequest
+::SkipRequest := .f.
+
+if ::ProcessingRequest  //We send the output when we come back into the main loop, and before we go in hb_Fcgx_Wait() mode
     ::Finish()
 endif
 
@@ -289,6 +292,19 @@ if ::ProcessingRequest
 else
     if ::RequestCount > 0
         ::OnShutdown()
+    endif
+endif
+
+// SendToDebugView("v 002  page = ",l_cPage)
+
+if l_lProcessRequest
+    //If a resource file is requested, like for example favicon.ico, and the file is not present, under Apache the Harbour app will be called (bug imho). So a web page should not have an extension, and therefore skip the request.
+    l_nPos := hb_RAt(".",l_cPage)
+    if !empty(l_nPos)
+        ::SkipRequest := .t.
+        ::SetHeaderValue("Status","404 Not found by Harbour FastCGI")
+        ::RequestCount--  // To undo the request counter increment.
+        // SendToDebugView("Status 404 Not found")
     endif
 endif
 
