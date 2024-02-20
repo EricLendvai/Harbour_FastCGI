@@ -1,6 +1,6 @@
-#ifndef USING_HB_VFP
+#ifndef USING_HB_EL
 
-//vfp_StrReplace is case insensitive ready version of hb_StrReplace
+//el_StrReplace is case insensitive ready version of hb_StrReplace
 
 /*
 	* hb_StrReplace()
@@ -63,7 +63,7 @@
 /* hb_StrReplace( <cString>, [ <cSource> | <acSource> | <hReplace> ], [ <cDest> | <acDest> ] ,nFlag)
 	*    --> <cResult>
 	*/
-HB_FUNC( VFP_STRREPLACE )
+HB_FUNC( EL_STRREPLACE )
 {
 	PHB_ITEM pText = hb_param( 1, HB_IT_STRING );
 	PHB_ITEM pSrc  = hb_param( 2, HB_IT_STRING | HB_IT_ARRAY |
@@ -261,5 +261,5 @@ HB_FUNC( VFP_STRREPLACE )
 		hb_errRT_BASE_SubstR( EG_ARG, 3012, NULL, HB_ERR_FUNCNAME, HB_ERR_ARGS_BASEPARAMS );
 }
 
-#endif //USING_HB_VFP
+#endif //USING_HB_EL
  

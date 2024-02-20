@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 02/19/2024 v 1.8
+* Code refactored to refer to Harbour_EL routines instead of Harbour_VFP
+
 ## 01/07/2024 v 1.7
 * Due to a bug in Apache (non MS Windows), which would call the FastCGI exe for missing resource files, like favicon.ico, or any files with an extension, the new engine will skip any pages with an extension. DO NOT use extensions in page names, those are reserved for resource files, like .ico, .css, .js, .txt, .html, ...
 * Please update any main loop by testing the new property SkipRequest as follow:

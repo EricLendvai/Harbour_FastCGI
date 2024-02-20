@@ -971,21 +971,21 @@ endswitch
  return l_cResult   
 //=================================================================================================================
 function FcgiPrepFieldForValue( par_FieldValue ) 
-// for now calling vfp_StrReplace, which is case insensitive ready version of hb_StrReplace
-return vfp_StrReplace(par_FieldValue,{;
-                                        [&lt;] => [&amp;lt;] ,;
-                                        [&gt;] => [&amp;gt;] ,;
-                                        ["]    => [&quot;]   ,;
-                                        [<]    => [&lt;]     ,;
-                                        [>]    => [&gt;]     ,;
-                                        chr(9) => [&#9;]      ;
+// for now calling el_StrReplace, which is case insensitive ready version of hb_StrReplace
+return el_StrReplace(par_FieldValue,{;
+                                      [&lt;] => [&amp;lt;] ,;
+                                      [&gt;] => [&amp;gt;] ,;
+                                      ["]    => [&quot;]   ,;
+                                      [<]    => [&lt;]     ,;
+                                      [>]    => [&gt;]     ,;
+                                      chr(9) => [&#9;]      ;
                                      },,1)
 //=================================================================================================================
-//If the web application is also using the Harbour_VFP contrib define the compiler variable USING_HB_VFP to avoid object redefinition.
-#ifndef USING_HB_VFP
+//If the web application is also using the Harbour_EL contrib define the compiler variable USING_HB_EL to avoid object redefinition.
+#ifndef USING_HB_EL
 
-//The VFP_ScanStack is to be used in conjuntion with the "#command SCAN" and "#command ENDSCAN"
-function VFP_ScanStack(par_action)    //action = "push" "pop" "scan" , "clear" (empty the entire stack)
+//The EL_ScanStack is to be used in conjuntion with the "#command SCAN" and "#command ENDSCAN"
+function EL_ScanStack(par_action)    //action = "push" "pop" "scan" , "clear" (empty the entire stack)
 local l_xResult := nil
 static s_iTop   := 0
 static s_aStack := {}
@@ -1018,7 +1018,7 @@ endswitch
 
 return l_xResult
 //=================================================================================================================
-function VFP_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
+function el_StrToFile(par_cExpression,par_cFileName,par_lAdditive)   //Partial implementation of VFP9's strtran(). The 3rd parameter only supports a logical
 local l_lAdditive
 local l_nBytesWritten := 0
 local l_nFileHandle
@@ -1047,7 +1047,7 @@ endif
 
 return l_nBytesWritten
 
-#endif //USING_HB_VFP
+#endif //USING_HB_EL
 //=================================================================================================================
 //The following a modified version of the "uhttpd_URLDecode" function from extras\httpsrv\_cgifunc.prg   Copyright 2009 Francesco Saverio Giudice <info / at / fsgiudice.com>
 //under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2, or (at your option) * any later version.
@@ -1167,7 +1167,7 @@ case 3  // Append to Line, same as ?? <expr>
     exit
 case 4
 case 5
-    vfp_StrToFile(s_cBuffer,par_cString)
+    el_StrToFile(s_cBuffer,par_cString)
     if par_nAction == 5
         s_cBuffer := ""
     endif

@@ -234,29 +234,29 @@ Edit local dns host file. Add "localsandbox" and "echo" to use 127.0.0.1
 To test if host file worked, using the ping command. To stop the command use CTRL+SHIFT+C or CTRL+C (depending of settings)
 	ping echo
 
-Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means home folder (specific to logged in user).
+Get the Harbour_FastCGI and Harbour_EL repos in a ~/GitHub folder.   "~" means home folder (specific to logged in user).
 
 	mkdir ~/GitHub
 	cd ~/GitHub
 	git clone https://github.com/EricLendvai/Harbour_FastCGI.git
-	git clone https://github.com/EricLendvai/Harbour_VFP.git
+	git clone https://github.com/EricLendvai/Harbour_EL.git
 	git clone https://github.com/EricLendvai/Harbour_ORM.git
 
 	$ sudo mkdir /etc/Harbour_FastCGI
 	$ sudo mkdir /etc/Harbour_websites
 	$ sudo mkdir /etc/Harbour_ORM
-	$ sudo mkdir /etc/Harbour_VFP
+	$ sudo mkdir /etc/Harbour_EL
 	
 	$ sudo chmod -R a+rwx /etc/Harbour_FastCGI
 	$ sudo chmod -R a+rwx /etc/Harbour_websites
 	$ sudo chmod -R a+rwx /etc/Harbour_ORM
-	$ sudo chmod -R a+rwx /etc/Harbour_VFP
+	$ sudo chmod -R a+rwx /etc/Harbour_EL
 
 	
-	$ sudo cp -r ~/GitHub/Harbour_VFP /etc
+	$ sudo cp -r ~/GitHub/Harbour_EL /etc
 	On purpose did not specify files patterns, so hidden folders are also copied. Then we can remove the .git folder
-	$ sudo rm -rf /etc/Harbour_VFP/.git
-	$ sudo chmod -R a+rwx /etc/Harbour_VFP/
+	$ sudo rm -rf /etc/Harbour_EL/.git
+	$ sudo chmod -R a+rwx /etc/Harbour_EL/
 
 	$ sudo cp -r ~/GitHub/Harbour_ORM /etc
 	$ sudo rm -rf /etc/Harbour_ORM/.git
@@ -267,11 +267,11 @@ Get the Harbour_FastCGI and Harbour_VFP repos in a ~/GitHub folder.   "~" means 
 	$ sudo chmod -R a+rwx /etc/Harbour_FastCGI/
 
 	-------------------------------------
-	code /etc/Harbour_VFP/hb_vfp_linux.code-workspace
+	code /etc/Harbour_EL/hb_el_linux.code-workspace
 	Use the <Compile Debug> and <Compile Release> buttons in the footer of VSCODE.
 
 	Optional
-	code /etc/Harbour_VFP/Examples/hb_vfp_Test_linux.code-workspace
+	code /etc/Harbour_EL/Examples/hb_el_Test_linux.code-workspace
 	Use the <Compile Debug> and <Compile Release> buttons in the footer of VSCODE and even run the example.
 
 	-------------------------------------

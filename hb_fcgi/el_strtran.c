@@ -1,4 +1,4 @@
-#ifndef USING_HB_VFP
+#ifndef USING_HB_EL
 
 /*
 	* StrTran() function
@@ -62,7 +62,7 @@
 				string is too large. Example:
 				StrTran( "...", ".", Replicate( "A", 32000 ) ) [vszakats] */
 
-HB_FUNC( VFP_STRTRAN )
+HB_FUNC( EL_STRTRAN )
 {
 	PHB_ITEM pText = hb_param( 1, HB_IT_STRING );
 	PHB_ITEM pSeek = hb_param( 2, HB_IT_STRING );
@@ -206,4 +206,4 @@ HB_FUNC( VFP_STRTRAN )
 	}
 }
 
-#endif //USING_HB_VFP
+#endif //USING_HB_EL

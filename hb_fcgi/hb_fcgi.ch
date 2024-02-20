@@ -1,5 +1,5 @@
 #ifndef HB_FCGI_BUILDVERSION
-#define HB_FCGI_BUILDVERSION "1.7"
+#define HB_FCGI_BUILDVERSION "1.8"
 
 #include "hbclass.ch"
 
@@ -17,59 +17,59 @@
 
 #define CRLF chr(13)+chr(10)
 
-//Following SCAN definitions come from the Harbour_VFP repo.
+//Following SCAN definitions come from the Harbour_EL repo.
 //--------------------------------------------------------------------------------------------
 
 #xcommand SCAN ALL [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            dbGoTop(); VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            dbGoTop(); EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 #xcommand SCAN [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 //--------------------------------------------------------------------------------------------
 // #xcommand SCAN ALL WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-//             dbGoTop(); VFP_ScanStack("push") ;;
-//             do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(dbskip()) .and. hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+//             dbGoTop(); EL_ScanStack("push") ;;
+//             do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(dbskip()) .and. hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 // #xcommand SCAN WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-//             VFP_ScanStack("push") ;;
-//             do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(dbskip()) .and. hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+//             EL_ScanStack("push") ;;
+//             do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(dbskip()) .and. hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 //Buggy WHILE, so added a using the eval({||<while>})
 
 #xcommand SCAN ALL WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            dbGoTop(); VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof() .and. eval({||<while>}),hb_isnil(__dbContinue()) .and. Found() .and. !eof() .and. eval({||<while>}))
+            dbGoTop(); EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof() .and. eval({||<while>}),hb_isnil(__dbContinue()) .and. Found() .and. !eof() .and. eval({||<while>}))
 
 #xcommand SCAN WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof() .and. eval({||<while>}),hb_isnil(__dbContinue()) .and. Found() .and. !eof() .and. eval({||<while>}))
+            EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate({||.T.}, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof() .and. eval({||<while>}),hb_isnil(__dbContinue()) .and. Found() .and. !eof() .and. eval({||<while>}))
 
 //--------------------------------------------------------------------------------------------
 
 #xcommand SCAN ALL FOR <for> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            dbGoTop(); VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate( <{for}>, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            dbGoTop(); EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate( <{for}>, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 #xcommand SCAN FOR <for> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate( <{for}>, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate( <{for}>, {||.T.}, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 //--------------------------------------------------------------------------------------------
 //Did not test this att all. Most likely buggy due to the WHILE
 #xcommand SCAN ALL FOR <for> WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            dbGoTop(); VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate( <{for}>, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            dbGoTop(); EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate( <{for}>, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 #xcommand SCAN FOR <for> WHILE <while> [NEXT <next>] [RECORD <rec>] [<rest:REST>] [NOOPTIMIZE] => ;
-            VFP_ScanStack("push") ;;
-            do while iif(VFP_ScanStack(),hb_isnil(__dbLocate( <{for}>, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
+            EL_ScanStack("push") ;;
+            do while iif(EL_ScanStack(),hb_isnil(__dbLocate( <{for}>, <{while}>, <next>, <rec>, <.rest.> )) .and. Found() .and. !eof(),hb_isnil(__dbContinue()) .and. Found() .and. !eof())
 
 //--------------------------------------------------------------------------------------------
 
-#command ENDSCAN => ENDDO;VFP_ScanStack("pop")
+#command ENDSCAN => ENDDO;EL_ScanStack("pop")
 
 
 
