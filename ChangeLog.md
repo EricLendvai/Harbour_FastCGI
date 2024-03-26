@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 03/25/2024 v 1.9
+* Support for Root Arrays in "application/json" input.
+
 ## 02/19/2024 v 1.8
 * Code refactored to refer to Harbour_EL routines instead of Harbour_VFP
 

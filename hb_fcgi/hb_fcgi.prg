@@ -26,7 +26,7 @@ class hb_Fcgi
         data   Input                      init {=>}   //TODO  Hash with FieldName as Key, and an array as value. Array as follows: {nType(1=Field,2=File),cInputValue,cFileName,cContentType,Content}
         data   InputLength                init -1     // -1 Means not loaded
         data   InputRaw                   init ""
-        data   hJsonInput                 init {=>}   //The Json input for APIs when "Content-Type" is set to "application/json"
+        data   xJsonInput                 init {=>}   //The Json input for APIs when "Content-Type" is set to "application/json". Could be an Array of Hash Array
         method LoadInput()
 
         data   ReloadConfigAtEveryRequest init .f.
@@ -215,7 +215,16 @@ else
         hb_HClear(::RequestCookies)
         hb_HClear(::Input)
         hb_HClear(::ResponseHeader)
-        hb_HClear(::hJsonInput)
+
+        do case
+        case ValType(::xJsonInput) == "A"
+            ASize(::xJsonInput,0)
+            ::xJsonInput := {=>}
+        case ValType(::xJsonInput) == "H"
+            hb_HClear(::xJsonInput)
+        otherwise
+            ::xJsonInput := {=>}
+        endcase
 
         ::aTrace := {}
 
@@ -393,7 +402,7 @@ local l_cInputName
 local l_cFileName
 local l_cToken
 local l_lFoundFormData
-local l_hJsonInput
+local l_xJsonInput
 
 if !::LoadedInput
     ::LoadedInput := .t.
@@ -514,12 +523,19 @@ if !::LoadedInput
 
     case l_cContentType == "application/json"
         l_cInputBuffer := ::InputRaw
-        l_hJsonInput := {=>}
+        l_xJsonInput := {=>}
 
         if !empty(l_cInputBuffer)
             // hb_jsonDecode(l_cInputBuffer,<@xValue>,[<cdpID>]) ➔ <nLengthDecoded>
-            hb_jsonDecode(l_cInputBuffer,@l_hJsonInput)
-            ::hJsonInput := hb_HClone(l_hJsonInput) 
+            hb_jsonDecode(l_cInputBuffer,@l_xJsonInput)
+            do case
+            case ValType(l_xJsonInput) == "A"
+                ::xJsonInput := AClone(l_xJsonInput) 
+            case ValType(l_xJsonInput) == "H"
+                ::xJsonInput := hb_HClone(l_xJsonInput) 
+            otherwise
+                ::xJsonInput := {"Message"=>"Invalid JSON Input"}
+            endcase
         endif
 
     otherwise
@@ -540,7 +556,7 @@ method GetJsonInput() class hb_Fcgi
 if !::LoadedInput
     ::LoadInput()
 endif
-return ::hJsonInput
+return ::xJsonInput
 //-----------------------------------------------------------------------------------------------------------------
 method GetInputValue(par_cName) class hb_Fcgi
 local l_aResult
