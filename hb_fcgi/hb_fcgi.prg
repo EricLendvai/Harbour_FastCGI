@@ -410,7 +410,7 @@ if !::LoadedInput
     
     // Used during development and debugging
     // SendToClipboard(::InputRaw)
-    // hb_MemoWrit("R:\Harbour_websites\fcgi_mod_harbour\RequestHistory\request.txt",::InputRaw)   // To assist in debugging. 
+    // hb_MemoWrit("D:\request.txt",::InputRaw)   // To assist in debugging. 
 
     l_cContentType := ::GetContentType()
 //  SendToDebugView("Content Type: "+l_cContentType)
@@ -686,7 +686,7 @@ local l_nExpireDays := hb_defaultValue(par_nExpireDays,365)
 local l_cPath       := hb_defaultValue(@par_cPath,"/")
 
 //Added the cookie name to the Header Name since using a Hash array
-::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+";SameSite=Strict"+;
                     iif(empty(l_nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+l_nExpireDays))+;
                     iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
@@ -697,7 +697,7 @@ method SetSessionCookieValue(par_cName,par_cValue,par_cPath)
 local l_cPath       := hb_defaultValue(@par_cPath,"/")
 
 //Added the cookie name to the Header Name since using a Hash array
-::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+;
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+";SameSite=Strict"+;
                     iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
 //-----------------------------------------------------------------------------------------------------------------
@@ -707,7 +707,7 @@ method DeleteCookie(par_cName,par_cPath)
 local l_cPath       := hb_defaultValue(@par_cPath,"/")
 
 //Added the cookie name to the Header Name since using a Hash array
-::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+;
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+";SameSite=Strict"+;
                     "; Expires=0"+;
                     iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL

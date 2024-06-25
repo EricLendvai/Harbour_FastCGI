@@ -1,5 +1,8 @@
 # Harbour FastCGI - Change Log
 
+## 06/23/2024 v 1.10
+* Made all the cookies "SameSite=Strict".
+
 ## 03/25/2024 v 1.9
 * Support for Root Arrays in "application/json" input.
 
