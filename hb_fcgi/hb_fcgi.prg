@@ -1,7 +1,7 @@
-//Copyright (c) 2023 Eric Lendvai MIT License
+//Copyright (c) 2024 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
-
+#include "hbsocket.ch"
 #include "fileio.ch"
 
 // #define DEVELOPMENTMODE
@@ -856,6 +856,23 @@ function SendToDebugView(par_cStep,par_xValue)
 
 return .T.
 //=================================================================================================================
+function SendUDPMessage(par_cIp,par_nPort,par_cMessage,par_lSendDebugView)
+local l_nSocketHandle
+
+if !empty(l_nSocketHandle := hb_socketOpen(,HB_SOCKET_PT_DGRAM))
+    hb_socketSendTo(l_nSocketHandle,par_cMessage,,,{ HB_SOCKET_AF_INET,par_cIp, par_nPort })
+    if par_lSendDebugView
+        hb_Fcgx_OutputDebugString("[Harbour] "+"UDP: "+par_cMessage)
+    endif
+    hb_socketClose(l_nSocketHandle)
+else
+    if par_lSendDebugView
+        hb_Fcgx_OutputDebugString("[Harbour] "+"Failed to Send UDP: "+par_cMessage)
+    endif
+endif
+
+return nil
+//=================================================================================================================
 function SendToClipboard(par_cText)
 //#if defined(_WIN32) || defined(_WIN64)   // Will not work since this is a PRG So will use the DEBUGVIEW setting.
 
@@ -1140,7 +1157,7 @@ function EncodeURIComponent(par_cString,par_lComplete)
 	RETURN cRet
 //=================================================================================================================
 function FcgiLogger(par_nAction,par_cString,...)
-//par_nAction, 1=Reset,2=Add Line,3=Append To Line,4=Save to File,5=Save to File and Reset
+//par_nAction, 1=Reset,2=Add Line,3=Append To Line,4=Save to File,5=Save to File and Reset,6=Return Buffer
 //par_cString, if par_nAction = 2 or 3 the text to send out, if par_nAction = 4 the full file name to write out.
 
 static s_cBuffer := ""
@@ -1187,6 +1204,9 @@ case 5
     if par_nAction == 5
         s_cBuffer := ""
     endif
+    exit
+case 6
+    return s_cBuffer
 endswitch
 
 return nil

@@ -1,5 +1,11 @@
 # Harbour FastCGI - Change Log
 
+## 09/25/2025 v 1.12
+* New function SendUDPMessage(<cIp>,<nPort>,<cMessage>,<lDebugView>) that can be used for debugging. It will also send a message to DebugView if <lDebugView> is true.
+
+## 07/21/2024 v 1.11
+* New option in FcgiLogger to return current output buffer. Especially useful for reporting output before an error occurred in the Local Harbour Sandbox.
+
 ## 06/23/2024 v 1.10
 * Made all the cookies "SameSite=Strict".
 
