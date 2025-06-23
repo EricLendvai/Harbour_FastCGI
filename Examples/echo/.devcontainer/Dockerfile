@@ -1,8 +1,8 @@
 FROM ubuntu:22.04
 
 # for apt to be noninteractive
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
 # Used by running apps to detect if inside a docker container. Testing for existence of /.dockerenv may not always work.
 ENV InDocker=True
@@ -20,6 +20,26 @@ RUN apt-get install -y \
         wget \
         psmisc \
         libcurl4-openssl-dev
+
+# Install Python 3.11 from Deadsnakes PPA
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+        python3.11 \
+        python3.11-dev \
+        python3.11-venv \
+        python3.11-distutils \
+        curl \
+        ca-certificates
+
+# Install pip for Python 3.11
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+
+# Optionally set python3 → python3.11
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
+    update-alternatives --set python3 /usr/bin/python3.11 && \
+    ln -s /usr/local/bin/pip3 /usr/bin/pip || true
 
 # install harbour from src
 RUN mkdir /src
@@ -40,7 +60,6 @@ RUN apt-get install -y \
         libfcgi-dev \
         libapache2-mod-fcgid
 
-
 # The following are optional instructions if you need to change timezone.
 # preesed tzdata, update package index, upgrade packages and install needed software
 # RUN echo "tzdata tzdata/Areas select Europe" > /tmp/preseed.txt; \
@@ -52,11 +71,11 @@ RUN apt-get install -y \
 RUN a2enmod rewrite
 RUN mkdir -p /var/www/Harbour_websites/fcgi_echo/apache-logs/
 
-ENV APACHE_RUN_USER www-data
-ENV APACHE_RUN_GROUP www-data
-ENV APACHE_LOG_DIR /var/log/apache2
-ENV APACHE_LOCK_DIR /var/lock/apache2
-ENV APACHE_PID_FILE /var/run/apache2.pid
+ENV APACHE_RUN_USER=www-data
+ENV APACHE_RUN_GROUP=www-data
+ENV APACHE_LOG_DIR=/var/log/apache2
+ENV APACHE_LOCK_DIR=/var/lock/apache2
+ENV APACHE_PID_FILE=/var/run/apache2.pid
 
 ADD ./FilesForPublishedWebsites/LinuxApache2/echo.conf /etc/apache2/sites-enabled/000-default.conf
 

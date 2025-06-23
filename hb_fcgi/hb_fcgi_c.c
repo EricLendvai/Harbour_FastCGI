@@ -41,7 +41,7 @@ extern char **environ;
 #include "hbapicdp.h"
 #include "hbapierr.h"
 
-#include <signal.h>
+// #include <signal.h>
 
 #define AP_FILENAMEMAXLENGTH 512
 // static char cAP_FileName[AP_FILENAMEMAXLENGTH] = "Not Set";          // Used hold last value of SET_AP_FILENAME

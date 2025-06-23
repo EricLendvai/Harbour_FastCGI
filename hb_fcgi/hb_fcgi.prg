@@ -1,8 +1,9 @@
-//Copyright (c) 2024 Eric Lendvai MIT License
+//Copyright (c) 2025 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 #include "hbsocket.ch"
 #include "fileio.ch"
+#include "directry.ch"
 
 // #define DEVELOPMENTMODE
 // #ifdef DEVELOPMENTMODE
@@ -32,6 +33,7 @@ class hb_Fcgi
         data   ReloadConfigAtEveryRequest init .f.
         data   AppConfig                  init {=>}   // Will be set to case insensitive keys
         method LoadAppConfig()
+        method LoadWebsiteStaticFileInfo()            // Prepares a Hash for all website static files information
 
         data   RequestMethod              init ""
         data   ProcessingRequest          init .f.    // To determine if the :Finish() method should be called.
@@ -44,6 +46,7 @@ class hb_Fcgi
         data   OnErrorProgramInfo init ""             //See SetOnErrorProgramInfo() method
 
         data   aTrace                     init {}     //Used by methods TraceAdd and TraceList to assist development by displaying routines used to build response 
+        data   hStaticFileInfo            init {=>}
     exported:
         data   p_hb_fcgi_version          init HB_FCGI_BUILDVERSION READONLY
         data   RequestCount               init 0                    READONLY
@@ -86,8 +89,9 @@ class hb_Fcgi
         method OnRequest()      inline nil
         method OnShutdown()     inline nil
         method ClearOutputBuffer() 
-        method TraceAdd(par_cInfo)                //Add to the current request any text that can be listed later. Can be user to help developer find out where code should be updated.
-        method TraceList(par_nListMethod)             //List the info added during multiple calls of TraceAdd. par_nListMethod: 1 = comma delimited, 2 = CR, 3 = <br>, 4 = ordered list
+        method TraceAdd(par_cInfo)                            //Add to the current request any text that can be listed later. Can be user to help developer find out where code should be updated.
+        method TraceList(par_nListMethod)                     //List the info added during multiple calls of TraceAdd. par_nListMethod: 1 = comma delimited, 2 = CR, 3 = <br>, 4 = ordered list
+        method GetStaticFileLink(par_cRelativeWebsitePath)    //Given a relative local Path, get a URL relative path with 
 
         data   OSPathSeparator            init hb_ps() READONLY
         data   PathBackend                init ""      READONLY   //Folder of FastCGI exe and any other run support files
@@ -297,6 +301,7 @@ l_cPath := left(l_cPath,l_nPos)
 if ::ProcessingRequest
     if ::RequestCount == 1
         ::OnFirstRequest()
+        ::LoadWebsiteStaticFileInfo() // By loading after OnFirstRequest the app can add more static files.
     endif
 else
     if ::RequestCount > 0
@@ -640,6 +645,73 @@ endfor
 ::ReloadConfigAtEveryRequest := (hb_HGetDef(::AppConfig,"ReloadConfigAtEveryRequest","false") == "true")
 return l_iNumberOfConfigs
 //-----------------------------------------------------------------------------------------------------------------
+method LoadWebsiteStaticFileInfo() class hb_Fcgi
+//::PathWebsite := l_cRootPath+"website"+::OSPathSeparator
+
+local l_aStack            := {::PathWebsite}
+local l_cCurrentFolder
+local l_aEntry
+local l_aEntries
+local l_cEntry
+local l_cRelativePath
+local l_cPath
+
+::hStaticFileInfo := {=>}
+
+do while len(l_aStack) > 0
+    l_cCurrentFolder := l_aStack[len(l_aStack)]
+    hb_adel(l_aStack, len(l_aStack),.t.)
+
+    l_aEntries := hb_Directory(l_cCurrentFolder+::OSPathSeparator+"*", "HSD")
+    for each l_aEntry in l_aEntries
+        l_cEntry := l_aEntry[F_NAME]
+        l_cPath  := l_cCurrentFolder+::OSPathSeparator+l_cEntry
+
+        if "D" $ l_aEntry[F_ATTR]
+            if !(l_cEntry == "." .or. l_cEntry == "..")
+                aadd(l_aStack, l_cPath)
+            endif
+        else
+            l_cRelativePath := substr(l_cPath, len(::PathWebsite) + 2)
+            ::hStaticFileInfo[l_cRelativePath] := { l_aEntry[F_SIZE], l_aEntry[F_DATE] }
+        endif
+    endfor
+enddo
+
+return nil
+//-----------------------------------------------------------------------------------------------------------------
+method GetStaticFileLink(par_cRelativeWebsitePath)
+local l_cURL
+local l_cRelativeWebsitePath
+local l_aFileInfo
+local l_cSitePath := ::RequestSettings["SitePath"]
+
+if ::OSPathSeparator == "\"
+    l_cRelativeWebsitePath := strtran(par_cRelativeWebsitePath,"/","\")
+else
+    l_cRelativeWebsitePath := strtran(par_cRelativeWebsitePath,"\","/")
+endif
+if left(l_cRelativeWebsitePath,1) == ::OSPathSeparator
+    l_cRelativeWebsitePath := substr(l_cRelativeWebsitePath,2)
+endif
+
+l_aFileInfo := hb_HGetDef(::hStaticFileInfo,l_cRelativeWebsitePath,{})
+if empty(l_aFileInfo)
+    SendToDebugView("Failed to find static file: "+l_cRelativeWebsitePath)
+    l_cURL := ""
+else
+    l_cURL := l_cSitePath
+    if ::OSPathSeparator == "\"
+        l_cURL += strtran(l_cRelativeWebsitePath,"\","/")
+    else
+        l_cURL += l_cRelativeWebsitePath
+    endif
+
+    l_cURL += "?version="+strtran(hb_TtoC(l_aFileInfo[2],"YYYYMMDD","HHMMSS")," ")
+endif
+
+return l_cURL
+//-----------------------------------------------------------------------------------------------------------------
 method GetInputLength() class hb_Fcgi
 if ::InputLength < 0
     ::InputLength := val(::GetEnvironment("CONTENT_LENGTH"))
@@ -858,20 +930,23 @@ return .T.
 //=================================================================================================================
 function SendUDPMessage(par_cIp,par_nPort,par_cMessage,par_lSendDebugView)
 local l_nSocketHandle
+local l_lSentMessage := .f.
 
-if !empty(l_nSocketHandle := hb_socketOpen(,HB_SOCKET_PT_DGRAM))
-    hb_socketSendTo(l_nSocketHandle,par_cMessage,,,{ HB_SOCKET_AF_INET,par_cIp, par_nPort })
-    if par_lSendDebugView
-        hb_Fcgx_OutputDebugString("[Harbour] "+"UDP: "+par_cMessage)
-    endif
-    hb_socketClose(l_nSocketHandle)
-else
-    if par_lSendDebugView
-        hb_Fcgx_OutputDebugString("[Harbour] "+"Failed to Send UDP: "+par_cMessage)
+if !empty(par_cMessage)
+    if !empty(l_nSocketHandle := hb_socketOpen(,HB_SOCKET_PT_DGRAM))
+        l_lSentMessage := (hb_socketSendTo(l_nSocketHandle,par_cMessage,,,{ HB_SOCKET_AF_INET,par_cIp, par_nPort }) > 0)
+        if par_lSendDebugView
+            hb_Fcgx_OutputDebugString("[Harbour] "+"UDP: "+par_cMessage)
+        endif
+        hb_socketClose(l_nSocketHandle)
+    else
+        if par_lSendDebugView
+            hb_Fcgx_OutputDebugString("[Harbour] "+"Failed to Send UDP: "+par_cMessage)
+        endif
     endif
 endif
 
-return nil
+return l_lSentMessage
 //=================================================================================================================
 function SendToClipboard(par_cText)
 //#if defined(_WIN32) || defined(_WIN64)   // Will not work since this is a PRG So will use the DEBUGVIEW setting.
@@ -926,7 +1001,7 @@ end
 if ! Empty( par_cCode )
     l_aLines = hb_ATokens( par_cCode, Chr( 10 ) )
     l_n = 1
-    l_nLine := 0
+    // l_nLine := 0
     while( l_nLine := ProcLine( ++l_n ) ) == 0   //The the line number in the last on the stack of programs
     end   
     if l_nLine > 0

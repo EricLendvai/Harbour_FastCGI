@@ -136,8 +136,8 @@
         },
         {
             "label":"KillFcgiExe",
-            "type": "shell",
             "windows":{
+                "type": "shell",
                 "command":"taskkill",
                 "args": ["/IM","FCGIecho.exe","/f","/t"],
                 "options": {
@@ -145,15 +145,13 @@
                 }
             },
             "linux": {
-                "command":"taskkill",
-                "args": ["/IM","FCGIecho.exe","/f","/t"],
-                "options": {"statusbar": {"hide" : true}}
+                "command": "","options": {"statusbar": {"hide" : true}}
             }
         },
         {
             "label":"SoftKillFcgiExe",
-            "type": "shell",
             "windows":{
+                "type": "shell",
                 "command":"${workspaceFolder}\\..\\..\\FCGITaskManagerBin\\FCGITaskManager.exe",
                 "args": ["kill","http","localhost","8164","/fcgi_echo/","C:/Harbour_websites/fcgi_echo/","echo",""],
                 "options": {
@@ -161,10 +159,7 @@
                 }
             },
             "linux": {
-//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
-                "command":"${workspaceFolder}/../../FCGITaskManager/gcc/release/FCGITaskManager.exe",
-                "args": ["kill","http","localhost","8164","/","/var/www/Harbour_websites/fcgi_echo/","echo",""],
-                "options": {"statusbar": {"hide" : true}}
+                "command": "","options": {"statusbar": {"hide" : true}}
             }
         },
         {
@@ -190,70 +185,67 @@
         },
         {
             "label": "Down",
-            "type": "shell",
             "windows":{
-                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo"
+                "type": "shell",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe down http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+                "isBackground": true,
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "statusbar": {"label" : "<Down>","hide" : false}
+                },
+                "presentation": {"reveal": "never"}
             },
             "linux": {
-                //The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
-                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe down http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo"
-            },
-            "isBackground": true,
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Down>","hide" : false}
-            },
-            "presentation": {"reveal": "never"}
+                "command": "","options": {"statusbar": {"hide" : true}}
+            }
         },
         {
             "label": "ActivateEcho",
-            "type": "shell",
             "windows":{
+                "type": "shell",
                 "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe activate http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "statusbar": {"label" : "<Activate Echo>","hide" : false}
+                },
+                "isBackground": true,
+                "presentation": {"reveal": "never"}
             },
             "linux": {
-//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
-                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe activate http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo",
+                "command": "","options": {"statusbar": {"hide" : true}}
             },
-            "isBackground": true,
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Activate Echo>","hide" : false}
-            },
-            "presentation": {"reveal": "never"}
         },
         {
             "label": "KillEcho",
-            "type": "shell",
             "windows":{
-                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo"
+                "type": "shell",
+                "command": "C:\\Harbour_FastCGI\\FCGITaskManagerBin\\FCGITaskManager.exe kill http localhost 8164 /fcgi_echo/ C:/Harbour_websites/fcgi_echo/ echo",
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "statusbar": {"label" : "<Kill Echo>","hide" : false}
+                },
+                "isBackground": true,
+                "presentation": {"reveal": "never"}
             },
             "linux": {
-//The following section is hiddent since there is no equivalent of FCGITaskManager under linux. For updated containers are going to be used.
-                "command": "/opt/Harbour_FastCGI/FCGITaskManagerBin/FCGITaskManager.exe kill http localhost 8164 / /var/www/Harbour_websites/fcgi_echo/ echo"
-            },
-            "isBackground": true,
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Kill Echo>","hide" : false}
-            },
-            "presentation": {"reveal": "never"}
+                "command": "","options": {"statusbar": {"hide" : true}}
+            }
         },
         {
             "label": "BrowseEcho",
-            "type":"shell",
             "windows":{
-                "command": "firefox.exe http://localhost:8164/fcgi_echo/"
+                "type":"shell",
+                "command": "firefox.exe http://localhost:8164/fcgi_echo/",
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "statusbar": {"label" : "<Browse Echo>","hide" : false}
+                },
+                "isBackground": true,
+                "presentation": {"reveal": "never"}
             },
             "linux": {
-                "command": "firefox http://echo/"
-            },
-            "isBackground": true,
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "statusbar": {"label" : "<Browse Echo>","hide" : false}
-            },
-            "presentation": {"reveal": "never"}
+                "command": "","options": {"statusbar": {"hide" : true}}
+            }
         }
     ],
     "inputs": [

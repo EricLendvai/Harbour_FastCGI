@@ -10,13 +10,10 @@
         //     "path": "c:\\apache24-64\\conf"
         // }
         // ,{
-        //     "path": "C:\\Harbour_websites\\fcgi_echo\\backend"
+        //     "path": "R:\\Harbour_websites\\fcgi_echo\\backend"
         // }
     ],
     "settings": {
-        "files.autoSave": "onFocusChange",
-        "harbour.warningLevel":1,
-        "harbour.decorator":true
     }
 
-}  
+}

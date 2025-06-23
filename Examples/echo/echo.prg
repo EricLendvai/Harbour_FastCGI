@@ -1,18 +1,17 @@
-//Copyright (c) 2022 Eric Lendvai MIT License
+//Copyright (c) 2025 Eric Lendvai MIT License
 
 #include "hb_fcgi.ch"
 
 //=================================================================================================================
 Function Main()
-
-local cHtml
 // local cCrash  // To test the error handler
 
 SendToDebugView("Starting echo")
 
 private oFcgi
-// oFcgi := hb_Fcgi():New()
 oFcgi := MyFcgi():New()    // Used a subclass of hb_Fcgi
+
+// el_StrToFile(e"\nWill Start Main Loop\n","/tmp/hb_fcgi_shutdown3.log",.t.)
 
 do while oFcgi:Wait()
     if !oFcgi:SkipRequest
@@ -21,6 +20,8 @@ do while oFcgi:Wait()
 enddo
 
 SendToDebugView("Done")
+
+// el_StrToFile(e"Done...\n","/tmp/hb_fcgi_shutdown3.log",.t.)
 
 return nil
 //=================================================================================================================
@@ -43,6 +44,8 @@ method OnRequest() class MyFcgi
 
     SendToDebugView("Request Counter",::RequestCount)
 
+    // SendUDPMessage("127.0.0.1",49152,"Hello From Echo FastCGI app "+trans(::RequestCount),.f.)
+
     ::Print([<!DOCTYPE html><html><body>])
 
     // Following can be used to test the VSCODE debugger
@@ -51,7 +54,6 @@ method OnRequest() class MyFcgi
 
     ::Print("<h1>FastCGI echo</h1>")
 
-altd()
 // GetSymbols()
 
     ::Print("<p>FastCGI EXE = "+::FastCGIExeFullPath+"</p>")
@@ -124,11 +126,10 @@ return l_cBuildInfo
 //=================================================================================================================
 //---------------------------------------------------------------------------
 function GetSymbols()
-local xValue := ""
+local xValue
 local nSymbolCount := __dynscount()
-local i, cName, cVarNames := ''
-static xMyStatic
-public xMyPublic
+local i
+local cName
 private xMyVar1, xMyVar2, xMyVar3
 
 for i := 1 to nSymbolCount

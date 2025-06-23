@@ -4,37 +4,35 @@
     "name": "fastcgi-echo",
     "build": {
         "dockerfile": "Dockerfile",
-        "context":".."
+        "context": ".."
     },
-
-    // Set *default* container specific settings.json values on container create.
-    "settings": {
-        "files.autoSave": "onFocusChange",
-        "harbour.compilerExecutable": "/src/harbour/bin/linux/gcc/harbour",
-        "harbour.extraOptions": "-i/src/harbour/include/",
-        "harbour.extraIncludePaths":["/src/harbour/include/"],
-        "harbour.warningLevel":1,
-        "harbour.decorator":true
-    },
-
-    "mounts": ["source=C:\\Harbour_FastCGI,target=/src/Harbour_FastCGI,type=bind,consistency=default"],
-
-    // Add the IDs of extensions you want installed when the container is created.
-    "extensions": [
-        "aperricone.harbour",
-        "actboy168.tasks"
-    ],
-
-    // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    "forwardPorts": [80],
-
-    // Use 'portsAttributes' to set default properties for specific forwarded ports. More info1: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
-    "portsAttributes": {
-        "80": {
-            "label": "Apache",
-            "onAutoForward": "notify"
+    "customizations": {
+        "vscode": {
+        "settings": {
+            "files.autoSave": "onFocusChange",
+            "harbour.compilerExecutable": "/usr/local/bin/harbour",
+            "harbour.extraOptions": "-i/usr/local/include",
+            "harbour.extraIncludePaths": [
+                "/usr/local/include/"
+            ],
+            "harbour.warningLevel": 1,
+            "harbour.decorator": true
+        },
+        "extensions": [
+            "aperricone.harbour",
+            "actboy168.tasks"
+            ]
         }
     },
-
-    "postStartCommand": "service apache2 start" //start services
+    "mounts": [
+        "source=C:\\Harbour_FastCGI,target=/src/Harbour_FastCGI,type=bind,consistency=default"
+    ],
+    "forwardPorts": [80],
+    "portsAttributes": {
+        "80": {
+        "label": "Apache",
+        "onAutoForward": "notify"
+        }
+    },
+    "postStartCommand": "service apache2 start"
 }
