@@ -1,4 +1,5 @@
-//Copyright (c) 2025 Eric Lendvai MIT License
+//Copyright (c) 2026 Eric Lendvai, Federal Way, WA, USA
+//SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "hb_fcgi.ch"
 #include "hbsocket.ch"
@@ -52,6 +53,7 @@ class hb_Fcgi
         data   RequestCount               init 0                    READONLY
         data   MaxRequestToProcess        init 0                    READONLY
         data   FastCGIExeFullPath         init ""                   READONLY
+        data   UsedConfigurationFile      init ""                   READONLY
 
         method New() constructor
         method Wait()
@@ -301,7 +303,6 @@ l_cPath := left(l_cPath,l_nPos)
 if ::ProcessingRequest
     if ::RequestCount == 1
         ::OnFirstRequest()
-        ::LoadWebsiteStaticFileInfo() // By loading after OnFirstRequest the app can add more static files.
     endif
 else
     if ::RequestCount > 0
@@ -618,10 +619,11 @@ local l_cValue
 local l_iNumberOfConfigs := 0
 //The configuration file is purposely not with a .txt extension to block users from accessing it.
 if file(::PathBackend+"config_deployment.txt")
-    l_cConfigText := hb_MemoRead(::PathBackend+"config_deployment.txt")
+    ::UsedConfigurationFile := ::PathBackend+"config_deployment.txt"
 else
-    l_cConfigText := hb_MemoRead(::PathBackend+"config.txt")
+    ::UsedConfigurationFile := ::PathBackend+"config.txt"
 endif
+l_cConfigText := hb_MemoRead(::UsedConfigurationFile)
 l_cConfigText := StrTran(StrTran(l_cConfigText,chr(13)+chr(10),chr(10)),chr(13),chr(10))
 for each l_cLine in hb_ATokens(l_cConfigText,chr(10),.f.,.f.)
     l_nPos := at("=",l_cLine)
@@ -685,6 +687,10 @@ local l_cURL
 local l_cRelativeWebsitePath
 local l_aFileInfo
 local l_cSitePath := ::RequestSettings["SitePath"]
+
+if empty(::hStaticFileInfo)
+    ::LoadWebsiteStaticFileInfo()
+endif
 
 if ::OSPathSeparator == "\"
     l_cRelativeWebsitePath := strtran(par_cRelativeWebsitePath,"/","\")
@@ -757,8 +763,15 @@ method SetCookieValue(par_cName,par_cValue,par_nExpireDays,par_cPath)
 local l_nExpireDays := hb_defaultValue(par_nExpireDays,365)
 local l_cPath       := hb_defaultValue(@par_cPath,"/")
 
+// HttpOnly: Prevents JavaScript from accessing the cookie.
+// Secure: Ensures the cookie is only sent over HTTPS.
+// SameSite: Possible Values
+//     Strict   Cookie only sent for same-site requests. Best for high-security apps.
+//     Lax      Cookie sent for top-level navigation (GET only). Default in many browsers.
+//     None     Cookie sent in all contexts but must be combined with Secure.
+
 //Added the cookie name to the Header Name since using a Hash array
-::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+";SameSite=Strict"+;
+::SetHeaderValue("Set-Cookie~"+par_cName,par_cName+"="+par_cValue+";SameSite=Strict;HttpOnly"+;
                     iif(empty(l_nExpireDays),"","; Expires="+FcgiCookieTimeToExpires(hb_DateTime()+l_nExpireDays))+;
                     iif(empty(l_cPath),"","; Path="+l_cPath) )
 return NIL
@@ -1248,7 +1261,8 @@ case 1  // Reset
     exit
 case 2  // Add Line, same as ? <expr>
     if len(s_cBuffer) > 0
-        s_cBuffer += chr(13)+chr(10)
+        // s_cBuffer += chr(13)+chr(10)
+        s_cBuffer += chr(10)
     endif
 case 3  // Append to Line, same as ?? <expr>
     for l_nPCount := 2 to pcount()
@@ -1265,7 +1279,7 @@ case 3  // Append to Line, same as ?? <expr>
 
         for l_nPos := 1 to hb_utf8Len(l_cCallBuffer)
             l_nChar := hb_utf8Peek(l_cCallBuffer,l_nPos)
-            if l_nChar < 32
+            if l_nChar < 32 .and. l_nChar <> 10 .and. l_nChar <> 13
                 hb_utf8Poke(@l_cCallBuffer,l_nPos,hb_utf8Asc("?"))   // to replace invalid html char with "?"
             endif
         endfor

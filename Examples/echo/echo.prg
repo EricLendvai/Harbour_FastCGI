@@ -1,4 +1,6 @@
-//Copyright (c) 2025 Eric Lendvai MIT License
+//Copyright (c) 2026 Eric Lendvai, Federal Way, WA, USA
+//SPDX-License-Identifier: GPL-3.0-or-later
+
 
 #include "hb_fcgi.ch"
 

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # for apt to be noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -19,27 +19,9 @@ RUN apt-get install -y \
         gnupg \
         wget \
         psmisc \
-        libcurl4-openssl-dev
-
-# Install Python 3.11 from Deadsnakes PPA
-RUN apt-get update && apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y \
-        python3.11 \
-        python3.11-dev \
-        python3.11-venv \
-        python3.11-distutils \
+        libcurl4-openssl-dev \
         curl \
         ca-certificates
-
-# Install pip for Python 3.11
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
-
-# Optionally set python3 → python3.11
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
-    update-alternatives --set python3 /usr/bin/python3.11 && \
-    ln -s /usr/local/bin/pip3 /usr/bin/pip || true
 
 # install harbour from src
 RUN mkdir /src
